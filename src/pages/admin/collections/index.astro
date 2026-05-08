@@ -17,10 +17,10 @@ const projects: Project[] = projectsRes.data || [];
 <AdminLayout title="Collections" activeTab="collections">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Collections</h1>
-    <button id="add-coll-btn" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+    <a href="/admin/collections/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Collection
-    </button>
+    </a>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -112,72 +112,71 @@ const projects: Project[] = projectsRes.data || [];
 </AdminLayout>
 
 <script define:vars={{ collections, projects: projects.map(p => ({ id: p.id, title: p.title })) }}>
-  const modal = document.getElementById('coll-modal')!;
-  const modalTitle = document.getElementById('c-modal-title')!;
-  const form = document.getElementById('coll-form') as HTMLFormElement;
+  const modal = document.getElementById('coll-modal');
+  const modalTitle = document.getElementById('c-modal-title');
+  const form = document.getElementById('coll-form');
 
-  async function loadCollectionProjects(collId: string) {
+  async function loadCollectionProjects(collId) {
     const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
     const res = await fetch(`/admin/api/collections?collection_id=${collId}`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
     if (res.ok) {
       const ids = await res.json();
-      document.querySelectorAll('.project-check').forEach((cb: HTMLInputElement) => {
+      document.querySelectorAll('.project-check').forEach((cb) => {
         cb.checked = ids.includes(cb.value);
       });
     }
   }
 
-  function openModal(c?: any) {
+  function openModal(c) {
     if (c) {
       modalTitle.textContent = 'Edit Collection';
-      (document.getElementById('c-id') as HTMLInputElement).value = c.id;
-      (document.getElementById('c-title') as HTMLInputElement).value = c.title;
-      (document.getElementById('c-slug') as HTMLInputElement).value = c.slug;
-      (document.getElementById('c-city') as HTMLSelectElement).value = c.city_id || '';
-      (document.getElementById('c-type') as HTMLInputElement).value = c.collection_type || '';
-      (document.getElementById('c-intro') as HTMLTextAreaElement).value = c.intro_content || '';
-      (document.getElementById('c-meta-title') as HTMLInputElement).value = c.meta_title || '';
-      (document.getElementById('c-meta-desc') as HTMLTextAreaElement).value = c.meta_description || '';
-      document.querySelectorAll('.project-check').forEach((cb: HTMLInputElement) => { cb.checked = false; });
+      document.getElementById('c-id').value = c.id;
+      document.getElementById('c-title').value = c.title;
+      document.getElementById('c-slug').value = c.slug;
+      document.getElementById('c-city').value = c.city_id || '';
+      document.getElementById('c-type').value = c.collection_type || '';
+      document.getElementById('c-intro').value = c.intro_content || '';
+      document.getElementById('c-meta-title').value = c.meta_title || '';
+      document.getElementById('c-meta-desc').value = c.meta_description || '';
+      document.querySelectorAll('.project-check').forEach((cb) => { cb.checked = false; });
       loadCollectionProjects(c.id);
     } else {
       modalTitle.textContent = 'Add Collection';
       form.reset();
-      (document.getElementById('c-id') as HTMLInputElement).value = '';
-      document.querySelectorAll('.project-check').forEach((cb: HTMLInputElement) => { cb.checked = false; });
+      document.getElementById('c-id').value = '';
+      document.querySelectorAll('.project-check').forEach((cb) => { cb.checked = false; });
     }
     modal.classList.remove('hidden');
   }
 
-  document.getElementById('add-coll-btn')!.addEventListener('click', () => openModal());
-  document.getElementById('c-cancel')!.addEventListener('click', () => modal.classList.add('hidden'));
+  // Add collection logic moved to separate page
+  document.getElementById('c-cancel').addEventListener('click', () => modal.classList.add('hidden'));
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
 
   document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => openModal(JSON.parse((btn as HTMLElement).dataset.coll!)));
+    btn.addEventListener('click', () => openModal(JSON.parse(btn.dataset.coll)));
   });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
-    const id = (document.getElementById('c-id') as HTMLInputElement).value;
-    const projectIds = Array.from(document.querySelectorAll('.project-check:checked')).map((cb: HTMLInputElement) => cb.value);
+    const id = document.getElementById('c-id').value;
+    const projectIds = Array.from(document.querySelectorAll('.project-check:checked')).map((cb) => cb.value);
     const body = {
-      title: (document.getElementById('c-title') as HTMLInputElement).value,
-      slug: (document.getElementById('c-slug') as HTMLInputElement).value,
-      city_id: (document.getElementById('c-city') as HTMLSelectElement).value || null,
-      collection_type: (document.getElementById('c-type') as HTMLInputElement).value,
-      intro_content: (document.getElementById('c-intro') as HTMLTextAreaElement).value,
-      meta_title: (document.getElementById('c-meta-title') as HTMLInputElement).value,
-      meta_description: (document.getElementById('c-meta-desc') as HTMLTextAreaElement).value,
+      title: document.getElementById('c-title').value,
+      slug: document.getElementById('c-slug').value,
+      city_id: document.getElementById('c-city').value || null,
+      collection_type: document.getElementById('c-type').value,
+      intro_content: document.getElementById('c-intro').value,
+      meta_title: document.getElementById('c-meta-title').value,
+      meta_description: document.getElementById('c-meta-desc').value,
       project_ids: projectIds,
     };
 
     const res = await fetch(id ? `/admin/api/collections?id=${id}` : '/admin/api/collections', {
       method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -187,19 +186,17 @@ const projects: Project[] = projectsRes.data || [];
 
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
-      const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
-      const res = await fetch(`/admin/api/collections?id=${(btn as HTMLElement).dataset.id}`, {
+      if (!confirm(`Delete ${btn.dataset.name}?`)) return;
+      const res = await fetch(`/admin/api/collections?id=${btn.dataset.id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
       });
       if (res.ok) { window.location.reload(); }
       else { alert('Failed to delete'); }
     });
   });
 
-  (document.getElementById('c-title') as HTMLInputElement).addEventListener('input', (e) => {
-    const slug = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    (document.getElementById('c-slug') as HTMLInputElement).value = slug;
+  document.getElementById('c-title').addEventListener('input', (e) => {
+    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    document.getElementById('c-slug').value = slug;
   });
 </script>

@@ -1,0 +1,132 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City } from '../../../lib/types';
+
+// Check for id to prepopulate (edit mode)
+const cityId = Astro.url.searchParams.get('id');
+let cityToEdit: City | null = null;
+if (cityId) {
+  const { data } = await supabase.from('cities').select('*').eq('id', cityId).single();
+  cityToEdit = data;
+}
+
+const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
+---
+
+<AdminLayout title={pageTitle} activeTab="cities">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/cities" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-lg">
+    <form id="city-form" class="space-y-4">
+      <input type="hidden" id="city-id" />
+      <div>
+        <label for="city-name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+        <input type="text" id="city-name" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+      </div>
+      <div>
+        <label for="city-slug" class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+        <input type="text" id="city-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+      </div>
+      <div>
+        <label for="city-state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+        <input type="text" id="city-state" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+      </div>
+      <div>
+        <label for="city-hero" class="block text-sm font-medium text-gray-700 mb-1">Hero Image URL</label>
+        <input type="text" id="city-hero" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+      </div>
+      <div>
+        <label for="city-overview" class="block text-sm font-medium text-gray-700 mb-1">Overview</label>
+        <textarea id="city-overview" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+      </div>
+      <div>
+        <label for="city-meta-title" class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+        <input type="text" id="city-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+      </div>
+      <div>
+        <label for="city-meta-desc" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+        <textarea id="city-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+      </div>
+      <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
+        <a href="/admin/cities" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
+        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm">Save City</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<script define:vars={{ city: cityToEdit }}>
+  const form = document.getElementById('city-form');
+  const nameInput = document.getElementById('city-name');
+  const slugInput = document.getElementById('city-slug');
+
+  if (city) {
+    document.getElementById('city-id').value = city.id;
+    document.getElementById('city-name').value = city.name;
+    document.getElementById('city-slug').value = city.slug;
+    document.getElementById('city-state').value = city.state;
+    document.getElementById('city-hero').value = city.hero_image || '';
+    document.getElementById('city-overview').value = city.overview || '';
+    document.getElementById('city-meta-title').value = city.meta-title || '';
+    document.getElementById('city-meta-desc').value = city.meta_description || '';
+  } else {
+    document.getElementById('city-state').value = 'Gujarat';
+  }
+
+  // Auto-generate slug from name
+  nameInput.addEventListener('input', (e) => {
+    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    slugInput.value = slug;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+
+    try {
+      const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
+      const id = document.getElementById('city-id').value;
+      const body = {
+        name: document.getElementById('city-name').value,
+        slug: document.getElementById('city-slug').value,
+        state: document.getElementById('city-state').value,
+        hero_image: document.getElementById('city-hero').value,
+        overview: document.getElementById('city-overview').value,
+        meta_title: document.getElementById('city-meta-title').value,
+        meta_description: document.getElementById('city-meta-desc').value,
+      };
+
+      const res = await fetch(id ? `/admin/api/cities?id=${id}` : '/admin/api/cities', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) { 
+        window.location.href = '/admin/cities';
+      } else { 
+        const d = await res.json(); 
+        alert(d.error || 'Failed to save'); 
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An external error occurred.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>

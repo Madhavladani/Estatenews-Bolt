@@ -16,10 +16,10 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
 <AdminLayout title="Projects" activeTab="projects">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
-    <button id="add-project-btn" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+    <a href="/admin/projects/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Project
-    </button>
+    </a>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
@@ -45,7 +45,7 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
             <td class="px-4 py-3"><span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{statusLabels[p.project_status] || p.project_status}</span></td>
             <td class="px-4 py-3 text-sm text-gray-900 font-medium">{p.price_range}</td>
             <td class="px-4 py-3 text-right">
-              <button class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors" data-project={JSON.stringify(p)}>Edit</button>
+              <a href={`/admin/projects/add?id=${p.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
               <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={p.id} data-name={p.title}>Delete</button>
             </td>
           </tr>
@@ -54,227 +54,9 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
     </table>
     {projects.length === 0 && <div class="text-center py-12 text-gray-500 text-sm">No projects found.</div>}
   </div>
-
-  <!-- Modal -->
-  <div id="project-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6">
-      <h2 id="p-modal-title" class="text-lg font-bold text-gray-900 mb-4">Add Project</h2>
-      <form id="project-form" class="space-y-4">
-        <input type="hidden" id="p-id" />
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-            <input type="text" id="p-title" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
-            <input type="text" id="p-slug" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-            <select id="p-city" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none">
-              <option value="">Select City</option>
-              {cities.map((c) => <option value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Project Type *</label>
-            <select id="p-type" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none">
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Builder Name</label>
-            <input type="text" id="p-builder" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Builder Phone</label>
-            <input type="text" id="p-phone" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <input type="text" id="p-location" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-            <input type="text" id="p-price" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="e.g. ₹50 Lakh - ₹1 Cr" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Project Status</label>
-            <select id="p-status" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none">
-              <option value="under-construction">Under Construction</option>
-              <option value="new-launch">New Launch</option>
-              <option value="ready-to-move">Ready to Move</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Possession Date</label>
-            <input type="text" id="p-possession" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="e.g. December 2026" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
-          <textarea id="p-short-desc" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
-          <textarea id="p-full-desc" rows="4" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image URL</label>
-          <input type="text" id="p-image" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Gallery Images (one URL per line)</label>
-          <textarea id="p-gallery" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="https://...&#10;https://..."></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Amenities (comma separated)</label>
-          <input type="text" id="p-amenities" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Swimming Pool, Gym, Clubhouse" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Highlights (comma separated)</label>
-          <input type="text" id="p-highlights" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Floor Plans (JSON array)</label>
-          <textarea id="p-floor-plans" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono text-xs" placeholder='[{"name":"2 BHK","size":"1050 sq.ft","price":"₹55 Lakh"}]'></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">RERA Number</label>
-            <input type="text" id="p-rera" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Brochure URL</label>
-            <input type="text" id="p-brochure" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
-            <input type="number" step="0.001" id="p-lat" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
-            <input type="number" step="0.001" id="p-lng" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-            <input type="text" id="p-meta-title" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-            <textarea id="p-meta-desc" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-          </div>
-        </div>
-        <div class="flex justify-end gap-3 pt-2">
-          <button type="button" id="p-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </AdminLayout>
 
 <script>
-  const modal = document.getElementById('project-modal')!;
-  const modalTitle = document.getElementById('p-modal-title')!;
-  const form = document.getElementById('project-form') as HTMLFormElement;
-
-  function openModal(p?: any) {
-    if (p) {
-      modalTitle.textContent = 'Edit Project';
-      (document.getElementById('p-id') as HTMLInputElement).value = p.id;
-      (document.getElementById('p-title') as HTMLInputElement).value = p.title;
-      (document.getElementById('p-slug') as HTMLInputElement).value = p.slug;
-      (document.getElementById('p-city') as HTMLSelectElement).value = p.city_id;
-      (document.getElementById('p-type') as HTMLSelectElement).value = p.project_type;
-      (document.getElementById('p-builder') as HTMLInputElement).value = p.builder_name || '';
-      (document.getElementById('p-phone') as HTMLInputElement).value = p.builder_phone || '';
-      (document.getElementById('p-location') as HTMLInputElement).value = p.location || '';
-      (document.getElementById('p-price') as HTMLInputElement).value = p.price_range || '';
-      (document.getElementById('p-status') as HTMLSelectElement).value = p.project_status;
-      (document.getElementById('p-possession') as HTMLInputElement).value = p.possession_date || '';
-      (document.getElementById('p-short-desc') as HTMLTextAreaElement).value = p.short_description || '';
-      (document.getElementById('p-full-desc') as HTMLTextAreaElement).value = p.full_description || '';
-      (document.getElementById('p-image') as HTMLInputElement).value = p.featured_image || '';
-      (document.getElementById('p-gallery') as HTMLTextAreaElement).value = (p.gallery_images || []).join('\n');
-      (document.getElementById('p-amenities') as HTMLInputElement).value = (p.amenities || []).join(', ');
-      (document.getElementById('p-highlights') as HTMLInputElement).value = (p.highlights || []).join(', ');
-      (document.getElementById('p-floor-plans') as HTMLTextAreaElement).value = JSON.stringify(p.floor_plans || []);
-      (document.getElementById('p-rera') as HTMLInputElement).value = p.rera_number || '';
-      (document.getElementById('p-brochure') as HTMLInputElement).value = p.brochure_url || '';
-      (document.getElementById('p-lat') as HTMLInputElement).value = p.latitude || '';
-      (document.getElementById('p-lng') as HTMLInputElement).value = p.longitude || '';
-      (document.getElementById('p-meta-title') as HTMLInputElement).value = p.meta_title || '';
-      (document.getElementById('p-meta-desc') as HTMLTextAreaElement).value = p.meta_description || '';
-    } else {
-      modalTitle.textContent = 'Add Project';
-      form.reset();
-      (document.getElementById('p-id') as HTMLInputElement).value = '';
-    }
-    modal.classList.remove('hidden');
-  }
-
-  document.getElementById('add-project-btn')!.addEventListener('click', () => openModal());
-  document.getElementById('p-cancel')!.addEventListener('click', () => modal.classList.add('hidden'));
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => openModal(JSON.parse((btn as HTMLElement).dataset.project!)));
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = (document.getElementById('p-id') as HTMLInputElement).value;
-    const body = {
-      title: (document.getElementById('p-title') as HTMLInputElement).value,
-      slug: (document.getElementById('p-slug') as HTMLInputElement).value,
-      city_id: (document.getElementById('p-city') as HTMLSelectElement).value,
-      project_type: (document.getElementById('p-type') as HTMLSelectElement).value,
-      builder_name: (document.getElementById('p-builder') as HTMLInputElement).value,
-      builder_phone: (document.getElementById('p-phone') as HTMLInputElement).value,
-      location: (document.getElementById('p-location') as HTMLInputElement).value,
-      price_range: (document.getElementById('p-price') as HTMLInputElement).value,
-      project_status: (document.getElementById('p-status') as HTMLSelectElement).value,
-      possession_date: (document.getElementById('p-possession') as HTMLInputElement).value,
-      short_description: (document.getElementById('p-short-desc') as HTMLTextAreaElement).value,
-      full_description: (document.getElementById('p-full-desc') as HTMLTextAreaElement).value,
-      featured_image: (document.getElementById('p-image') as HTMLInputElement).value,
-      gallery_images: (document.getElementById('p-gallery') as HTMLTextAreaElement).value,
-      amenities: (document.getElementById('p-amenities') as HTMLInputElement).value,
-      highlights: (document.getElementById('p-highlights') as HTMLInputElement).value,
-      floor_plans: (document.getElementById('p-floor-plans') as HTMLTextAreaElement).value,
-      rera_number: (document.getElementById('p-rera') as HTMLInputElement).value,
-      brochure_url: (document.getElementById('p-brochure') as HTMLInputElement).value,
-      latitude: parseFloat((document.getElementById('p-lat') as HTMLInputElement).value) || 0,
-      longitude: parseFloat((document.getElementById('p-lng') as HTMLInputElement).value) || 0,
-      meta_title: (document.getElementById('p-meta-title') as HTMLInputElement).value,
-      meta_description: (document.getElementById('p-meta-desc') as HTMLTextAreaElement).value,
-    };
-
-    const res = await fetch(id ? `/admin/api/projects?id=${id}` : '/admin/api/projects', {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (res.ok) { window.location.reload(); }
-    else { const d = await res.json(); alert(d.error || 'Failed to save'); }
-  });
-
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
@@ -284,10 +66,5 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
       if (res.ok) { window.location.reload(); }
       else { alert('Failed to delete'); }
     });
-  });
-
-  (document.getElementById('p-title') as HTMLInputElement).addEventListener('input', (e) => {
-    const slug = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    (document.getElementById('p-slug') as HTMLInputElement).value = slug;
   });
 </script>

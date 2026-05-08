@@ -9,10 +9,10 @@ const { data: cities } = await supabase.from('cities').select('*').order('name')
 <AdminLayout title="Cities" activeTab="cities">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Cities</h1>
-    <button id="add-city-btn" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+    <a href="/admin/cities/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add City
-    </button>
+    </a>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -32,7 +32,7 @@ const { data: cities } = await supabase.from('cities').select('*').order('name')
             <td class="px-4 py-3 text-sm text-gray-500">{city.slug}</td>
             <td class="px-4 py-3 text-sm text-gray-500">{city.state}</td>
             <td class="px-4 py-3 text-right">
-              <button class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors" data-city={JSON.stringify(city)}>Edit</button>
+              <a href={`/admin/cities/add?id=${city.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
               <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={city.id} data-name={city.name}>Delete</button>
             </td>
           </tr>
@@ -43,109 +43,9 @@ const { data: cities } = await supabase.from('cities').select('*').order('name')
       <div class="text-center py-12 text-gray-500 text-sm">No cities found. Add your first city.</div>
     )}
   </div>
-
-  <!-- Modal -->
-  <div id="city-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
-      <h2 id="modal-title" class="text-lg font-bold text-gray-900 mb-4">Add City</h2>
-      <form id="city-form" class="space-y-4">
-        <input type="hidden" id="city-id" />
-        <div>
-          <label for="city-name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-          <input type="text" id="city-name" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label for="city-slug" class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
-          <input type="text" id="city-slug" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label for="city-state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
-          <input type="text" id="city-state" value="Gujarat" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label for="city-hero" class="block text-sm font-medium text-gray-700 mb-1">Hero Image URL</label>
-          <input type="text" id="city-hero" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label for="city-overview" class="block text-sm font-medium text-gray-700 mb-1">Overview</label>
-          <textarea id="city-overview" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-        </div>
-        <div>
-          <label for="city-meta-title" class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-          <input type="text" id="city-meta-title" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
-        </div>
-        <div>
-          <label for="city-meta-desc" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-          <textarea id="city-meta-desc" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
-        </div>
-        <div class="flex justify-end gap-3 pt-2">
-          <button type="button" id="cancel-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </AdminLayout>
 
 <script>
-  const modal = document.getElementById('city-modal')!;
-  const modalTitle = document.getElementById('modal-title')!;
-  const form = document.getElementById('city-form') as HTMLFormElement;
-  const addBtn = document.getElementById('add-city-btn')!;
-  const cancelBtn = document.getElementById('cancel-btn')!;
-
-  function openModal(city?: any) {
-    if (city) {
-      modalTitle.textContent = 'Edit City';
-      (document.getElementById('city-id') as HTMLInputElement).value = city.id;
-      (document.getElementById('city-name') as HTMLInputElement).value = city.name;
-      (document.getElementById('city-slug') as HTMLInputElement).value = city.slug;
-      (document.getElementById('city-state') as HTMLInputElement).value = city.state;
-      (document.getElementById('city-hero') as HTMLInputElement).value = city.hero_image || '';
-      (document.getElementById('city-overview') as HTMLTextAreaElement).value = city.overview || '';
-      (document.getElementById('city-meta-title') as HTMLInputElement).value = city.meta_title || '';
-      (document.getElementById('city-meta-desc') as HTMLTextAreaElement).value = city.meta_description || '';
-    } else {
-      modalTitle.textContent = 'Add City';
-      form.reset();
-      (document.getElementById('city-id') as HTMLInputElement).value = '';
-      (document.getElementById('city-state') as HTMLInputElement).value = 'Gujarat';
-    }
-    modal.classList.remove('hidden');
-  }
-
-  addBtn.addEventListener('click', () => openModal());
-  cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => openModal(JSON.parse((btn as HTMLElement).dataset.city!)));
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
-    const id = (document.getElementById('city-id') as HTMLInputElement).value;
-    const body = {
-      name: (document.getElementById('city-name') as HTMLInputElement).value,
-      slug: (document.getElementById('city-slug') as HTMLInputElement).value,
-      state: (document.getElementById('city-state') as HTMLInputElement).value,
-      hero_image: (document.getElementById('city-hero') as HTMLInputElement).value,
-      overview: (document.getElementById('city-overview') as HTMLTextAreaElement).value,
-      meta_title: (document.getElementById('city-meta-title') as HTMLInputElement).value,
-      meta_description: (document.getElementById('city-meta-desc') as HTMLTextAreaElement).value,
-    };
-
-    const res = await fetch(id ? `/admin/api/cities?id=${id}` : '/admin/api/cities', {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(body),
-    });
-
-    if (res.ok) { window.location.reload(); }
-    else { const d = await res.json(); alert(d.error || 'Failed to save'); }
-  });
-
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
@@ -157,11 +57,5 @@ const { data: cities } = await supabase.from('cities').select('*').order('name')
       if (res.ok) { window.location.reload(); }
       else { alert('Failed to delete'); }
     });
-  });
-
-  // Auto-generate slug from name
-  (document.getElementById('city-name') as HTMLInputElement).addEventListener('input', (e) => {
-    const slug = (e.target as HTMLInputElement).value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    (document.getElementById('city-slug') as HTMLInputElement).value = slug;
   });
 </script>

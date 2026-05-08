@@ -1,0 +1,153 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City, Project } from '../../../lib/types';
+
+const [citiesRes, projectsRes] = await Promise.all([
+  supabase.from('cities').select('*').order('name'),
+  supabase.from('projects').select('id, title, city_id, project_type').order('title'),
+]);
+
+const cities: City[] = citiesRes.data || [];
+const projects: Project[] = projectsRes.data || [];
+---
+
+<AdminLayout title="Add Collection" activeTab="collections">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/collections" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">Add Collection</h1>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-4xl">
+    <form id="coll-form" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input type="text" id="c-title" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+          <input type="text" id="c-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+          <select id="c-city" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+            <option value="">All Cities</option>
+            {cities.map((c) => <option value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Collection Type</label>
+          <input type="text" id="c-type" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. luxury, top-projects" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Intro Content</label>
+        <textarea id="c-intro" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow placeholder-gray-400" placeholder="Add an engaging introduction for this collection..."></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+          <input type="text" id="c-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="SEO Meta Title" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+          <textarea id="c-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="SEO Meta Description"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Projects in Collection</label>
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 max-h-[300px] overflow-y-auto w-full space-y-2">
+          {projects.map((p) => (
+            <label class="flex items-center gap-3 py-2 px-3 bg-white border border-gray-100 rounded-lg hover:border-primary-200 cursor-pointer transition-colors shadow-sm">
+              <input type="checkbox" class="project-check w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500" value={p.id} />
+              <div class="flex flex-col">
+                <span class="text-sm font-medium text-gray-900">{p.title}</span>
+                <span class="text-xs text-gray-500">{p.project_type}</span>
+              </div>
+            </label>
+          ))}
+          {projects.length === 0 && (
+            <div class="text-sm text-gray-500 text-center py-4">No projects available.</div>
+          )}
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
+        <a href="/admin/collections" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
+        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm">Create Collection</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<script>
+  const form = document.getElementById('coll-form') as HTMLFormElement;
+  const titleInput = document.getElementById('c-title') as HTMLInputElement;
+  const slugInput = document.getElementById('c-slug') as HTMLInputElement;
+
+  titleInput.addEventListener('input', (e) => {
+    const slug = (e.target as HTMLInputElement).value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    slugInput.value = slug;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Disable submit button while saving
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+
+    try {
+      const projectIds = Array.from(document.querySelectorAll('.project-check:checked')).map((cb) => (cb as HTMLInputElement).value);
+      
+      const body = {
+        title: titleInput.value,
+        slug: slugInput.value,
+        city_id: (document.getElementById('c-city') as HTMLSelectElement).value || null,
+        collection_type: (document.getElementById('c-type') as HTMLInputElement).value,
+        intro_content: (document.getElementById('c-intro') as HTMLTextAreaElement).value,
+        meta_title: (document.getElementById('c-meta-title') as HTMLInputElement).value,
+        meta_description: (document.getElementById('c-meta-desc') as HTMLTextAreaElement).value,
+        project_ids: projectIds,
+      };
+
+      const res = await fetch('/admin/api/collections', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        window.location.href = '/admin/collections';
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to create collection');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An external error occurred.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>
