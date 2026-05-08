@@ -10,9 +10,11 @@ interface Props {
   ogImage?: string;
   jsonLd?: object | object[];
   breadcrumbs?: { name: string; url: string }[];
+  showHeader?: boolean;
+  showFooter?: boolean;
 }
 
-const { title, description, canonical, ogImage, jsonLd, breadcrumbs } = Astro.props;
+const { title, description, canonical, ogImage, jsonLd, breadcrumbs, showHeader = true, showFooter = true } = Astro.props;
 const siteUrl = 'https://propdiscover.com';
 const pageUrl = canonical || new URL(Astro.url.pathname, siteUrl).href;
 const og = ogImage || `${siteUrl}/og-default.jpg`;
@@ -46,11 +48,11 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     ))}
   </head>
   <body class="bg-white text-gray-900 font-sans antialiased">
-    <Header />
+    {showHeader && <Header />}
     {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
     <main>
       <slot />
     </main>
-    <Footer />
+    {showFooter && <Footer />}
   </body>
 </html>

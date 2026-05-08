@@ -11,7 +11,9 @@ export default defineConfig({
 
   integrations: [
     tailwind(),
-    sitemap()
+    sitemap({
+      filter: (page) => !new URL(page).pathname.startsWith('/admin'),
+    })
   ],
 
   adapter: node({

@@ -11,7 +11,7 @@ const { title, activeTab } = Astro.props;
 const user = Astro.locals.user as User | undefined;
 ---
 
-<BaseLayout title={`${title} | PropDiscover Admin`} description="PropDiscover Admin Panel">
+<BaseLayout title={`${title} | PropDiscover Admin`} description="PropDiscover Admin Panel" showHeader={false} showFooter={false}>
   <div class="flex min-h-[calc(100vh-64px)]">
     <!-- Sidebar -->
     <aside class="w-64 bg-primary-900 text-white flex-shrink-0 hidden lg:block">
