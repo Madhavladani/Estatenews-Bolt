@@ -238,7 +238,6 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
     const id = (document.getElementById('p-id') as HTMLInputElement).value;
     const body = {
       title: (document.getElementById('p-title') as HTMLInputElement).value,
@@ -268,7 +267,7 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
 
     const res = await fetch(id ? `/admin/api/projects?id=${id}` : '/admin/api/projects', {
       method: id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -279,10 +278,8 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
-      const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
       const res = await fetch(`/admin/api/projects?id=${(btn as HTMLElement).dataset.id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
       });
       if (res.ok) { window.location.reload(); }
       else { alert('Failed to delete'); }

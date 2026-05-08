@@ -79,25 +79,20 @@ const error = Astro.url.searchParams.get('error');
     const password = (document.getElementById('password') as HTMLInputElement).value;
 
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY
-      );
+      const response = await fetch('/admin/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const result = await response.json().catch(() => ({}));
 
-      if (error) {
-        errorEl.textContent = error.message;
+      if (!response.ok) {
+        errorEl.textContent = result.error || 'Invalid email or password.';
         errorEl.classList.remove('hidden');
         btn.disabled = false;
         btn.textContent = 'Sign In';
         return;
-      }
-
-      // Store token in cookie
-      if (data.session?.access_token) {
-        document.cookie = `sb-auth-token=${data.session.access_token}; path=/; max-age=86400; SameSite=Lax`;
       }
 
       window.location.href = '/admin';

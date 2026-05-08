@@ -6,12 +6,27 @@ import node from '@astrojs/node';
 
 export default defineConfig({
   output: 'server',
+
   site: 'https://propdiscover.com',
-  integrations: [tailwind(), sitemap()],
+
+  integrations: [
+    tailwind(),
+    sitemap()
+  ],
+
   adapter: node({
     mode: 'standalone',
   }),
+
   build: {
     format: 'directory',
   },
+
+  server: {
+    host: true
+  },
+
+  security: {
+    checkOrigin: false
+  }
 });
