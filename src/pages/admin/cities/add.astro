@@ -42,6 +42,11 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
       <div>
         <label for="city-hero" class="block text-sm font-medium text-gray-700 mb-1">Hero Image URL</label>
         <input type="text" id="city-hero" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <div class="mt-2 flex items-center gap-3">
+          <input type="file" id="city-hero-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+        </div>
+        <p id="city-upload-status" class="mt-2 text-xs text-gray-500"></p>
+        <img id="city-hero-preview" alt="City hero preview" class="hidden mt-3 w-full h-44 object-cover rounded-lg border border-gray-200" />
       </div>
       <div>
         <label for="city-overview" class="block text-sm font-medium text-gray-700 mb-1">Overview</label>
@@ -67,6 +72,20 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
   const form = document.getElementById('city-form');
   const nameInput = document.getElementById('city-name');
   const slugInput = document.getElementById('city-slug');
+  const heroInput = document.getElementById('city-hero');
+  const heroPreview = document.getElementById('city-hero-preview');
+  const heroFileInput = document.getElementById('city-hero-file');
+  const uploadStatus = document.getElementById('city-upload-status');
+
+  function updateCityPreview(url) {
+    if (!url) {
+      heroPreview.classList.add('hidden');
+      heroPreview.removeAttribute('src');
+      return;
+    }
+    heroPreview.src = url;
+    heroPreview.classList.remove('hidden');
+  }
 
   if (city) {
     document.getElementById('city-id').value = city.id;
@@ -75,17 +94,19 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     document.getElementById('city-state').value = city.state;
     document.getElementById('city-hero').value = city.hero_image || '';
     document.getElementById('city-overview').value = city.overview || '';
-    document.getElementById('city-meta-title').value = city.meta-title || '';
+    document.getElementById('city-meta-title').value = city.meta_title || '';
     document.getElementById('city-meta-desc').value = city.meta_description || '';
   } else {
     document.getElementById('city-state').value = 'Gujarat';
   }
+  updateCityPreview(heroInput.value);
 
   // Auto-generate slug from name
   nameInput.addEventListener('input', (e) => {
     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     slugInput.value = slug;
   });
+  heroInput.addEventListener('input', (e) => updateCityPreview(e.target.value));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -96,7 +117,6 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     submitBtn.disabled = true;
 
     try {
-      const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
       const id = document.getElementById('city-id').value;
       const body = {
         name: document.getElementById('city-name').value,
@@ -110,7 +130,7 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
 
       const res = await fetch(id ? `/admin/api/cities?id=${id}` : '/admin/api/cities', {
         method: id ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
@@ -127,6 +147,56 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
       alert('An external error occurred.');
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
+    }
+  });
+  heroFileInput?.addEventListener('change', async () => {
+    const file = heroFileInput.files?.[0];
+    const id = document.getElementById('city-id').value;
+
+    if (!file) {
+      uploadStatus.textContent = '';
+      return;
+    }
+    const localPreview = URL.createObjectURL(file);
+    updateCityPreview(localPreview);
+    uploadStatus.textContent = 'Uploading image...';
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'cities');
+
+      const res = await fetch('/admin/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        uploadStatus.textContent = data.error || 'Upload failed.';
+        return;
+      }
+
+      heroInput.value = data.url;
+      updateCityPreview(data.url);
+
+      if (id) {
+        const saveRes = await fetch(`/admin/api/cities?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hero_image: data.url }),
+        });
+        if (!saveRes.ok) {
+          uploadStatus.textContent = 'Image uploaded, but database update failed.';
+          return;
+        }
+      }
+      uploadStatus.textContent = id
+        ? 'Image uploaded and URL updated in database.'
+        : 'Image uploaded. Click Save City to store full record.';
+    } catch (error) {
+      console.error(error);
+      uploadStatus.textContent = 'Upload failed.';
     }
   });
 </script>
