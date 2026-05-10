@@ -1,0 +1,590 @@
+---
+export const prerender = true;
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { supabase } from "../lib/supabase";
+import { formatProjectType, formatStatus } from "../lib/seo";
+import type { City, Project } from "../lib/types";
+
+const [citiesRes, projectsRes] = await Promise.all([
+  supabase.from("cities").select("*").order("name"),
+  supabase
+    .from("projects")
+    .select("*, city:cities(*)")
+    .order("published_at", { ascending: false }),
+]);
+
+const cities: City[] = citiesRes.data || [];
+const projects: (Project & { city?: City })[] = projectsRes.data || [];
+
+const compareData = projects.map((project) => ({
+  id: project.id,
+  title: project.title,
+  slug: project.slug,
+  citySlug: project.city?.slug || "",
+  cityName: project.city?.name || "",
+  projectType: project.project_type,
+  projectTypeLabel: formatProjectType(project.project_type),
+  location: project.location || "N/A",
+  builderName: project.builder_name || "N/A",
+  priceRange: project.price_range || "N/A",
+  possessionDate: project.possession_date || "N/A",
+  projectStatus: project.project_status,
+  projectStatusLabel: formatStatus(project.project_status),
+  amenities: project.amenities || [],
+  highlights: project.highlights || [],
+  reraNumber: project.rera_number || "N/A",
+  featuredImage: project.featured_image,
+  shortDescription: project.short_description || "",
+}));
+---
+
+<BaseLayout
+  title="Compare Properties by City and Type | PropDiscover"
+  description="Compare properties in the same city and same property type with images, pricing, amenities, possession timelines, and project status."
+  breadcrumbs={[{ name: "Compare Properties", url: "/compare-properties" }]}
+>
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-slate-950 pt-20 pb-32">
+    <div
+      class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"
+    >
+    </div>
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-orange-500/20 via-sky-500/5 to-transparent blur-[100px] pointer-events-none"
+    >
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6"
+      >
+        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+        <span
+          class="text-orange-200/90 text-xs font-semibold tracking-wider uppercase"
+          >Smart Compare Tool</span
+        >
+      </div>
+      <h1
+        class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-6"
+      >
+        Compare properties, <br class="hidden md:block" />
+        <span
+          class="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-amber-200"
+          >side by side</span
+        >
+      </h1>
+      <p class="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl font-light">
+        Evaluate locations, pricing, amenities, and builder details in one
+        unified dashboard to make confident decisions.
+      </p>
+    </div>
+  </section>
+
+  <!-- Filter Section (Floating) -->
+  <section class="relative z-20 -mt-16 mb-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div
+        class="bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl shadow-slate-200/50 rounded-3xl p-6 md:p-8"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div class="space-y-2">
+            <label
+              for="city-filter"
+              class="block text-sm font-medium text-slate-500"
+              >City Location</label
+            >
+            <div class="relative">
+              <select
+                id="city-filter"
+                class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3.5 pr-10 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium"
+              >
+                {
+                  cities.map((city) => (
+                    <option value={city.slug}>{city.name}</option>
+                  ))
+                }
+              </select>
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"></path></svg
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label
+              for="type-filter"
+              class="block text-sm font-medium text-slate-500"
+              >Property Type</label
+            >
+            <div class="relative">
+              <select
+                id="type-filter"
+                class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3.5 pr-10 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium"
+              >
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+              </select>
+              <div
+                class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"></path></svg
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="flex items-center justify-center md:justify-end h-full pt-4 md:pt-0"
+          >
+            <div
+              class="bg-slate-950 text-white rounded-2xl px-6 py-4 w-full md:w-auto text-center border border-slate-800 shadow-inner"
+            >
+              <p
+                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1"
+              >
+                Live Pool
+              </p>
+              <p id="filter-note" class="text-sm font-medium text-orange-300">
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pickers Section -->
+  <section class="py-8 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div id="project-pickers" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      </div>
+      <div
+        id="compare-empty"
+        class="hidden bg-white border border-slate-200 rounded-3xl p-16 text-center shadow-sm"
+      >
+        <div
+          class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6"
+        >
+          <svg
+            class="w-10 h-10 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg
+          >
+        </div>
+        <h3 class="text-slate-900 font-bold text-2xl mb-2">No matches found</h3>
+        <p class="text-slate-500 text-base max-w-sm mx-auto">
+          Try switching the city or property type to discover more comparisons.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Insights & Table Section -->
+  <section class="pb-24 bg-slate-50 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div id="insights" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      </div>
+
+      <div
+        class="bg-white rounded-[2rem] border border-slate-200/60 shadow-xl shadow-slate-200/40 overflow-hidden"
+      >
+        <div class="overflow-x-auto">
+          <table
+            class="w-full min-w-[1000px] text-left border-collapse"
+            id="compare-table"
+          >
+            <thead
+              class="bg-white/80 backdrop-blur-xl sticky top-0 z-10 border-b border-slate-200"
+            >
+              <tr>
+                <th
+                  class="p-6 text-sm font-bold text-slate-900 uppercase tracking-wider w-1/4"
+                  >Feature Details</th
+                >
+                <th
+                  class="p-6 text-sm font-bold text-slate-900 uppercase tracking-wider w-1/4"
+                  >Property One</th
+                >
+                <th
+                  class="p-6 text-sm font-bold text-slate-900 uppercase tracking-wider w-1/4"
+                  >Property Two</th
+                >
+                <th
+                  class="p-6 text-sm font-bold text-slate-900 uppercase tracking-wider w-1/4"
+                  >Property Three</th
+                >
+              </tr>
+            </thead>
+            <tbody id="compare-body" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ compareData }}>
+    const allProjects = compareData || [];
+    const cityFilter = document.getElementById("city-filter");
+    const typeFilter = document.getElementById("type-filter");
+    const filterNote = document.getElementById("filter-note");
+    const pickerWrap = document.getElementById("project-pickers");
+    const compareBody = document.getElementById("compare-body");
+    const compareEmpty = document.getElementById("compare-empty");
+    const insights = document.getElementById("insights");
+
+    const selected = [null, null, null];
+
+    const getFiltered = () =>
+      allProjects.filter(
+        (p) =>
+          p.citySlug === cityFilter?.value &&
+          p.projectType === typeFilter?.value,
+      );
+
+    const projectUrl = (p) => `/${p.citySlug}/${p.projectType}/${p.slug}`;
+    const getProject = (id) => allProjects.find((p) => p.id === id) || null;
+
+    const bestAmenityProject = (items) => {
+      if (!items.length) return null;
+      return [...items].sort(
+        (a, b) => (b.amenities.length || 0) - (a.amenities.length || 0),
+      )[0];
+    };
+
+    const budgetClueProject = (items) => {
+      if (!items.length) return null;
+      return items[0];
+    };
+
+    const readyProject = (items) =>
+      items.find((item) => item.projectStatus === "ready-to-move") || null;
+
+    const renderInsights = (items) => {
+      if (!insights) return;
+      const amenitiesLead = bestAmenityProject(items);
+      const readyLead = readyProject(items);
+      const budgetLead = budgetClueProject(items);
+
+      insights.innerHTML = `
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 border border-slate-700 shadow-lg relative overflow-hidden group">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl transition-transform group-hover:scale-150 duration-700"></div>
+          <div class="relative z-10">
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            </div>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Amenity Leader</p>
+            <p class="text-white font-bold text-lg leading-tight mb-2">${amenitiesLead ? amenitiesLead.title : "Select properties"}</p>
+            <p class="text-slate-300 text-sm font-light">${amenitiesLead ? `Leads with ${amenitiesLead.amenities.length} premium amenities.` : "Choose properties to unlock."}</p>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-3xl p-6 border border-orange-200 shadow-lg shadow-orange-100/50 relative overflow-hidden group">
+           <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-10 -mt-10 blur-2xl transition-transform group-hover:scale-150 duration-700"></div>
+           <div class="relative z-10">
+            <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center mb-4 border border-orange-200">
+              <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <p class="text-orange-500 text-xs font-bold uppercase tracking-widest mb-1">Move-in Readiness</p>
+            <p class="text-slate-900 font-bold text-lg leading-tight mb-2">${readyLead ? readyLead.title : "No ready options yet"}</p>
+            <p class="text-slate-600 text-sm font-light">${readyLead ? `Currently marked as ${readyLead.projectStatusLabel}.` : "Select to view possession timelines."}</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 border border-sky-200 shadow-lg shadow-sky-100/50 relative overflow-hidden group">
+           <div class="absolute top-0 right-0 w-32 h-32 bg-sky-50 rounded-full -mr-10 -mt-10 blur-2xl transition-transform group-hover:scale-150 duration-700"></div>
+           <div class="relative z-10">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center mb-4 border border-sky-200">
+              <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <p class="text-sky-600 text-xs font-bold uppercase tracking-widest mb-1">Budget Snapshot</p>
+            <p class="text-slate-900 font-bold text-lg leading-tight mb-2">${budgetLead ? budgetLead.priceRange : "Select properties"}</p>
+            <p class="text-slate-600 text-sm font-light">${budgetLead ? `Baseline comparison via ${budgetLead.title}.` : "Pricing will appear once selected."}</p>
+          </div>
+        </div>
+      `;
+    };
+
+    const row = (label, values, isHighlight = false) => `
+      <tr class="group hover:bg-slate-50 transition-colors">
+        <td class="p-6 text-sm font-semibold text-slate-500 align-top ${isHighlight ? "text-slate-900" : ""}">${label}</td>
+        <td class="p-6 text-sm text-slate-700 align-top ${isHighlight ? "font-bold text-slate-900" : ""}">${values[0] || '<span class="text-slate-300">-</span>'}</td>
+        <td class="p-6 text-sm text-slate-700 align-top ${isHighlight ? "font-bold text-slate-900" : ""}">${values[1] || '<span class="text-slate-300">-</span>'}</td>
+        <td class="p-6 text-sm text-slate-700 align-top ${isHighlight ? "font-bold text-slate-900" : ""}">${values[2] || '<span class="text-slate-300">-</span>'}</td>
+      </tr>
+    `;
+
+    const imageCell = (project) => {
+      if (!project)
+        return '<div class="h-48 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center"><span class="text-slate-300 text-xs uppercase tracking-widest">Empty</span></div>';
+      return `
+        <a href="${projectUrl(project)}" class="block group relative overflow-hidden rounded-2xl shadow-sm">
+          <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors z-10"></div>
+          <img src="${project.featuredImage}" alt="${project.title}" class="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-900/80 to-transparent p-4 z-20">
+             <span class="text-white font-bold block truncate">${project.title}</span>
+          </div>
+        </a>
+      `;
+    };
+
+    const renderTable = () => {
+      if (!compareBody) return;
+      const selectedItems = selected
+        .map((id) => getProject(id))
+        .filter(Boolean);
+      renderInsights(selectedItems);
+
+      compareBody.innerHTML = [
+        row(
+          "",
+          selected.map((id) => imageCell(getProject(id))),
+        ),
+        row(
+          "Project Name",
+          selected.map((id) => {
+            const p = getProject(id);
+            return p
+              ? `<a href="${projectUrl(p)}" class="text-orange-600 hover:text-orange-700 hover:underline font-bold text-base transition-colors">${p.title}</a>`
+              : "";
+          }),
+          true,
+        ),
+        row(
+          "Quick Overview",
+          selected.map((id) =>
+            getProject(id)?.shortDescription
+              ? `<p class="line-clamp-3 text-slate-500 leading-relaxed">${getProject(id).shortDescription}</p>`
+              : "",
+          ),
+        ),
+        row(
+          "Property Type",
+          selected.map((id) => getProject(id)?.projectTypeLabel || ""),
+        ),
+        row(
+          "Location",
+          selected.map((id) => getProject(id)?.location || ""),
+        ),
+        row(
+          "Builder",
+          selected.map((id) => getProject(id)?.builderName || ""),
+        ),
+        row(
+          "Price Range",
+          selected.map((id) => {
+            const p = getProject(id);
+            return p
+              ? `<span class="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-lg font-bold border border-green-200">${p.priceRange}</span>`
+              : "";
+          }),
+        ),
+        row(
+          "Possession",
+          selected.map((id) => getProject(id)?.possessionDate || ""),
+        ),
+        row(
+          "Current Status",
+          selected.map((id) => {
+            const p = getProject(id);
+            return p
+              ? `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${p.projectStatus === "ready-to-move" ? "bg-green-500" : "bg-orange-500"}"></span>${p.projectStatusLabel}</span>`
+              : "";
+          }),
+        ),
+        row(
+          "RERA Number",
+          selected.map((id) =>
+            getProject(id)?.reraNumber
+              ? `<code class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${getProject(id).reraNumber}</code>`
+              : "",
+          ),
+        ),
+        row(
+          "Total Amenities",
+          selected.map((id) => {
+            const project = getProject(id);
+            return project
+              ? `<span class="font-bold text-lg">${project.amenities.length}</span>`
+              : "";
+          }),
+        ),
+        row(
+          "Top Amenities",
+          selected.map((id) => {
+            const project = getProject(id);
+            if (!project) return "";
+            return `<div class="flex flex-wrap gap-2">${project.amenities
+              .slice(0, 4)
+              .map(
+                (a) =>
+                  `<span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1.5 rounded-md border border-slate-200">${a}</span>`,
+              )
+              .join("")}</div>`;
+          }),
+        ),
+        row(
+          "Key Highlights",
+          selected.map((id) => {
+            const project = getProject(id);
+            if (!project) return "";
+            return `<ul class="list-disc list-inside space-y-1 text-slate-600 ml-1 marker:text-orange-400">${project.highlights
+              .slice(0, 3)
+              .map((h) => `<li>${h}</li>`)
+              .join("")}</ul>`;
+          }),
+        ),
+      ].join("");
+    };
+
+    const pickerCard = (project, index, options) => `
+      <div class="bg-white rounded-[2rem] border border-slate-200 p-3 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col h-full">
+        <div class="px-4 pt-4 pb-3 flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full">Slot 0${index + 1}</span>
+        </div>
+        <div class="px-3 mb-4">
+            <div class="relative">
+                <select class="w-full appearance-none bg-white border-2 border-slate-100 text-slate-900 rounded-xl px-4 py-3 pr-10 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-400 transition-all font-semibold text-sm picker" data-index="${index}">
+                <option value="">Select a property to compare...</option>
+                ${options}
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        ${
+          project
+            ? `
+          <div class="px-3 pb-3 flex-grow flex flex-col">
+            <div class="relative overflow-hidden rounded-2xl mb-5 group">
+              <img src="${project.featuredImage}" alt="${project.title}" class="h-56 w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                 ${project.projectStatusLabel}
+              </div>
+            </div>
+            
+            <div class="px-2 flex-grow">
+              <h3 class="text-xl font-bold text-slate-900 mb-1">${project.title}</h3>
+              <p class="text-sm font-medium text-slate-500 flex items-center gap-1.5 mb-4">
+                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                 ${project.location}, ${project.cityName}
+              </p>
+              
+              <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Builder</span>
+                  <span class="block text-sm font-semibold text-slate-800 truncate">${project.builderName}</span>
+                </div>
+                <div class="bg-orange-50/50 rounded-xl p-3 border border-orange-100/50">
+                  <span class="block text-[10px] font-bold text-orange-400 uppercase tracking-wider mb-1">Est. Price</span>
+                  <span class="block text-sm font-bold text-slate-800 truncate">${project.priceRange}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-auto pt-4 px-2 border-t border-slate-100">
+                <a href="${projectUrl(project)}" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-orange-500 transition-colors group">
+                View full details
+                <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+            </div>
+          </div>
+        `
+            : `
+          <div class="flex-grow flex flex-col items-center justify-center p-8 text-center bg-slate-50/50 rounded-2xl mx-3 mb-3 border border-dashed border-slate-200">
+            <div class="w-16 h-16 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-4 text-slate-300">
+               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <p class="text-slate-600 font-semibold mb-1">Empty Slot</p>
+            <p class="text-xs text-slate-400 max-w-[200px] mx-auto leading-relaxed">Select a property from the dropdown above to begin comparing.</p>
+          </div>
+        `
+        }
+      </div>
+    `;
+
+    const renderPickers = () => {
+      if (!pickerWrap) return;
+      const filtered = getFiltered();
+      const validIds = new Set(filtered.map((project) => project.id));
+
+      for (let i = 0; i < selected.length; i += 1) {
+        if (selected[i] && !validIds.has(selected[i])) selected[i] = null;
+      }
+
+      const defaults = filtered.slice(0, 3).map((project) => project.id);
+      for (let i = 0; i < 3; i += 1) {
+        if (!selected[i] && defaults[i]) selected[i] = defaults[i];
+      }
+
+      const cityName =
+        filtered[0]?.cityName ||
+        cityFilter?.selectedOptions?.[0]?.textContent ||
+        "";
+      const typeLabel =
+        typeFilter?.value === "commercial" ? "Commercial" : "Residential";
+      if (filterNote) {
+        filterNote.textContent = `${filtered.length} ${typeLabel.toLowerCase()} properties in ${cityName || "this city"}`;
+      }
+
+      if (compareEmpty)
+        compareEmpty.classList.toggle("hidden", filtered.length > 0);
+
+      pickerWrap.innerHTML = selected
+        .map((id, index) => {
+          const options = filtered
+            .map(
+              (project) =>
+                `<option value="${project.id}" ${id === project.id ? "selected" : ""}>${project.title}</option>`,
+            )
+            .join("");
+          return pickerCard(getProject(id), index, options);
+        })
+        .join("");
+
+      document.querySelectorAll(".picker").forEach((element) => {
+        element.addEventListener("change", (event) => {
+          const target = event.target;
+          const idx = Number(target.dataset.index);
+          selected[idx] = target.value || null;
+          renderPickers();
+          renderTable();
+        });
+      });
+
+      renderTable();
+    };
+
+    cityFilter?.addEventListener("change", renderPickers);
+    typeFilter?.addEventListener("change", renderPickers);
+    renderPickers();
+  </script>
+</BaseLayout>

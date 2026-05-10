@@ -12,7 +12,11 @@ export default defineConfig({
   integrations: [
     tailwind(),
     sitemap({
-      filter: (page) => !new URL(page).pathname.startsWith('/admin'),
+      filter: (page) => {
+        const pathname = new URL(page).pathname;
+        const excluded = ['/admin', '/privacy-policy', '/terms-and-conditions'];
+        return !excluded.some((path) => pathname.startsWith(path));
+      },
     })
   ],
 

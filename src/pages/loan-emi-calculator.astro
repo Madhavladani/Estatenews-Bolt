@@ -1,0 +1,77 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Loan EMI Calculator | PropDiscover"
+  description="Calculate your monthly home loan EMI instantly with PropDiscover's EMI calculator."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Loan EMI Calculator</h1>
+      <p class="text-gray-600 mb-8">Estimate your monthly EMI, total interest, and total payment amount.</p>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label class="text-sm text-gray-700">Loan Amount (INR)
+            <input id="loanAmount" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 5000000" />
+          </label>
+          <label class="text-sm text-gray-700">Annual Interest Rate (%)
+            <input id="interestRate" type="number" step="0.01" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 8.5" />
+          </label>
+          <label class="text-sm text-gray-700">Loan Tenure (Years)
+            <input id="loanTenure" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 20" />
+          </label>
+        </div>
+        <button id="emiCalcBtn" class="mt-6 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-semibold">Calculate EMI</button>
+        <div id="emiResult" class="mt-6 hidden rounded-xl bg-primary-50 border border-primary-100 p-5 space-y-3">
+          <div>
+            <p class="text-sm text-gray-600">Monthly EMI</p>
+            <p id="monthlyEmiText" class="text-2xl font-bold text-primary-800"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Total Interest Payable</p>
+            <p id="totalInterestText" class="text-xl font-semibold text-gray-900"></p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Total Amount Payable</p>
+            <p id="totalPayableText" class="text-xl font-semibold text-gray-900"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const formatINR = (value: number) =>
+    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
+
+  const emiButton = document.getElementById('emiCalcBtn');
+  const emiResult = document.getElementById('emiResult');
+  const monthlyEmiText = document.getElementById('monthlyEmiText');
+  const totalInterestText = document.getElementById('totalInterestText');
+  const totalPayableText = document.getElementById('totalPayableText');
+
+  emiButton?.addEventListener('click', () => {
+    const principal = Number((document.getElementById('loanAmount') as HTMLInputElement)?.value || 0);
+    const annualRate = Number((document.getElementById('interestRate') as HTMLInputElement)?.value || 0);
+    const tenureYears = Number((document.getElementById('loanTenure') as HTMLInputElement)?.value || 0);
+
+    if (principal <= 0 || annualRate <= 0 || tenureYears <= 0) return;
+
+    const monthlyRate = annualRate / 12 / 100;
+    const months = tenureYears * 12;
+    const factor = Math.pow(1 + monthlyRate, months);
+    const emi = (principal * monthlyRate * factor) / (factor - 1);
+    const totalPayable = emi * months;
+    const totalInterest = totalPayable - principal;
+
+    if (monthlyEmiText && totalInterestText && totalPayableText && emiResult) {
+      monthlyEmiText.textContent = formatINR(emi);
+      totalInterestText.textContent = formatINR(totalInterest);
+      totalPayableText.textContent = formatINR(totalPayable);
+      emiResult.classList.remove('hidden');
+    }
+  });
+</script>
