@@ -3,8 +3,13 @@ export async function GET() {
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /admin/api/
 
 Sitemap: https://propdiscover.com/sitemap-index.xml
+Sitemap: https://propdiscover.com/sitemap-cities.xml
+Sitemap: https://propdiscover.com/sitemap-projects.xml
+Sitemap: https://propdiscover.com/sitemap-collections.xml
+Host: propdiscover.com
 `;
   return new Response(robotsTxt, {
     headers: { 'Content-Type': 'text/plain' },

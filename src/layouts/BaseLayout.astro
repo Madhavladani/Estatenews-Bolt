@@ -10,14 +10,18 @@ interface Props {
   ogImage?: string;
   jsonLd?: object | object[];
   breadcrumbs?: { name: string; url: string }[];
+  noindex?: boolean;
+  prevUrl?: string;
+  nextUrl?: string;
+  hreflangs?: Record<string, string>;
   showHeader?: boolean;
   showFooter?: boolean;
 }
 
-const { title, description, canonical, ogImage, jsonLd, breadcrumbs, showHeader = true, showFooter = true } = Astro.props;
+const { title, description, canonical, ogImage, jsonLd, breadcrumbs, noindex = false, prevUrl, nextUrl, hreflangs = { 'en-IN': '/', 'x-default': '/' }, showHeader = true, showFooter = true } = Astro.props;
 const siteUrl = 'https://propdiscover.com';
 const pageUrl = canonical || new URL(Astro.url.pathname, siteUrl).href;
-const og = ogImage || `${siteUrl}/og-default.jpg`;
+const og = ogImage || `${siteUrl}/api/og?title=${encodeURIComponent(title)}`;
 const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 ---
 
@@ -28,7 +32,13 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
     <link rel="canonical" href={pageUrl} />
+    {prevUrl && <link rel="prev" href={new URL(prevUrl, siteUrl).href} />}
+    {nextUrl && <link rel="next" href={new URL(nextUrl, siteUrl).href} />}
+    {Object.entries(hreflangs).map(([lang, path]) => (
+      <link rel="alternate" hreflang={lang} href={new URL(path, siteUrl).href} />
+    ))}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={pageUrl} />

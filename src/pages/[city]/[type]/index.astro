@@ -34,6 +34,8 @@ const { data: projectsData } = await supabase
   .order('published_at', { ascending: false });
 
 const projects: Project[] = projectsData || [];
+const totalPages = Math.max(1, Math.ceil(projects.length / ITEMS_PER_PAGE));
+const paginatedProjects = projects.slice(0, ITEMS_PER_PAGE);
 const locations = [...new Set(projects.map((p) => p.location).filter(Boolean))];
 const amenities = [...new Set(projects.flatMap((p) => p.amenities).filter(Boolean))].sort();
 const statuses = [...new Set(projects.map((p) => p.project_status).filter(Boolean))];
@@ -67,6 +69,8 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={`${typeLabel} Projects in ${city.name} | Top Properties & Prices`}
   description={`Explore the best ${typeLabel.toLowerCase()} projects in ${city.name}, ${city.state}. Find new launches, under-construction, and ready-to-move properties with premium amenities and prime locations.`}
+  canonical={`https://propdiscover.com/${city.slug}/${projectType}`}
+  nextUrl={totalPages > 1 ? `/${city.slug}/${projectType}/page/2` : undefined}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },
@@ -100,7 +104,7 @@ const faqSchema = buildFAQSchema(faqs);
         <div class="flex-1">
           <div class="flex items-center justify-between mb-6">
             <p class="text-sm text-gray-500">
-              Showing <span class="font-medium text-gray-900">{projects.length}</span> projects
+              Showing <span class="font-medium text-gray-900">{paginatedProjects.length}</span> of <span class="font-medium text-gray-900">{projects.length}</span> projects
             </p>
             <select id="sort-projects" class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 outline-none">
               <option value="latest">Latest First</option>
@@ -121,7 +125,7 @@ const faqSchema = buildFAQSchema(faqs);
             project_status: p.project_status,
             amenities: p.amenities,
           })))} data-city={JSON.stringify(city)} data-type={projectType}>
-            {projects.map((project) => (
+            {paginatedProjects.map((project) => (
               <div class="project-item" data-location={project.location} data-status={project.project_status} data-amenities={project.amenities.join(',')}>
                 <ProjectCard project={{ ...project, city }} />
               </div>
@@ -132,6 +136,14 @@ const faqSchema = buildFAQSchema(faqs);
               <p class="text-gray-500 text-lg">No {typeLabel.toLowerCase()} projects found in {city.name}.</p>
               <a href={`/${city.slug}/${otherType}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
                 Explore {otherType === 'residential' ? 'Residential' : 'Commercial'} Projects instead
+              </a>
+            </div>
+          )}
+          {totalPages > 1 && (
+            <div class="mt-8 flex justify-center">
+              <a href={`/${city.slug}/${projectType}/page/2`} class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-medium transition-colors">
+                Next Page
+                <span aria-hidden="true">&rarr;</span>
               </a>
             </div>
           )}

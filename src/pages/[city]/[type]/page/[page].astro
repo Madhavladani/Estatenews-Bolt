@@ -1,0 +1,99 @@
+---
+export const prerender = true;
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../../components/ProjectCard.astro';
+import { supabase } from '../../../../lib/supabase';
+import { buildBreadcrumbSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../../lib/seo';
+import type { Project } from '../../../../lib/types';
+
+export async function getStaticPaths() {
+  const { data: cities } = await supabase.from('cities').select('*');
+  const paths = [];
+  for (const city of cities || []) {
+    const { data: projects } = await supabase.from('projects').select('*').eq('city_id', city.id);
+    const byType = new Map<string, number>();
+    for (const project of projects || []) {
+      byType.set(project.project_type, (byType.get(project.project_type) || 0) + 1);
+    }
+    for (const [type, total] of byType.entries()) {
+      const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+      for (let page = 2; page <= totalPages; page++) {
+        paths.push({
+          params: { city: city.slug, type, page: String(page) },
+          props: { city, projectType: type, page },
+        });
+      }
+    }
+  }
+  return paths;
+}
+
+const { city, projectType, page } = Astro.props;
+const currentPage = Number(page);
+const typeLabel = formatProjectType(projectType);
+
+const { data: projectsData } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('city_id', city.id)
+  .eq('project_type', projectType)
+  .order('published_at', { ascending: false });
+
+const projects: Project[] = projectsData || [];
+const totalPages = Math.max(1, Math.ceil(projects.length / ITEMS_PER_PAGE));
+const start = (currentPage - 1) * ITEMS_PER_PAGE;
+const paginatedProjects = projects.slice(start, start + ITEMS_PER_PAGE);
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+  { name: typeLabel, url: `https://propdiscover.com/${city.slug}/${projectType}` },
+  { name: `Page ${currentPage}`, url: `https://propdiscover.com/${city.slug}/${projectType}/page/${currentPage}` },
+]);
+---
+
+<BaseLayout
+  title={`${typeLabel} Projects in ${city.name} - Page ${currentPage} | PropDiscover`}
+  description={`Browse page ${currentPage} of ${typeLabel.toLowerCase()} projects in ${city.name}.`}
+  canonical={`https://propdiscover.com/${city.slug}/${projectType}/page/${currentPage}`}
+  prevUrl={currentPage === 2 ? `/${city.slug}/${projectType}` : `/${city.slug}/${projectType}/page/${currentPage - 1}`}
+  nextUrl={currentPage < totalPages ? `/${city.slug}/${projectType}/page/${currentPage + 1}` : undefined}
+  jsonLd={breadcrumbSchema}
+  breadcrumbs={[
+    { name: city.name, url: `/${city.slug}` },
+    { name: typeLabel, url: `/${city.slug}/${projectType}` },
+    { name: `Page ${currentPage}`, url: `/${city.slug}/${projectType}/page/${currentPage}` },
+  ]}
+>
+  <section class="bg-primary-800 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-3">
+        {typeLabel} Projects in {city.name} - Page {currentPage}
+      </h1>
+    </div>
+  </section>
+
+  <section class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {paginatedProjects.map((project) => (
+          <ProjectCard project={{ ...project, city }} />
+        ))}
+      </div>
+
+      <div class="mt-8 flex justify-between items-center">
+        {currentPage > 1 ? (
+          <a href={currentPage === 2 ? `/${city.slug}/${projectType}` : `/${city.slug}/${projectType}/page/${currentPage - 1}`} class="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
+            Previous
+          </a>
+        ) : <span></span>}
+        <p class="text-sm text-gray-500">Page {currentPage} of {totalPages}</p>
+        {currentPage < totalPages ? (
+          <a href={`/${city.slug}/${projectType}/page/${currentPage + 1}`} class="px-4 py-2 rounded-lg bg-primary-700 text-white text-sm hover:bg-primary-800">
+            Next
+          </a>
+        ) : <span></span>}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
