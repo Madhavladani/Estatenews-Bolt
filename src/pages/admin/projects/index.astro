@@ -3,14 +3,69 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
 import type { Project, City } from '../../../lib/types';
 
+const url = new URL(Astro.request.url);
+const search = url.searchParams.get('q') || '';
+const selectedCity = url.searchParams.get('city') || '';
+const selectedStatus = url.searchParams.get('status') || '';
+const selectedType = url.searchParams.get('type') || '';
+const sortBy = url.searchParams.get('sort') || 'title';
+const order = url.searchParams.get('order') || 'asc';
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 10;
+const from = (page - 1) * limit;
+const to = from + limit - 1;
+
+// Build Projects Query
+let query = supabase.from('projects').select('*, city:cities(name)', { count: 'exact' });
+
+if (search) {
+  query = query.ilike('title', `%${search}%`);
+}
+if (selectedCity) {
+  query = query.eq('city_id', selectedCity);
+}
+if (selectedStatus) {
+  query = query.eq('project_status', selectedStatus);
+}
+if (selectedType) {
+  query = query.eq('project_type', selectedType);
+}
+
+// Order
+query = query.order(sortBy, { ascending: order === 'asc' });
+
+// Pagination
+query = query.range(from, to);
+
 const [projectsRes, citiesRes] = await Promise.all([
-  supabase.from('projects').select('*, city:cities(name)').order('title'),
+  query,
   supabase.from('cities').select('*').order('name'),
 ]);
 
 const projects: any[] = projectsRes.data || [];
+const totalCount = projectsRes.count || 0;
+const totalPages = Math.ceil(totalCount / limit);
 const cities: City[] = citiesRes.data || [];
 const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'under-construction': 'Under Construction', 'ready-to-move': 'Ready to Move' };
+
+// Pagination logic
+const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+const paginationItems: { type: 'page' | 'dots'; value: number | string }[] = [];
+
+pageNumbers.forEach((p) => {
+  const isFirstOrLast = p === 1 || p === totalPages;
+  const isNearCurrent = p >= page - 1 && p <= page + 1;
+  const showDotsBefore = p === 2 && page > 3;
+  const showDotsAfter = p === totalPages - 1 && page < totalPages - 2;
+
+  if (isFirstOrLast || isNearCurrent) {
+    paginationItems.push({ type: 'page', value: p });
+  } else if (showDotsBefore || showDotsAfter) {
+    if (paginationItems[paginationItems.length - 1]?.type !== 'dots') {
+      paginationItems.push({ type: 'dots', value: '...' });
+    }
+  }
+});
 ---
 
 <AdminLayout title="Projects" activeTab="projects">
@@ -20,6 +75,48 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
       Add Project
     </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="relative">
+      <input 
+        type="text" 
+        id="search-input"
+        placeholder="Search projects..." 
+        value={search}
+        class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+    </div>
+
+    <select id="city-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+      <option value="">All Cities</option>
+      {cities.map(city => (
+        <option value={city.id} selected={city.id === selectedCity}>{city.name}</option>
+      ))}
+    </select>
+
+    <select id="status-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+      <option value="">All Status</option>
+      {Object.entries(statusLabels).map(([val, label]) => (
+        <option value={val} selected={val === selectedStatus}>{label}</option>
+      ))}
+    </select>
+
+    <select id="type-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+      <option value="">All Types</option>
+      <option value="residential" selected={selectedType === 'residential'}>Residential</option>
+      <option value="commercial" selected={selectedType === 'commercial'}>Commercial</option>
+    </select>
+
+    <select id="sort-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+      <option value="title:asc" selected={sortBy === 'title' && order === 'asc'}>Title (A-Z)</option>
+      <option value="title:desc" selected={sortBy === 'title' && order === 'desc'}>Title (Z-A)</option>
+      <option value="created_at:desc" selected={sortBy === 'created_at' && order === 'desc'}>Newest First</option>
+      <option value="created_at:asc" selected={sortBy === 'created_at' && order === 'asc'}>Oldest First</option>
+    </select>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
@@ -54,9 +151,88 @@ const statusLabels: Record<string, string> = { 'new-launch': 'New Launch', 'unde
     </table>
     {projects.length === 0 && <div class="text-center py-12 text-gray-500 text-sm">No projects found.</div>}
   </div>
+
+  {totalPages > 1 && (
+    <div class="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
+      <div class="text-sm text-gray-500">
+        Showing <span class="font-medium text-gray-900">{from + 1}-{Math.min(to + 1, totalCount)}</span> of <span class="font-medium text-gray-900">{totalCount}</span> projects
+      </div>
+      <div class="flex items-center gap-2">
+        {page > 1 && (
+          <button class="page-btn px-3 py-1 text-sm border border-gray-200 rounded-md hover:bg-gray-50 bg-white" data-page={page - 1}>Previous</button>
+        )}
+        
+        {paginationItems.map(item => (
+          item.type === 'page' ? (
+            <button 
+              class={`page-btn px-3 py-1 text-sm border rounded-md transition-colors ${item.value === page ? 'bg-primary-700 text-white border-primary-700' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+              data-page={item.value}
+            >
+              {item.value}
+            </button>
+          ) : (
+            <span class="px-1 text-gray-400">{item.value}</span>
+          )
+        ))}
+
+        {page < totalPages && (
+          <button class="page-btn px-3 py-1 text-sm border border-gray-200 rounded-md hover:bg-gray-50 bg-white" data-page={page + 1}>Next</button>
+        )}
+      </div>
+    </div>
+  )}
 </AdminLayout>
 
 <script>
+  // Filter and Sort interactions
+  const filters = ['search-input', 'city-filter', 'status-filter', 'type-filter', 'sort-filter'];
+  
+  function updateFilters() {
+    const url = new URL(window.location.href);
+    
+    const search = (document.getElementById('search-input') as HTMLInputElement).value;
+    const city = (document.getElementById('city-filter') as HTMLSelectElement).value;
+    const status = (document.getElementById('status-filter') as HTMLSelectElement).value;
+    const type = (document.getElementById('type-filter') as HTMLSelectElement).value;
+    const sortVal = (document.getElementById('sort-filter') as HTMLSelectElement).value;
+    const [sort, order] = sortVal.split(':');
+
+    if (search) url.searchParams.set('q', search); else url.searchParams.delete('q');
+    if (city) url.searchParams.set('city', city); else url.searchParams.delete('city');
+    if (status) url.searchParams.set('status', status); else url.searchParams.delete('status');
+    if (type) url.searchParams.set('type', type); else url.searchParams.delete('type');
+    if (sort) url.searchParams.set('sort', sort);
+    if (order) url.searchParams.set('order', order);
+    
+    url.searchParams.set('page', '1'); // Reset to page 1 on filter change
+    window.location.href = url.toString();
+  }
+
+  filters.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (id === 'search-input') {
+        let timeout: any;
+        el.addEventListener('input', () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(updateFilters, 500);
+        });
+      } else {
+        el.addEventListener('change', updateFilters);
+      }
+    }
+  });
+
+  document.querySelectorAll('.page-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = (btn as HTMLElement).dataset.page;
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', p || '1');
+      window.location.href = url.toString();
+    });
+  });
+
+  // Delete interaction
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
