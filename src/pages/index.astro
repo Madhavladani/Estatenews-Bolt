@@ -3,6 +3,7 @@ export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import CollectionCard from '../components/CollectionCard.astro';
+import FAQSection from '../components/FAQSection.astro';
 import { supabase } from '../lib/supabase';
 import { buildBreadcrumbSchema } from '../lib/seo';
 import type { City, Project, Collection } from '../lib/types';
@@ -31,7 +32,6 @@ for (const p of allProjects) {
   projectCounts[slug] = (projectCounts[slug] || 0) + 1;
 }
 
-const builders = [...new Set(allProjects.map((p) => p.builder_name).filter(Boolean))].slice(0, 8);
 const featuredDesktopLimit = 12;
 const featuredCities = cities.map((city) => {
   const initials = city.name
@@ -46,6 +46,25 @@ const featuredCities = cities.map((city) => {
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://propdiscover.com' },
 ]);
+
+const listingFaqs = [
+  {
+    question: 'How do I add my property / project on PropDiscover?',
+    answer: 'Use the “List Your Project / Properties” form and share your basic project details. Our team reviews and publishes eligible listings.',
+  },
+  {
+    question: 'What details should I submit?',
+    answer: 'Project name, location/city, property type, a short description, and your contact details (builder/company). Images and brochures help.',
+  },
+  {
+    question: 'How long does approval take?',
+    answer: 'Most submissions are reviewed within 24–48 hours (business days). We may contact you for missing details.',
+  },
+  {
+    question: 'Is listing free?',
+    answer: 'Basic listings can be supported; featured placements and premium promotion may be available on request.',
+  },
+];
 ---
 
 <BaseLayout
@@ -69,18 +88,25 @@ const breadcrumbSchema = buildBreadcrumbSchema([
         </p>
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
-            <input
-              type="text"
-              id="city-search"
-              placeholder="Search by city, project, or locality..."
-              class="w-full px-5 py-3.5 rounded-xl text-gray-900 bg-white shadow-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm"
-            />
+            <select
+              id="city-select"
+              class="w-full px-5 py-3.5 rounded-xl text-gray-900 bg-white shadow-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm appearance-none cursor-pointer"
+            >
+              <option value="" disabled selected>Select your city...</option>
+              {cities.map((city) => (
+                <option value={city.slug}>{city.name}</option>
+              ))}
+            </select>
+            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
-          <button class="px-8 py-3.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-xl shadow-lg transition-colors text-sm">
+          <button id="hero-search-btn" class="px-8 py-3.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-xl shadow-lg transition-colors text-sm">
             Search Projects
           </button>
         </div>
-        <div id="search-results" class="hidden mt-3 bg-white rounded-xl shadow-xl overflow-hidden"></div>
       </div>
     </div>
   </section>
@@ -229,27 +255,32 @@ const breadcrumbSchema = buildBreadcrumbSchema([
     </div>
   </section>
 
-  <!-- Featured Developers -->
-  <section class="py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-gray-900 mb-3">Featured Developers</h2>
-        <p class="text-gray-600">Trusted builders delivering quality projects across Gujarat</p>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {builders.map((builder) => (
-          <div class="bg-white rounded-xl border border-gray-100 p-5 text-center hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-              </svg>
-            </div>
-            <p class="text-sm font-semibold text-gray-900">{builder}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
+	  <!-- List Your Project / Properties -->
+	  <section class="py-16 bg-primary-800 text-white">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+	        <div class="lg:col-span-2">
+	          <h2 class="text-3xl font-bold mb-3">Add Your Properties / Project</h2>
+	          <p class="text-gray-200 leading-relaxed">
+	            Are you a builder, developer, or channel partner? Submit your listing and get discovered by serious buyers across Gujarat.
+	          </p>
+	        </div>
+	        <div class="flex lg:justify-end">
+	          <a
+	            href="/list-your-project-properties"
+	            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-xl shadow-lg transition-colors text-sm w-full sm:w-auto"
+	          >
+	            List Your Project
+	            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+	            </svg>
+	          </a>
+	        </div>
+	      </div>
+	    </div>
+	  </section>
+
+	  <FAQSection title="Listing FAQs" faqs={listingFaqs} />
 
   <!-- Collections -->
   <section class="py-16 bg-gray-50">
@@ -331,31 +362,16 @@ const breadcrumbSchema = buildBreadcrumbSchema([
     });
   });
 
-  const searchInput = document.getElementById('city-search') as HTMLInputElement;
-  const searchResults = document.getElementById('search-results');
-  const cityData = JSON.parse(
-    document.getElementById('city-data-json')?.textContent || '[]'
-  ) as { name: string; slug: string }[];
+  const citySelect = document.getElementById('city-select') as HTMLSelectElement;
+  const heroSearchBtn = document.getElementById('hero-search-btn');
 
-  searchInput?.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase().trim();
-    if (!q) {
-      searchResults?.classList.add('hidden');
-      return;
-    }
-    const matches = cityData.filter((c: { name: string; slug: string }) => c.name.toLowerCase().includes(q));
-    if (matches.length > 0) {
-      searchResults!.innerHTML = matches
-        .map((c) => `<a href="/${c.slug}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">${c.name} Properties</a>`)
-        .join('');
-      searchResults?.classList.remove('hidden');
+  heroSearchBtn?.addEventListener('click', () => {
+    const slug = citySelect.value;
+    if (slug) {
+      window.location.href = `/${slug}`;
     } else {
-      searchResults?.classList.add('hidden');
+      citySelect.focus();
     }
-  });
-
-  searchInput?.addEventListener('blur', () => {
-    setTimeout(() => searchResults?.classList.add('hidden'), 200);
   });
 
   const showAllBtn = document.getElementById('show-all-cities-btn');
