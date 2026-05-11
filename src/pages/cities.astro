@@ -1,0 +1,62 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+import { buildBreadcrumbSchema } from '../lib/seo';
+import type { City } from '../lib/types';
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: 'Cities', url: 'https://propdiscover.com/cities' },
+]);
+
+// Build-time fetch only; page is prerendered.
+const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
+const cities: City[] = citiesRes || [];
+---
+
+<BaseLayout
+  title="All Cities - Real Estate Projects in Gujarat | PropDiscover"
+  description="Browse real estate opportunities across Gujarat cities. Compare city-wise markets for residential and commercial property investment."
+  jsonLd={breadcrumbSchema}
+>
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">All Cities</h1>
+        <p class="text-gray-600 max-w-3xl mx-auto">
+          Explore city-level real estate markets across Gujarat. Open any city to see the latest residential and commercial property options.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {cities.map((city) => {
+          const initials = city.name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0]?.toUpperCase() ?? '')
+            .join('');
+          return (
+            <a href={`/${city.slug}`} class="group bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-primary-200 transition-all">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="relative flex items-center justify-center w-11 h-11 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
+                  <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span>{initials}</span>
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</h2>
+                  <p class="text-sm text-gray-500">{city.state}</p>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600">{city.overview}</p>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
