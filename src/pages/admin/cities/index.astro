@@ -3,16 +3,47 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
 import type { City } from '../../../lib/types';
 
-const { data: cities } = await supabase.from('cities').select('*').order('name');
+const url = new URL(Astro.request.url);
+const selectedState = url.searchParams.get('state') || '';
+
+// Fetch all unique states for the filter
+const { data: allStatesData } = await supabase.from('cities').select('state').order('state');
+const uniqueStates = [...new Set(allStatesData?.map(c => (c as any).state).filter(Boolean) as string[])].sort();
+
+let query = supabase.from('cities').select('*').order('name');
+
+if (selectedState) {
+  query = query.eq('state', selectedState);
+}
+
+const { data: cities } = await query;
 ---
 
 <AdminLayout title="Cities" activeTab="cities">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
     <h1 class="text-2xl font-bold text-gray-900">Cities</h1>
-    <a href="/admin/cities/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Add City
-    </a>
+    
+    <div class="flex items-center gap-3">
+      <div class="relative min-w-[200px]">
+        <select 
+          id="state-filter"
+          class="block w-full px-4 py-2 text-sm text-gray-900 bg-white border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500 appearance-none cursor-pointer"
+        >
+          <option value="">All States</option>
+          {uniqueStates.map(state => (
+            <option value={state} selected={state === selectedState}>{state}</option>
+          ))}
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <a href="/admin/cities/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add City
+      </a>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -46,6 +77,19 @@ const { data: cities } = await supabase.from('cities').select('*').order('name')
 </AdminLayout>
 
 <script>
+  // Handle state filter change
+  const stateFilter = document.getElementById('state-filter') as HTMLSelectElement;
+  stateFilter?.addEventListener('change', () => {
+    const selectedState = stateFilter.value;
+    const url = new URL(window.location.href);
+    if (selectedState) {
+      url.searchParams.set('state', selectedState);
+    } else {
+      url.searchParams.delete('state');
+    }
+    window.location.href = url.toString();
+  });
+
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;

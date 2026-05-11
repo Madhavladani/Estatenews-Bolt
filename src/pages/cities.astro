@@ -13,6 +13,9 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 // Build-time fetch only; page is prerendered.
 const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
 const cities: City[] = citiesRes || [];
+
+// Extract unique states for filtering
+const states = [...new Set(cities.map(city => city.state))].sort();
 ---
 
 <BaseLayout
@@ -29,7 +32,19 @@ const cities: City[] = citiesRes || [];
         </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- State Filter -->
+      <div class="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <label for="state-filter" class="text-sm font-medium text-gray-700">Filter by State:</label>
+        <select id="state-filter" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow min-w-[200px]">
+          <option value="all">All States</option>
+          {states.map(state => (
+            <option value={state}>{state}</option>
+          ))}
+        </select>
+        <span id="city-count" class="text-sm text-gray-500">Showing {cities.length} cities</span>
+      </div>
+
+      <div id="cities-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {cities.map((city) => {
           const initials = city.name
             .split(' ')
@@ -38,7 +53,7 @@ const cities: City[] = citiesRes || [];
             .map((part) => part[0]?.toUpperCase() ?? '')
             .join('');
           return (
-            <a href={`/${city.slug}`} class="group bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-primary-200 transition-all">
+            <a href={`/${city.slug}`} data-state={city.state} class="city-card group bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-primary-200 transition-all">
               <div class="flex items-center gap-3 mb-3">
                 <div class="relative flex items-center justify-center w-11 h-11 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
                   <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -59,4 +74,30 @@ const cities: City[] = citiesRes || [];
       </div>
     </div>
   </section>
+
+  <script>
+    const stateFilter = document.getElementById('state-filter') as HTMLSelectElement;
+    const citiesGrid = document.getElementById('cities-grid');
+    const cityCards = document.querySelectorAll('.city-card') as NodeListOf<HTMLElement>;
+    const cityCount = document.getElementById('city-count');
+
+    stateFilter?.addEventListener('change', (e) => {
+      const selectedState = (e.target as HTMLSelectElement).value;
+      let visibleCount = 0;
+
+      cityCards.forEach(card => {
+        const cityState = card.getAttribute('data-state');
+        if (selectedState === 'all' || cityState === selectedState) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (cityCount) {
+        cityCount.textContent = `Showing ${visibleCount} city${visibleCount !== 1 ? 's' : ''}`;
+      }
+    });
+  </script>
 </BaseLayout>

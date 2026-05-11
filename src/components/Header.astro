@@ -1,3 +1,12 @@
+---
+import { supabase } from '../lib/supabase';
+import type { City } from '../lib/types';
+
+// Fetch top 6 cities for the dropdown
+const { data: citiesData } = await supabase.from('cities').select('name, slug').order('name').limit(6);
+const topCities: Partial<City>[] = citiesData || [];
+---
+
 <header class="bg-primary-800 text-white sticky top-0 z-50 shadow-lg">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
@@ -9,6 +18,30 @@
       </a>
       <nav class="hidden md:flex items-center gap-6">
         <a href="/" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Home</a>
+        
+        <!-- Cities Dropdown -->
+        <div class="relative group">
+          <button class="flex items-center gap-1 text-gray-200 group-hover:text-white transition-colors text-sm font-medium">
+            Cities
+            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          
+          <div class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200">
+            {topCities.map(city => (
+              <a href={`/${city.slug}`} class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                {city.name}
+              </a>
+            ))}
+            <div class="border-t border-gray-100 mt-2 pt-2">
+              <a href="/cities" class="block px-4 py-2 text-sm font-bold text-primary-700 hover:bg-primary-50 transition-colors">
+                View All Cities
+              </a>
+            </div>
+          </div>
+        </div>
+
         <a href="/collections" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Collections</a>
         <a href="/compare-properties" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Compare Property</a>
         <a href="/list-your-project-properties" class="add-properties-cta text-white text-sm font-semibold">Add Properties</a>
@@ -23,6 +56,7 @@
   <div id="mobile-menu" class="hidden md:hidden bg-primary-900 border-t border-primary-700">
     <div class="px-4 py-3 space-y-2">
       <a href="/" class="block py-2 text-gray-200 hover:text-white text-sm">Home</a>
+      <a href="/cities" class="block py-2 text-gray-200 hover:text-white text-sm">Cities</a>
       <a href="/collections" class="block py-2 text-gray-200 hover:text-white text-sm">Collections</a>
       <a href="/compare-properties" class="block py-2 text-gray-200 hover:text-white text-sm">Compare Property</a>
       <a href="/list-your-project-properties" class="add-properties-cta-mobile block py-2 text-sm font-semibold text-center">Add Properties</a>
