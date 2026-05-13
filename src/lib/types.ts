@@ -81,6 +81,7 @@ export interface News {
   og_image: string;
   noindex: boolean;
   city?: City;
+  linked_collection_ids?: string[];
 }
 
 export interface Database {
@@ -119,6 +120,22 @@ export interface Database {
         Update: Partial<{
           collection_id: string;
           project_id: string;
+        }>;
+      };
+      news_collections: {
+        Row: {
+          id: string;
+          news_id: string;
+          collection_id: string;
+          created_at: string;
+        };
+        Insert: {
+          news_id: string;
+          collection_id: string;
+        };
+        Update: Partial<{
+          news_id: string;
+          collection_id: string;
         }>;
       };
     };
