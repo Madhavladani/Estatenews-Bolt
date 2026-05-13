@@ -57,9 +57,22 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image URL</label>
-          <input type="url" id="n-featured" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
-          <p class="mt-1 text-xs text-gray-500">Used on cards + article header.</p>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+          <div class="space-y-3">
+            <div class="flex gap-3">
+              <input type="url" id="n-featured" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+              <label class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium cursor-pointer transition-colors whitespace-nowrap flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <span>Upload</span>
+                <input type="file" id="n-featured-file" accept="image/*" class="hidden" />
+              </label>
+            </div>
+            <p id="n-featured-status" class="text-xs text-gray-500"></p>
+            <div id="n-featured-preview-container" class="hidden relative inline-block">
+              <img id="n-featured-preview" class="max-h-48 rounded-lg border border-gray-200" />
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-gray-500">Used on cards + article header. High resolution images are auto-compressed.</p>
         </div>
         <div class="flex items-end">
           <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -102,6 +115,9 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">OG Image URL</label>
             <input type="url" id="n-og-image" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+            <div id="n-og-preview-container" class="hidden mt-2 relative inline-block">
+              <img id="n-og-preview" class="max-h-32 rounded-lg border border-gray-200" />
+            </div>
           </div>
         </div>
 
@@ -143,6 +159,14 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
   const form = document.getElementById('news-form');
   const titleInput = document.getElementById('n-title');
   const slugInput = document.getElementById('n-slug');
+  const featuredInput = document.getElementById('n-featured');
+  const ogImageInput = document.getElementById('n-og-image');
+  const featuredFileInput = document.getElementById('n-featured-file');
+  const featuredStatus = document.getElementById('n-featured-status');
+  const featuredPreview = document.getElementById('n-featured-preview');
+  const featuredPreviewContainer = document.getElementById('n-featured-preview-container');
+  const ogPreview = document.getElementById('n-og-preview');
+  const ogPreviewContainer = document.getElementById('n-og-preview-container');
 
   function toLocalDatetimeValue(iso) {
     if (!iso) return '';
@@ -173,6 +197,93 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
     document.getElementById('n-published').checked = true;
     document.getElementById('n-published-at').value = toLocalDatetimeValue(new Date().toISOString());
   }
+
+  function updateFeaturedPreview(url) {
+    if (!url) {
+      featuredPreviewContainer.classList.add('hidden');
+      featuredPreview.removeAttribute('src');
+      return;
+    }
+    featuredPreview.src = url;
+    featuredPreviewContainer.classList.remove('hidden');
+  }
+
+  function updateOgPreview(url) {
+    if (!url) {
+      ogPreviewContainer.classList.add('hidden');
+      ogPreview.removeAttribute('src');
+      return;
+    }
+    ogPreview.src = url;
+    ogPreviewContainer.classList.remove('hidden');
+  }
+
+  if (featuredInput.value) {
+    updateFeaturedPreview(featuredInput.value);
+  }
+  if (ogImageInput.value) {
+    updateOgPreview(ogImageInput.value);
+  }
+
+  featuredInput.addEventListener('input', (e) => {
+    const val = e.target.value;
+    updateFeaturedPreview(val);
+    // Sync with OG image if OG image is empty or same as previous featured
+    if (!ogImageInput.value || ogImageInput.value === articleToEdit?.featured_image) {
+      ogImageInput.value = val;
+      updateOgPreview(val);
+    }
+  });
+
+  ogImageInput.addEventListener('input', (e) => {
+    updateOgPreview(e.target.value);
+  });
+
+  async function uploadNewsImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'news');
+
+    const res = await fetch('/admin/api/upload-image', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    return data.url;
+  }
+
+  featuredFileInput?.addEventListener('change', async () => {
+    const file = featuredFileInput.files?.[0];
+    if (!file) return;
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file);
+    updateFeaturedPreview(localUrl);
+    featuredStatus.textContent = 'Uploading to R2... (Compressing 60-70%)';
+    featuredStatus.className = 'text-xs text-primary-600 animate-pulse';
+
+    try {
+      const remoteUrl = await uploadNewsImage(file);
+      featuredInput.value = remoteUrl;
+      updateFeaturedPreview(remoteUrl);
+      
+      // Auto-sync with OG image
+      if (!ogImageInput.value || ogImageInput.value === articleToEdit?.featured_image || ogImageInput.value === localUrl) {
+        ogImageInput.value = remoteUrl;
+        updateOgPreview(remoteUrl);
+      }
+
+      featuredStatus.textContent = 'Upload successful!';
+      featuredStatus.className = 'text-xs text-green-600';
+    } catch (error) {
+      console.error(error);
+      featuredStatus.textContent = 'Upload failed: ' + error.message;
+      featuredStatus.className = 'text-xs text-red-600';
+      // Revert preview if needed or just keep local one
+    }
+  });
 
   titleInput.addEventListener('input', (e) => {
     if (document.getElementById('n-id').value) return; // don't overwrite slug in edit mode
