@@ -82,6 +82,7 @@ export interface News {
   noindex: boolean;
   city?: City;
   linked_collection_ids?: string[];
+  faqs?: { question: string; answer: string }[];
 }
 
 export interface Database {
