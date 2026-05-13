@@ -23,9 +23,11 @@ export async function getStaticPaths() {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
-  return (data || []).map((article) => ({
+  const articles = (data || []) as News[];
+
+  return articles.map((article) => ({
     params: { slug: article.slug },
-    props: { article, allArticles: data || [] },
+    props: { article, allArticles: articles },
   }));
 }
 
