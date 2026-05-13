@@ -43,7 +43,8 @@ const heroImage = article.featured_image || undefined;
 const html = article.content_html || "";
 const readingTime = calculateReadingTime(html);
 const toc = extractTOC(html);
-const faqs = extractFAQs(html);
+const htmlFaqs = extractFAQs(html);
+const faqs = [...(article.faqs || []), ...htmlFaqs];
 
 // ── Keywords
 const keywords = article.meta_keywords
