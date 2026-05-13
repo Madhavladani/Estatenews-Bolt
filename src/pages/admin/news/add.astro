@@ -1,0 +1,237 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City, News } from '../../../lib/types';
+
+const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
+const cities: City[] = citiesRes || [];
+
+const newsId = Astro.url.searchParams.get('id');
+let articleToEdit: News | null = null;
+if (newsId) {
+  const { data } = await supabase.from('news').select('*').eq('id', newsId).single();
+  articleToEdit = data;
+}
+
+const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
+---
+
+<AdminLayout title={pageTitle} activeTab="news">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/news" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-4xl">
+    <form id="news-form" class="space-y-6">
+      <input type="hidden" id="n-id" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <input type="text" id="n-title" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+          <input type="text" id="n-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Author Name</label>
+          <input type="text" id="n-author" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Related City (optional)</label>
+          <select id="n-city" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+            <option value="">None</option>
+            {cities.map((c) => <option value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image URL</label>
+          <input type="url" id="n-featured" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+          <p class="mt-1 text-xs text-gray-500">Used on cards + article header.</p>
+        </div>
+        <div class="flex items-end">
+          <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input type="checkbox" id="n-published" class="rounded border-gray-300 text-primary-700 focus:ring-primary-500" />
+            Published
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+        <textarea id="n-excerpt" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Content (HTML) *</label>
+        <textarea id="n-content" rows="10" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="<p>...</p>"></textarea>
+        <p class="mt-1 text-xs text-gray-500">This is rendered as HTML on the public page.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+          <input type="text" id="n-tags" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="gujarat, ahmedabad, market" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Publish Date</label>
+          <input type="datetime-local" id="n-published-at" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">SEO</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+            <input type="text" id="n-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">OG Image URL</label>
+            <input type="url" id="n-og-image" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+          <textarea id="n-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Keywords</label>
+            <input type="text" id="n-meta-keywords" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="keyword1, keyword2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Canonical Path (optional)</label>
+            <input type="text" id="n-canonical" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="/news/my-slug" />
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input type="checkbox" id="n-noindex" class="rounded border-gray-300 text-primary-700 focus:ring-primary-500" />
+            Noindex (exclude from search)
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <a href="/admin/news" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50">Cancel</a>
+        <button type="submit" class="px-5 py-2 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg text-sm transition-colors">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<script define:vars={{ articleToEdit }}>
+  const form = document.getElementById('news-form');
+  const titleInput = document.getElementById('n-title');
+  const slugInput = document.getElementById('n-slug');
+
+  function toLocalDatetimeValue(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  if (articleToEdit) {
+    document.getElementById('n-id').value = articleToEdit.id || '';
+    titleInput.value = articleToEdit.title || '';
+    slugInput.value = articleToEdit.slug || '';
+    document.getElementById('n-author').value = articleToEdit.author_name || '';
+    document.getElementById('n-city').value = articleToEdit.city_id || '';
+    document.getElementById('n-featured').value = articleToEdit.featured_image || '';
+    document.getElementById('n-published').checked = !!articleToEdit.is_published;
+    document.getElementById('n-excerpt').value = articleToEdit.excerpt || '';
+    document.getElementById('n-content').value = articleToEdit.content_html || '';
+    document.getElementById('n-tags').value = (articleToEdit.tags || []).join(', ');
+    document.getElementById('n-published-at').value = toLocalDatetimeValue(articleToEdit.published_at);
+    document.getElementById('n-meta-title').value = articleToEdit.meta_title || '';
+    document.getElementById('n-meta-desc').value = articleToEdit.meta_description || '';
+    document.getElementById('n-meta-keywords').value = articleToEdit.meta_keywords || '';
+    document.getElementById('n-canonical').value = articleToEdit.canonical_path || '';
+    document.getElementById('n-og-image').value = articleToEdit.og_image || '';
+    document.getElementById('n-noindex').checked = !!articleToEdit.noindex;
+  } else {
+    document.getElementById('n-published').checked = true;
+    document.getElementById('n-published-at').value = toLocalDatetimeValue(new Date().toISOString());
+  }
+
+  titleInput.addEventListener('input', (e) => {
+    if (document.getElementById('n-id').value) return; // don't overwrite slug in edit mode
+    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    slugInput.value = slug;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+
+    try {
+      const id = document.getElementById('n-id').value;
+      const publishedAtInput = document.getElementById('n-published-at').value;
+      const publishedAtIso = publishedAtInput ? new Date(publishedAtInput).toISOString() : new Date().toISOString();
+
+      const body = {
+        title: document.getElementById('n-title').value,
+        slug: document.getElementById('n-slug').value,
+        author_name: document.getElementById('n-author').value,
+        city_id: document.getElementById('n-city').value || null,
+        featured_image: document.getElementById('n-featured').value,
+        is_published: document.getElementById('n-published').checked,
+        excerpt: document.getElementById('n-excerpt').value,
+        content_html: document.getElementById('n-content').value,
+        tags: document.getElementById('n-tags').value,
+        published_at: publishedAtIso,
+        meta_title: document.getElementById('n-meta-title').value,
+        meta_description: document.getElementById('n-meta-desc').value,
+        meta_keywords: document.getElementById('n-meta-keywords').value,
+        canonical_path: document.getElementById('n-canonical').value,
+        og_image: document.getElementById('n-og-image').value,
+        noindex: document.getElementById('n-noindex').checked,
+      };
+
+      const res = await fetch(id ? `/admin/api/news?id=${id}` : '/admin/api/news', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        window.location.href = '/admin/news';
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to save');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An external error occurred.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+

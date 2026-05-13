@@ -28,6 +28,16 @@ export default defineConfig({
     format: 'directory',
   },
 
+  vite: {
+    // Avoid Windows EPERM issues writing to node_modules/.vite
+    cacheDir: '.vite-cache',
+    optimizeDeps: {
+      // Reduce dependency pre-bundling churn on Windows.
+      noDiscovery: true,
+      include: [],
+    },
+  },
+
   server: {
     host: true
   },

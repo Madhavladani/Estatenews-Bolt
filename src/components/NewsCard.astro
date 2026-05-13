@@ -1,0 +1,36 @@
+---
+import type { News } from '../lib/types';
+
+interface Props {
+  article: News;
+}
+
+const { article } = Astro.props;
+const href = `/news/${article.slug}`;
+---
+
+<a href={href} class="group block bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+  <div class="aspect-[16/9] bg-gray-100 overflow-hidden">
+    {article.featured_image ? (
+      <img
+        src={article.featured_image}
+        alt={article.title}
+        class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+        loading="lazy"
+        width="800"
+        height="450"
+      />
+    ) : (
+      <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">No image</div>
+    )}
+  </div>
+  <div class="p-5">
+    <h3 class="text-base font-semibold text-gray-900 group-hover:text-primary-700 transition-colors line-clamp-2">{article.title}</h3>
+    <p class="text-sm text-gray-500 mt-2 line-clamp-3">{article.excerpt || article.meta_description}</p>
+    <div class="mt-4 flex items-center justify-between text-xs text-gray-400">
+      <span>{new Date(article.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' })}</span>
+      <span class="text-primary-700 font-medium group-hover:text-primary-800">Read more →</span>
+    </div>
+  </div>
+</a>
+

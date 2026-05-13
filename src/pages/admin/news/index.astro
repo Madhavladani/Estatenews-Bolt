@@ -1,0 +1,154 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { News } from '../../../lib/types';
+
+const url = new URL(Astro.request.url);
+const search = url.searchParams.get('q') || '';
+const published = url.searchParams.get('published') || '';
+const sortBy = url.searchParams.get('sort') || 'published_at';
+const order = url.searchParams.get('order') || 'desc';
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 10;
+const from = (page - 1) * limit;
+const to = from + limit - 1;
+
+let query = supabase.from('news').select('*', { count: 'exact' });
+
+if (search) {
+  query = query.ilike('title', `%${search}%`);
+}
+if (published === 'yes') query = query.eq('is_published', true);
+if (published === 'no') query = query.eq('is_published', false);
+
+query = query.order(sortBy, { ascending: order === 'asc' }).range(from, to);
+
+const res = await query;
+const articles: News[] = res.data || [];
+const totalCount = res.count || 0;
+const totalPages = Math.ceil(totalCount / limit);
+---
+
+<AdminLayout title="News" activeTab="news">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">News</h1>
+    <a href="/admin/news/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Add News
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="relative md:col-span-2">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search news..."
+        value={search}
+        class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+    </div>
+
+    <select id="published-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+      <option value="" selected={published === ''}>All</option>
+      <option value="yes" selected={published === 'yes'}>Published</option>
+      <option value="no" selected={published === 'no'}>Draft</option>
+    </select>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Slug</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+          <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Published</th>
+          <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {articles.map((a) => (
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-sm text-gray-900 font-medium">{a.title}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{a.slug}</td>
+            <td class="px-4 py-3">
+              <span class={`text-xs font-medium px-2 py-0.5 rounded-full ${a.is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
+                {a.is_published ? 'Published' : 'Draft'}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-500">
+              {a.published_at ? new Date(a.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' }) : '-'}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <a href={`/admin/news/add?id=${a.id}`} class="px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
+              <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={a.id} data-name={a.title}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {articles.length === 0 && <div class="text-center py-12 text-gray-500 text-sm">No news found.</div>}
+  </div>
+
+  {totalPages > 1 && (
+    <div class="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
+      <div class="text-sm text-gray-500">
+        Showing <span class="font-medium text-gray-900">{from + 1}-{Math.min(to + 1, totalCount)}</span> of <span class="font-medium text-gray-900">{totalCount}</span> news items
+      </div>
+      <div class="flex items-center gap-2">
+        {page > 1 && (
+          <button class="page-btn px-3 py-1 text-sm border border-gray-200 rounded-md hover:bg-gray-50 bg-white" data-page={page - 1}>Previous</button>
+        )}
+        <span class="text-sm text-gray-600">Page {page} / {totalPages}</span>
+        {page < totalPages && (
+          <button class="page-btn px-3 py-1 text-sm border border-gray-200 rounded-md hover:bg-gray-50 bg-white" data-page={page + 1}>Next</button>
+        )}
+      </div>
+    </div>
+  )}
+</AdminLayout>
+
+<script>
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const publishedFilter = document.getElementById('published-filter') as HTMLSelectElement;
+
+  function applyFilters() {
+    const url = new URL(window.location.href);
+    const q = searchInput.value;
+    const published = publishedFilter.value;
+    if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
+    if (published) url.searchParams.set('published', published); else url.searchParams.delete('published');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+  }
+
+  let timeout: any;
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(applyFilters, 400);
+  });
+  publishedFilter?.addEventListener('change', applyFilters);
+
+  document.querySelectorAll('.page-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const p = (btn as HTMLElement).dataset.page;
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', p || '1');
+      window.location.href = url.toString();
+    });
+  });
+
+  document.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
+      const res = await fetch(`/admin/api/news?id=${(btn as HTMLElement).dataset.id}`, { method: 'DELETE' });
+      if (res.ok) window.location.reload();
+      else alert('Failed to delete');
+    });
+  });
+</script>
+

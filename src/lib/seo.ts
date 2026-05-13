@@ -1,4 +1,4 @@
-import type { City, Project, Collection } from './types';
+import type { City, Project, Collection, News } from './types';
 
 const SITE_URL = 'https://propdiscover.com';
 const SITE_NAME = 'PropDiscover';
@@ -113,6 +113,34 @@ export function buildCollectionSchema(collection: Collection) {
     '@type': 'ItemList',
     name: collection.title,
     description: collection.intro_content,
+  };
+}
+
+export function buildNewsArticleSchema(article: News) {
+  const url = `${SITE_URL}${article.canonical_path || `/news/${article.slug}`}`;
+  const image = article.og_image || article.featured_image || `${SITE_URL}/og-default.jpg`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.meta_title || article.title,
+    name: article.title,
+    description: article.meta_description || article.excerpt,
+    image: [image],
+    datePublished: article.published_at,
+    dateModified: article.updated_at || article.published_at,
+    author: article.author_name ? [{ '@type': 'Person', name: article.author_name }] : undefined,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/favicon.svg`,
+      },
+    },
   };
 }
 

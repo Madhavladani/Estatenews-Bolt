@@ -4,20 +4,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import CollectionCard from '../components/CollectionCard.astro';
 import FAQSection from '../components/FAQSection.astro';
+import NewsCard from '../components/NewsCard.astro';
 import { supabase } from '../lib/supabase';
 import { buildBreadcrumbSchema } from '../lib/seo';
-import type { City, Project, Collection } from '../lib/types';
+import type { City, Project, Collection, News } from '../lib/types';
 
-const [citiesRes, projectsRes, collectionsRes] = await Promise.all([
+const [citiesRes, projectsRes, collectionsRes, newsRes] = await Promise.all([
   // Build-time fetch only; page is prerendered.
   supabase.from('cities').select('*').order('name'),
   supabase.from('projects').select('*, city:cities(*)').order('published_at', { ascending: false }),
   supabase.from('collections').select('*, city:cities(*)').order('created_at', { ascending: false }),
+  supabase.from('news').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(6),
 ]);
 
 const cities: City[] = citiesRes.data || [];
 const allProjects: (Project & { city?: City })[] = projectsRes.data || [];
 const collections: (Collection & { city?: City })[] = collectionsRes.data || [];
+const latestNews: News[] = newsRes.data || [];
 
 const residentialProjects = allProjects.filter((p) => p.project_type === 'residential');
 const commercialProjects = allProjects.filter((p) => p.project_type === 'commercial');
@@ -240,20 +243,55 @@ const listingFaqs = [
     </div>
   </section>
 
-  <!-- Trending Projects -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-gray-900 mb-3">Trending Projects</h2>
-        <p class="text-gray-600">Most searched and viewed projects this week</p>
+	  <!-- Trending Projects -->
+	  <section class="py-16 bg-gray-50">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <div class="text-center mb-10">
+	        <h2 class="text-3xl font-bold text-gray-900 mb-3">Trending Projects</h2>
+	        <p class="text-gray-600">Most searched and viewed projects this week</p>
+	      </div>
+	      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+	        {trendingProjects.map((project) => (
+	          <ProjectCard project={project} />
+	        ))}
+	      </div>
+	    </div>
+	  </section>
+
+    <!-- Latest News -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-4 mb-10">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Latest Real Estate News</h2>
+            <p class="text-gray-600">Fresh updates, launches, and market insights.</p>
+          </div>
+          <a href="/news" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+            View all news
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        {latestNews.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {latestNews.map((article) => (
+              <NewsCard article={article} />
+            ))}
+          </div>
+        ) : (
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-500">
+            News will appear here once published.
+          </div>
+        )}
+
+        <div class="sm:hidden text-center mt-8">
+          <a href="/news" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+            View all news
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {trendingProjects.map((project) => (
-          <ProjectCard project={project} />
-        ))}
-      </div>
-    </div>
-  </section>
+    </section>
 
 	  <!-- List Your Project / Properties -->
 	  <section class="py-16 bg-primary-800 text-white">
@@ -280,7 +318,7 @@ const listingFaqs = [
 	    </div>
 	  </section>
 
-	  <FAQSection title="Listing FAQs" faqs={listingFaqs} />
+		  <FAQSection title="Listing FAQs" faqs={listingFaqs} />
 
   <!-- Collections -->
   <section class="py-16 bg-gray-50">

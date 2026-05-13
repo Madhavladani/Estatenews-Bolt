@@ -1,0 +1,51 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { supabase } from '../../lib/supabase';
+import { buildBreadcrumbSchema } from '../../lib/seo';
+import type { News } from '../../lib/types';
+
+const { data } = await supabase
+  .from('news')
+  .select('*')
+  .eq('is_published', true)
+  .order('published_at', { ascending: false })
+  .limit(60);
+
+const articles: News[] = data || [];
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: 'News', url: 'https://propdiscover.com/news' },
+]);
+---
+
+<BaseLayout
+  title="Latest Real Estate News in Gujarat | PropDiscover"
+  description="Read the latest real estate news, updates, and insights across Gujarat. Market trends, new launches, policy changes, and investment tips."
+  jsonLd={breadcrumbSchema}
+  breadcrumbs={[{ name: 'News', url: '/news' }]}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Real Estate News</h1>
+        <p class="text-gray-600 mt-2">Latest updates, launches, and trends.</p>
+      </div>
+
+      {articles.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {articles.map((article) => (
+            <NewsCard article={article} />
+          ))}
+        </div>
+      ) : (
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-500">
+          No news published yet.
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+

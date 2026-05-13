@@ -60,6 +60,29 @@ export interface Collection {
   projects?: Project[];
 }
 
+export interface News {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content_html: string;
+  featured_image: string;
+  author_name: string;
+  city_id: string | null;
+  tags: string[];
+  is_published: boolean;
+  published_at: string;
+  updated_at: string;
+  created_at: string;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  canonical_path: string;
+  og_image: string;
+  noindex: boolean;
+  city?: City;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -77,6 +100,11 @@ export interface Database {
         Row: Collection;
         Insert: Omit<Collection, 'id' | 'created_at'>;
         Update: Partial<Omit<Collection, 'id' | 'created_at'>>;
+      };
+      news: {
+        Row: News;
+        Insert: Omit<News, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<News, 'id' | 'created_at' | 'updated_at'>>;
       };
       collection_projects: {
         Row: {

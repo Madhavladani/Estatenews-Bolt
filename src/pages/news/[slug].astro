@@ -1,0 +1,87 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supabase } from '../../lib/supabase';
+import { buildBreadcrumbSchema, buildNewsArticleSchema } from '../../lib/seo';
+import type { News } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const { data } = await supabase
+    .from('news')
+    .select('*')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false });
+
+  return (data || []).map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props as { article: News };
+
+const canonicalPath = article.canonical_path || `/news/${article.slug}`;
+const ogImage = article.og_image || article.featured_image || undefined;
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: 'News', url: 'https://propdiscover.com/news' },
+  { name: article.title, url: `https://propdiscover.com/news/${article.slug}` },
+]);
+
+const articleSchema = buildNewsArticleSchema(article);
+---
+
+<BaseLayout
+  title={article.meta_title || `${article.title} | PropDiscover`}
+  description={article.meta_description || article.excerpt || 'Latest real estate news and updates.'}
+  canonical={`https://propdiscover.com${canonicalPath}`}
+  ogImage={ogImage}
+  noindex={article.noindex}
+  jsonLd={[breadcrumbSchema, articleSchema]}
+  breadcrumbs={[{ name: 'News', url: '/news' }, { name: article.title, url: `/news/${article.slug}` }]}
+>
+  <article class="py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header class="mb-8">
+        <p class="text-sm text-gray-500">
+          {new Date(article.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: '2-digit' })}
+          {article.author_name ? ` • ${article.author_name}` : ''}
+        </p>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2 leading-tight">{article.title}</h1>
+        {(article.excerpt || article.meta_description) && (
+          <p class="text-lg text-gray-600 mt-4">{article.excerpt || article.meta_description}</p>
+        )}
+      </header>
+
+      {article.featured_image && (
+        <figure class="mb-10">
+          <img
+            src={article.featured_image}
+            alt={article.title}
+            class="w-full rounded-2xl border border-gray-100 shadow-sm object-cover"
+            loading="eager"
+            width="1200"
+            height="630"
+          />
+        </figure>
+      )}
+
+      <div class="prose prose-lg max-w-none prose-headings:scroll-mt-24">
+        <div set:html={article.content_html || ''} />
+      </div>
+
+      {article.tags?.length > 0 && (
+        <div class="mt-10 pt-8 border-t border-gray-100">
+          <h2 class="text-sm font-semibold text-gray-900 mb-3">Tags</h2>
+          <div class="flex flex-wrap gap-2">
+            {article.tags.map((t) => (
+              <span class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700">{t}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
