@@ -1,0 +1,47 @@
+---
+interface Stat {
+  label: string;
+  value: string;
+  description?: string;
+  trend?: 'up' | 'down' | 'neutral';
+}
+
+interface Props {
+  stats: Stat[];
+  title?: string;
+}
+
+const { stats, title } = Astro.props;
+
+const trendIcon = (trend?: string) => {
+  if (trend === 'up') return '↑';
+  if (trend === 'down') return '↓';
+  return '→';
+};
+
+const trendColor = (trend?: string) => {
+  if (trend === 'up') return 'text-green-600 bg-green-50';
+  if (trend === 'down') return 'text-red-600 bg-red-50';
+  return 'text-gray-500 bg-gray-50';
+};
+---
+
+{stats.length > 0 && (
+  <div class="my-8 not-prose">
+    {title && <h3 class="text-base font-semibold text-gray-700 mb-3">{title}</h3>}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      {stats.map((stat) => (
+        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <span class={`text-xs font-semibold px-2 py-0.5 rounded-full ${trendColor(stat.trend)}`}>
+              {trendIcon(stat.trend)}
+            </span>
+          </div>
+          <p class="text-xs font-medium text-gray-500 mt-1">{stat.label}</p>
+          {stat.description && <p class="text-xs text-gray-400 mt-0.5">{stat.description}</p>}
+        </div>
+      ))}
+    </div>
+  </div>
+)}

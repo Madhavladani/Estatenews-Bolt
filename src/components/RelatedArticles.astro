@@ -1,0 +1,62 @@
+---
+import type { News } from '../lib/types';
+
+interface Props {
+  articles: News[];
+  currentSlug: string;
+  currentTags?: string[];
+}
+
+const { articles, currentSlug, currentTags = [] } = Astro.props;
+
+// Score articles by shared tags
+const scored = articles
+  .filter((a) => a.slug !== currentSlug)
+  .map((a) => {
+    const shared = (a.tags || []).filter((t) => currentTags.includes(t)).length;
+    return { article: a, score: shared };
+  })
+  .sort((a, b) => b.score - a.score || new Date(b.article.published_at).getTime() - new Date(a.article.published_at).getTime());
+
+const related = scored.slice(0, 3).map((s) => s.article);
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' });
+}
+---
+
+{related.length > 0 && (
+  <section class="mt-14 border-t border-gray-100 pt-10" aria-labelledby="related-heading">
+    <h2 id="related-heading" class="text-xl font-bold text-gray-900 mb-6">Related Articles</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      {related.map((article) => (
+        <a
+          href={`/news/${article.slug}`}
+          class="group flex flex-col bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden"
+        >
+          {article.featured_image && (
+            <div class="aspect-[16/9] overflow-hidden bg-gray-100">
+              <img
+                src={article.featured_image}
+                alt={`${article.title} — PropDiscover`}
+                class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                loading="lazy"
+                width="400"
+                height="225"
+              />
+            </div>
+          )}
+          <div class="p-4 flex flex-col flex-1">
+            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">{article.title}</h3>
+            {(article.excerpt || article.meta_description) && (
+              <p class="text-xs text-gray-500 mt-1.5 line-clamp-2">{article.excerpt || article.meta_description}</p>
+            )}
+            <time datetime={article.published_at} class="mt-auto pt-3 text-xs text-gray-400">
+              {formatDate(article.published_at)}
+            </time>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
