@@ -149,11 +149,11 @@ const faqSchema = buildFAQSchema(faqs);
             </div>
           </div>
 
-          <!-- Overview -->
-          <div>
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Project Overview</h2>
-            <p class="text-gray-600 leading-relaxed">{project.full_description}</p>
-          </div>
+	          <!-- Overview -->
+	          <div>
+	            <h2 class="text-xl font-bold text-gray-900 mb-4">Project Overview</h2>
+	            <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed" set:html={project.full_description}></div>
+	          </div>
 
           <!-- Highlights -->
           {project.highlights.length > 0 && (

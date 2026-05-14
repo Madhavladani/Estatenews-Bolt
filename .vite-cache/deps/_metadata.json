@@ -1,25 +1,25 @@
 {
-  "hash": "e400c7f6",
-  "configHash": "ef5a6cb4",
+  "hash": "15165e90",
+  "configHash": "5ac89fa0",
   "lockfileHash": "442ee8c8",
-  "browserHash": "2763fed6",
+  "browserHash": "26432587",
   "optimized": {
     "astro > cssesc": {
       "src": "../../node_modules/cssesc/cssesc.js",
       "file": "astro___cssesc.js",
-      "fileHash": "9e1fb595",
+      "fileHash": "0bc9cfd4",
       "needsInterop": true
     },
     "astro > aria-query": {
       "src": "../../node_modules/aria-query/lib/index.js",
       "file": "astro___aria-query.js",
-      "fileHash": "2e261a0e",
+      "fileHash": "3319c130",
       "needsInterop": true
     },
     "astro > axobject-query": {
       "src": "../../node_modules/axobject-query/lib/index.js",
       "file": "astro___axobject-query.js",
-      "fileHash": "da128bfe",
+      "fileHash": "6a92ebae",
       "needsInterop": true
     }
   },

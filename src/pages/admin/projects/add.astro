@@ -101,10 +101,25 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         <textarea id="p-short-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
       </div>
       
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
-        <textarea id="p-full-desc" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
-      </div>
+	      <div>
+	        <label class="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
+	        <div class="rounded-lg border border-gray-200 overflow-hidden">
+	          <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+	            <button type="button" data-rte-cmd="bold" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Bold</button>
+	            <button type="button" data-rte-cmd="italic" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Italic</button>
+	            <button type="button" data-rte-cmd="underline" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Underline</button>
+	            <span class="w-px h-5 bg-gray-200 mx-1"></span>
+	            <button type="button" data-rte-cmd="insertUnorderedList" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Bullets</button>
+	            <button type="button" data-rte-cmd="insertOrderedList" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Numbered</button>
+	            <span class="w-px h-5 bg-gray-200 mx-1"></span>
+	            <button type="button" data-rte-link="1" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Link</button>
+	            <button type="button" data-rte-cmd="removeFormat" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Clear</button>
+	          </div>
+	          <div id="p-full-desc-editor" contenteditable="true" class="min-h-[160px] px-4 py-3 text-sm outline-none"></div>
+	        </div>
+	        <textarea id="p-full-desc" class="hidden"></textarea>
+	        <p class="mt-2 text-xs text-gray-500">Rich text is saved as HTML.</p>
+	      </div>
       
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
@@ -178,15 +193,17 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
   </div>
 </AdminLayout>
 
-<script define:vars={{ p: projectToEdit }}>
-  const form = document.getElementById('project-form');
-  const titleInput = document.getElementById('p-title');
-  const slugInput = document.getElementById('p-slug');
-  const featuredInput = document.getElementById('p-image');
-  const featuredPreview = document.getElementById('p-featured-preview');
-  const galleryInput = document.getElementById('p-gallery');
-  const featuredFileInput = document.getElementById('p-featured-file');
-  const galleryFileInput = document.getElementById('p-gallery-file');
+	<script define:vars={{ p: projectToEdit }}>
+	  const form = document.getElementById('project-form');
+	  const titleInput = document.getElementById('p-title');
+	  const slugInput = document.getElementById('p-slug');
+	  const fullDescHidden = document.getElementById('p-full-desc');
+	  const fullDescEditor = document.getElementById('p-full-desc-editor');
+	  const featuredInput = document.getElementById('p-image');
+	  const featuredPreview = document.getElementById('p-featured-preview');
+	  const galleryInput = document.getElementById('p-gallery');
+	  const featuredFileInput = document.getElementById('p-featured-file');
+	  const galleryFileInput = document.getElementById('p-gallery-file');
   const featuredStatus = document.getElementById('p-featured-status');
   const galleryStatus = document.getElementById('p-gallery-status');
   const galleryPreview = document.getElementById('p-gallery-preview');
@@ -214,44 +231,76 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     });
   }
 
-  function updateFeaturedPreview(url) {
-    if (!url) {
-      featuredPreview.classList.add('hidden');
-      featuredPreview.removeAttribute('src');
-      return;
-    }
-    featuredPreview.src = url;
-    featuredPreview.classList.remove('hidden');
-  }
+	  function updateFeaturedPreview(url) {
+	    if (!url) {
+	      featuredPreview.classList.add('hidden');
+	      featuredPreview.removeAttribute('src');
+	      return;
+	    }
+	    featuredPreview.src = url;
+	    featuredPreview.classList.remove('hidden');
+	  }
 
-  if (p) {
-    document.getElementById('p-id').value = p.id;
-    document.getElementById('p-title').value = p.title;
-    document.getElementById('p-slug').value = p.slug;
-    document.getElementById('p-city').value = p.city_id;
+	  function syncFullDescToHidden() {
+	    fullDescHidden.value = fullDescEditor.innerHTML;
+	  }
+
+	  function setFullDescHtml(html) {
+	    const safeHtml = String(html || '');
+	    fullDescEditor.innerHTML = safeHtml;
+	    syncFullDescToHidden();
+	  }
+
+	  // Toolbar actions
+	  document.querySelectorAll('[data-rte-cmd]').forEach((btn) => {
+	    btn.addEventListener('click', () => {
+	      const cmd = btn.getAttribute('data-rte-cmd');
+	      if (!cmd) return;
+	      fullDescEditor.focus();
+	      document.execCommand(cmd, false, null);
+	      syncFullDescToHidden();
+	    });
+	  });
+	  document.querySelectorAll('[data-rte-link]').forEach((btn) => {
+	    btn.addEventListener('click', () => {
+	      fullDescEditor.focus();
+	      const url = window.prompt('Enter URL');
+	      if (!url) return;
+	      document.execCommand('createLink', false, url);
+	      syncFullDescToHidden();
+	    });
+	  });
+	  fullDescEditor.addEventListener('input', syncFullDescToHidden);
+
+	  if (p) {
+	    document.getElementById('p-id').value = p.id;
+	    document.getElementById('p-title').value = p.title;
+	    document.getElementById('p-slug').value = p.slug;
+	    document.getElementById('p-city').value = p.city_id;
     document.getElementById('p-type').value = p.project_type;
     document.getElementById('p-builder').value = p.builder_name || '';
     document.getElementById('p-phone').value = p.builder_phone || '';
     document.getElementById('p-location').value = p.location || '';
     document.getElementById('p-price').value = p.price_range || '';
-    document.getElementById('p-status').value = p.project_status;
-    document.getElementById('p-possession').value = p.possession_date || '';
-    document.getElementById('p-short-desc').value = p.short_description || '';
-    document.getElementById('p-full-desc').value = p.full_description || '';
-    document.getElementById('p-image').value = p.featured_image || '';
-    document.getElementById('p-gallery').value = (p.gallery_images || []).join('\n');
-    document.getElementById('p-amenities').value = (p.amenities || []).join(', ');
-    document.getElementById('p-highlights').value = (p.highlights || []).join(', ');
-    document.getElementById('p-floor-plans').value = JSON.stringify(p.floor_plans || []);
+	    document.getElementById('p-status').value = p.project_status;
+	    document.getElementById('p-possession').value = p.possession_date || '';
+	    document.getElementById('p-short-desc').value = p.short_description || '';
+	    setFullDescHtml(p.full_description || '');
+	    document.getElementById('p-image').value = p.featured_image || '';
+	    document.getElementById('p-gallery').value = (p.gallery_images || []).join('\n');
+	    document.getElementById('p-amenities').value = (p.amenities || []).join(', ');
+	    document.getElementById('p-highlights').value = (p.highlights || []).join(', ');
+	    document.getElementById('p-floor-plans').value = JSON.stringify(p.floor_plans || []);
     document.getElementById('p-rera').value = p.rera_number || '';
     document.getElementById('p-brochure').value = p.brochure_url || '';
     document.getElementById('p-lat').value = p.latitude || '';
     document.getElementById('p-lng').value = p.longitude || '';
-    document.getElementById('p-meta-title').value = p.meta_title || '';
-    document.getElementById('p-meta-desc').value = p.meta_description || '';
-  }
-  updateFeaturedPreview(featuredInput.value);
-  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
+	    document.getElementById('p-meta-title').value = p.meta_title || '';
+	    document.getElementById('p-meta-desc').value = p.meta_description || '';
+	  }
+	  if (!p) setFullDescHtml('');
+	  updateFeaturedPreview(featuredInput.value);
+	  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
 
   titleInput.addEventListener('input', (e) => {
     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
