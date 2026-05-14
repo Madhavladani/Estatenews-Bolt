@@ -33,6 +33,20 @@ const { data: relatedData } = await supabase
   .limit(4);
 
 const relatedProjects: (Project & { city?: City })[] = (relatedData || []).map((p) => ({ ...p, city }));
+const galleryImages: string[] = Array.isArray(project.gallery_images)
+  ? project.gallery_images.map((s) => String(s || '').trim()).filter(Boolean)
+  : typeof (project as any)?.gallery_images === 'string'
+    ? String((project as any).gallery_images)
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+const featuredImage =
+  typeof (project as any)?.featured_image === 'string' && String((project as any).featured_image).trim()
+    ? String((project as any).featured_image).trim()
+    : galleryImages[0] || '';
+
 const floorPlans: FloorPlan[] = Array.isArray(project.floor_plans) ? project.floor_plans : [];
 const faqs = generateProjectFAQs(project, city);
 const statusLabel = formatStatus(project.project_status);
@@ -51,7 +65,7 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={project.meta_title || `${project.title} ${city.name} | ${project.builder_name} - ${project.price_range}`}
   description={project.meta_description || generateProjectDescription(project, city)}
-  ogImage={project.featured_image}
+  ogImage={featuredImage || undefined}
   jsonLd={[breadcrumbSchema, projectSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },
@@ -61,27 +75,33 @@ const faqSchema = buildFAQSchema(faqs);
 >
   <!-- Project Hero / Gallery -->
   <section class="bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="relative overflow-hidden rounded-xl aspect-[16/10]">
-          <img
-            src={project.featured_image}
-            alt={`${project.title} in ${project.location}, ${city.name}`}
-            class="w-full h-full object-cover"
-            loading="eager"
-            width="800"
-            height="500"
-          />
-          <div class="absolute top-4 left-4 flex gap-2">
-            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm">{statusLabel}</span>
-            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white">{typeLabel}</span>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          {project.gallery_images.slice(0, 4).map((img, i) => (
-            <div class="relative overflow-hidden rounded-xl aspect-[4/3]">
-              <img
-                src={img}
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+	      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+	        <div class="relative overflow-hidden rounded-xl aspect-[16/10]">
+	          {featuredImage ? (
+	            <img
+	              src={featuredImage}
+	              alt={`${project.title} in ${project.location}, ${city.name}`}
+	              class="w-full h-full object-cover"
+	              loading="eager"
+	              width="800"
+	              height="500"
+	            />
+	          ) : (
+	            <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950 flex items-center justify-center">
+	              <span class="text-gray-300 text-sm font-medium px-6 text-center">{project.title}</span>
+	            </div>
+	          )}
+	          <div class="absolute top-4 left-4 flex gap-2">
+	            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm">{statusLabel}</span>
+	            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white">{typeLabel}</span>
+	          </div>
+	        </div>
+	        <div class="grid grid-cols-2 gap-4">
+	          {galleryImages.slice(0, 4).map((img, i) => (
+	            <div class="relative overflow-hidden rounded-xl aspect-[4/3]">
+	              <img
+	                src={img}
                 alt={`${project.title} gallery image ${i + 1}`}
                 loading="lazy"
                 width="400"
