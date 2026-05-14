@@ -71,11 +71,18 @@ pageNumbers.forEach((p) => {
 <AdminLayout title="Projects" activeTab="projects">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Projects</h1>
-    <a href="/admin/projects/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Add Project
-    </a>
+    <div class="flex gap-3">
+      <a href="/admin/projects/bulk-add" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2 shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Bulk Add
+      </a>
+      <a href="/admin/projects/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Project
+      </a>
+    </div>
   </div>
+
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
     <div class="relative">

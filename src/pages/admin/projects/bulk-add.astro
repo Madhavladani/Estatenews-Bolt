@@ -1,0 +1,189 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City } from '../../../lib/types';
+
+const { data: citiesRes } = await supabase.from('cities').select('id, name').order('name');
+const cities: City[] = (citiesRes || []) as any;
+---
+
+<AdminLayout title="Bulk Add Projects" activeTab="projects">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/projects" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">Bulk Add Projects</h1>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- JSON Section -->
+    <div class="space-y-6">
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">JSON Copy-Paste</h2>
+        <p class="text-sm text-gray-500 mb-4">Paste an array of project objects here.</p>
+        <textarea id="json-input" rows="10" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder='[{"title": "Project 1", "city_id": "..."}, {"title": "Project 2", ...}]'></textarea>
+        <button id="upload-json-btn" class="mt-4 w-full px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Upload JSON</button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">JSON File Upload</h2>
+        <input type="file" id="json-file-input" accept=".json" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+      </div>
+    </div>
+
+    <!-- CSV Section -->
+    <div class="space-y-6">
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">CSV Upload</h2>
+          <a href="/examples/projects.csv" download class="text-sm font-medium text-primary-700 hover:text-primary-800 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download Example CSV
+          </a>
+        </div>
+        <p class="text-sm text-gray-500 mb-4">Upload a .csv file containing multiple projects. City names will be automatically mapped to their IDs.</p>
+        <input type="file" id="csv-file-input" accept=".csv" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 mb-4" />
+        <button id="upload-csv-btn" class="w-full px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Upload CSV</button>
+      </div>
+
+      <div id="status-card" class="hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Upload Status</h2>
+        <div id="status-message" class="text-sm text-gray-600 space-y-2"></div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" is:inline></script>
+
+<script define:vars={{ cities }}>
+  const jsonInput = document.getElementById('json-input');
+  const uploadJsonBtn = document.getElementById('upload-json-btn');
+  const jsonFileInput = document.getElementById('json-file-input');
+  const csvFileInput = document.getElementById('csv-file-input');
+  const uploadCsvBtn = document.getElementById('upload-csv-btn');
+  const statusCard = document.getElementById('status-card');
+  const statusMessage = document.getElementById('status-message');
+
+  function showStatus(message, isError = false) {
+    statusCard.classList.remove('hidden');
+    const div = document.createElement('div');
+    div.className = isError ? 'text-red-600' : 'text-green-600';
+    div.textContent = message;
+    statusMessage.appendChild(div);
+  }
+
+  function clearStatus() {
+    statusMessage.innerHTML = '';
+    statusCard.classList.add('hidden');
+  }
+
+  async function performUpload(data) {
+    const btn = uploadJsonBtn; // Generic button reference for state
+    const originalText = btn.textContent;
+    
+    try {
+      showStatus('Uploading...');
+      const res = await fetch('/admin/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+      showStatus(`Successfully uploaded ${Array.isArray(result) ? result.length : 1} projects!`);
+      setTimeout(() => {
+        window.location.href = '/admin/projects';
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      showStatus(err.message, true);
+    }
+  }
+
+  uploadJsonBtn.addEventListener('click', async () => {
+    clearStatus();
+    const val = jsonInput.value.trim();
+    if (!val) return alert('Please paste JSON data first.');
+    
+    try {
+      const data = JSON.parse(val);
+      await performUpload(data);
+    } catch (err) {
+      alert('Invalid JSON format.');
+    }
+  });
+
+  jsonFileInput.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        await performUpload(data);
+      } catch (err) {
+        alert('Invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  uploadCsvBtn.addEventListener('click', () => {
+    const file = csvFileInput.files?.[0];
+    if (!file) return alert('Please select a CSV file first.');
+
+    clearStatus();
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const rawData = results.data;
+        if (!rawData.length) return alert('CSV is empty.');
+
+        showStatus(`Processing ${rawData.length} rows...`);
+
+        const cityMap = {};
+        cities.forEach(c => cityMap[c.name.toLowerCase()] = c.id);
+
+        const processedData = rawData.map(row => {
+          const p = { ...row };
+          
+          // Map city_name to city_id
+          if (p.city_name && cityMap[p.city_name.toLowerCase()]) {
+            p.city_id = cityMap[p.city_name.toLowerCase()];
+            delete p.city_name;
+          }
+
+          // Generate slug if missing
+          if (!p.slug && p.title) {
+            p.slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          }
+
+          // Convert numeric fields
+          if (p.latitude) p.latitude = parseFloat(p.latitude);
+          if (p.longitude) p.longitude = parseFloat(p.longitude);
+
+          return p;
+        });
+
+        // Basic validation
+        const invalidRows = processedData.filter(p => !p.city_id || !p.title);
+        if (invalidRows.length > 0) {
+          showStatus(`${invalidRows.length} rows are missing a valid city name or title.`, true);
+          return;
+        }
+
+        await performUpload(processedData);
+      },
+      error: (err) => {
+        alert('Error parsing CSV: ' + err.message);
+      }
+    });
+  });
+</script>
