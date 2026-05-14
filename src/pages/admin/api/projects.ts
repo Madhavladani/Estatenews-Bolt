@@ -26,6 +26,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 export const PUT: APIRoute = async ({ request, url, locals }) => {
   const client = locals.supabase;
   if (!client) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+
+  const id = url.searchParams.get('id');
   if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400 });
 
   const body = await request.json();

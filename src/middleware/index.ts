@@ -88,28 +88,35 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return redirect('/admin/login');
   }
 
+  let user: any = null;
   try {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error } = await supabase.auth.getUser(authToken);
-
-    if (error || !user) {
+    const result = await supabase.auth.getUser(authToken);
+    user = result.data?.user ?? null;
+    if (result.error || !user) {
       cookies.delete('sb-auth-token', { path: '/' });
       return redirect('/admin/login');
     }
-
-    locals.user = user;
-    locals.supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      },
-    });
-
-    const response = await next();
-    return await compressResponse(response, acceptEncoding);
   } catch {
     cookies.delete('sb-auth-token', { path: '/' });
     return redirect('/admin/login');
+  }
+
+  locals.user = user;
+  locals.supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    },
+  });
+
+  try {
+    const response = await next();
+    return await compressResponse(response, acceptEncoding);
+  } catch (err) {
+    // Don't log the user out on route errors; preserve auth cookie.
+    console.error(err);
+    return new Response('Internal Server Error', { status: 500 });
   }
 });
