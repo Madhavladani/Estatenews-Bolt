@@ -114,8 +114,11 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	            <span class="w-px h-5 bg-gray-200 mx-1"></span>
 	            <button type="button" data-rte-link="1" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Link</button>
 	            <button type="button" data-rte-cmd="removeFormat" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Clear</button>
+	            <span class="w-px h-5 bg-gray-200 mx-1"></span>
+	            <button type="button" id="p-source-toggle" class="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 border border-primary-200 rounded hover:bg-primary-100">Source</button>
 	          </div>
 	          <div id="p-full-desc-editor" contenteditable="true" class="min-h-[160px] px-4 py-3 text-sm outline-none"></div>
+	          <textarea id="p-full-desc-textarea" class="hidden w-full min-h-[160px] px-4 py-3 text-sm font-mono border-0 focus:ring-0 outline-none"></textarea>
 	        </div>
 	        <textarea id="p-full-desc" class="hidden"></textarea>
 	        <p class="mt-2 text-xs text-gray-500">Rich text is saved as HTML.</p>
@@ -248,12 +251,43 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	  function setFullDescHtml(html) {
 	    const safeHtml = String(html || '');
 	    fullDescEditor.innerHTML = safeHtml;
+	    fullDescTextarea.value = safeHtml;
 	    syncFullDescToHidden();
 	  }
+	  
+	  // Source code toggle
+	  const sourceToggle = document.getElementById('p-source-toggle');
+	  const fullDescTextarea = document.getElementById('p-full-desc-textarea');
+	  let isSourceMode = false;
+
+	  sourceToggle.addEventListener('click', () => {
+	    isSourceMode = !isSourceMode;
+	    if (isSourceMode) {
+	      fullDescTextarea.value = fullDescEditor.innerHTML;
+	      fullDescEditor.classList.add('hidden');
+	      fullDescTextarea.classList.remove('hidden');
+	      sourceToggle.textContent = 'Visual';
+	      sourceToggle.classList.remove('bg-primary-50', 'text-primary-700', 'border-primary-200');
+	      sourceToggle.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
+	    } else {
+	      fullDescEditor.innerHTML = fullDescTextarea.value;
+	      fullDescTextarea.classList.add('hidden');
+	      fullDescEditor.classList.remove('hidden');
+	      sourceToggle.textContent = 'Source';
+	      sourceToggle.classList.add('bg-primary-50', 'text-primary-700', 'border-primary-200');
+	      sourceToggle.classList.remove('bg-gray-900', 'text-white', 'border-gray-900');
+	      syncFullDescToHidden();
+	    }
+	  });
+
+	  fullDescTextarea.addEventListener('input', () => {
+	    fullDescHidden.value = fullDescTextarea.value;
+	  });
 
 	  // Toolbar actions
 	  document.querySelectorAll('[data-rte-cmd]').forEach((btn) => {
 	    btn.addEventListener('click', () => {
+	      if (isSourceMode) return;
 	      const cmd = btn.getAttribute('data-rte-cmd');
 	      if (!cmd) return;
 	      fullDescEditor.focus();
@@ -263,6 +297,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	  });
 	  document.querySelectorAll('[data-rte-link]').forEach((btn) => {
 	    btn.addEventListener('click', () => {
+	      if (isSourceMode) return;
 	      fullDescEditor.focus();
 	      const url = window.prompt('Enter URL');
 	      if (!url) return;

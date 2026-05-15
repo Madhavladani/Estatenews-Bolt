@@ -16,7 +16,7 @@ const from = (page - 1) * limit;
 const to = from + limit - 1;
 
 // Build Projects Query
-let query = supabase.from('projects').select('*, city:cities(name)', { count: 'exact' });
+let query = supabase.from('projects').select('*, city:cities(name, slug)', { count: 'exact' });
 
 if (search) {
   query = query.ilike('title', `%${search}%`);
@@ -149,7 +149,8 @@ pageNumbers.forEach((p) => {
             <td class="px-4 py-3"><span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">{statusLabels[p.project_status] || p.project_status}</span></td>
             <td class="px-4 py-3 text-sm text-gray-900 font-medium">{p.price_range}</td>
             <td class="px-4 py-3 text-right">
-              <a href={`/admin/projects/add?id=${p.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
+              <a href={`/${p.city?.slug}/${p.project_type}/${p.slug}`} target="_blank" class="px-3 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded-md transition-colors inline-block">View</a>
+              <a href={`/admin/projects/add?id=${p.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block ml-2">Edit</a>
               <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={p.id} data-name={p.title}>Delete</button>
             </td>
           </tr>
