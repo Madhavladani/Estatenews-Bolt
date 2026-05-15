@@ -1,115 +1,168 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import ProjectCard from '../../../components/ProjectCard.astro';
-import FAQSection from '../../../components/FAQSection.astro';
-import { supabase } from '../../../lib/supabase';
-import { buildBreadcrumbSchema, buildProjectSchema, buildFAQSchema, generateProjectFAQs, generateProjectDescription, formatStatus, formatProjectType } from '../../../lib/seo';
-import type { City, Project, FloorPlan } from '../../../lib/types';
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectCard from "../../../components/ProjectCard.astro";
+import FAQSection from "../../../components/FAQSection.astro";
+import { supabase } from "../../../lib/supabase";
+import {
+  buildBreadcrumbSchema,
+  buildProjectSchema,
+  buildFAQSchema,
+  generateProjectFAQs,
+  generateProjectDescription,
+  formatStatus,
+  formatProjectType,
+} from "../../../lib/seo";
+import type { GetStaticPaths } from "astro";
+import type { City, Project, FloorPlan } from "../../../lib/types";
 
-export async function getStaticPaths() {
-  const { data: cities } = await supabase.from('cities').select('*');
-  const paths = [];
+type Props = {
+  city: City;
+  project: Project;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data: cities } = await supabase.from("cities").select("*");
+  const paths: {
+    params: { city: string; type: string; slug: string };
+    props: Props;
+  }[] = [];
   for (const city of cities || []) {
-    const { data: projects } = await supabase.from('projects').select('*').eq('city_id', city.id);
+    const { data: projects } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("city_id", city.id);
     for (const project of projects || []) {
+      if (!city?.slug || !project?.slug || !project?.project_type) continue;
       paths.push({
-        params: { city: city.slug, type: project.project_type, slug: project.slug },
+        params: {
+          city: city.slug,
+          type: project.project_type,
+          slug: project.slug,
+        },
         props: { city, project },
       });
     }
   }
   return paths;
-}
+};
 
-const { city, project } = Astro.props;
+const { city, project } = Astro.props as Props;
 
 const { data: relatedData } = await supabase
-  .from('projects')
-  .select('*')
-  .eq('city_id', city.id)
-  .eq('project_type', project.project_type)
-  .neq('id', project.id)
+  .from("projects")
+  .select("*")
+  .eq("city_id", city.id)
+  .eq("project_type", project.project_type)
+  .neq("id", project.id)
   .limit(4);
 
-const relatedProjects: (Project & { city?: City })[] = (relatedData || []).map((p) => ({ ...p, city }));
+const relatedProjects: (Project & { city?: City })[] = (relatedData || []).map(
+  (p) => ({ ...p, city }),
+);
 const galleryImages: string[] = Array.isArray(project.gallery_images)
-  ? project.gallery_images.map((s) => String(s || '').trim()).filter(Boolean)
-  : typeof (project as any)?.gallery_images === 'string'
+  ? project.gallery_images.map((s) => String(s || "").trim()).filter(Boolean)
+  : typeof (project as any)?.gallery_images === "string"
     ? String((project as any).gallery_images)
-        .split('\n')
+        .split("\n")
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
 
 const featuredImage =
-  typeof (project as any)?.featured_image === 'string' && String((project as any).featured_image).trim()
+  typeof (project as any)?.featured_image === "string" &&
+  String((project as any).featured_image).trim()
     ? String((project as any).featured_image).trim()
-    : galleryImages[0] || '';
+    : galleryImages[0] || "";
 
-const floorPlans: FloorPlan[] = Array.isArray(project.floor_plans) ? project.floor_plans : [];
+const floorPlans: FloorPlan[] = Array.isArray(project.floor_plans)
+  ? project.floor_plans
+  : [];
 const faqs = generateProjectFAQs(project, city);
 const statusLabel = formatStatus(project.project_status);
 const typeLabel = formatProjectType(project.project_type);
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: "Home", url: "https://propdiscover.com" },
   { name: city.name, url: `https://propdiscover.com/${city.slug}` },
-  { name: typeLabel, url: `https://propdiscover.com/${city.slug}/${project.project_type}` },
-  { name: project.title, url: `https://propdiscover.com/${city.slug}/${project.project_type}/${project.slug}` },
+  {
+    name: typeLabel,
+    url: `https://propdiscover.com/${city.slug}/${project.project_type}`,
+  },
+  {
+    name: project.title,
+    url: `https://propdiscover.com/${city.slug}/${project.project_type}/${project.slug}`,
+  },
 ]);
 const projectSchema = buildProjectSchema(project, city);
 const faqSchema = buildFAQSchema(faqs);
 ---
 
 <BaseLayout
-  title={project.meta_title || `${project.title} ${city.name} | ${project.builder_name} - ${project.price_range}`}
-  description={project.meta_description || generateProjectDescription(project, city)}
+  title={project.meta_title ||
+    `${project.title} ${city.name} | ${project.builder_name} - ${project.price_range}`}
+  description={project.meta_description ||
+    generateProjectDescription(project, city)}
   ogImage={featuredImage || undefined}
   jsonLd={[breadcrumbSchema, projectSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },
     { name: typeLabel, url: `/${city.slug}/${project.project_type}` },
-    { name: project.title, url: `/${city.slug}/${project.project_type}/${project.slug}` },
+    {
+      name: project.title,
+      url: `/${city.slug}/${project.project_type}/${project.slug}`,
+    },
   ]}
 >
   <!-- Project Hero / Gallery -->
   <section class="bg-gray-900">
-	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-	      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-	        <div class="relative overflow-hidden rounded-xl aspect-[16/10]">
-	          {featuredImage ? (
-	            <img
-	              src={featuredImage}
-	              alt={`${project.title} in ${project.location}, ${city.name}`}
-	              class="w-full h-full object-cover"
-	              loading="eager"
-	              width="800"
-	              height="500"
-	            />
-	          ) : (
-	            <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950 flex items-center justify-center">
-	              <span class="text-gray-300 text-sm font-medium px-6 text-center">{project.title}</span>
-	            </div>
-	          )}
-	          <div class="absolute top-4 left-4 flex gap-2">
-	            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm">{statusLabel}</span>
-	            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white">{typeLabel}</span>
-	          </div>
-	        </div>
-	        <div class="grid grid-cols-2 gap-4">
-	          {galleryImages.slice(0, 4).map((img, i) => (
-	            <div class="relative overflow-hidden rounded-xl aspect-[4/3]">
-	              <img
-	                src={img}
-                alt={`${project.title} gallery image ${i + 1}`}
-                loading="lazy"
-                width="400"
-                height="300"
-                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="relative overflow-hidden rounded-xl aspect-[16/10]">
+          {
+            featuredImage ? (
+              <img
+                src={featuredImage}
+                alt={`${project.title} in ${project.location}, ${city.name}`}
+                class="w-full h-full object-cover"
+                loading="eager"
+                width="800"
+                height="500"
               />
-            </div>
-          ))}
+            ) : (
+              <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950 flex items-center justify-center">
+                <span class="text-gray-300 text-sm font-medium px-6 text-center">
+                  {project.title}
+                </span>
+              </div>
+            )
+          }
+          <div class="absolute top-4 left-4 flex gap-2">
+            <span
+              class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm"
+              >{statusLabel}</span
+            >
+            <span
+              class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white"
+              >{typeLabel}</span
+            >
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          {
+            galleryImages.slice(0, 4).map((img, i) => (
+              <div class="relative overflow-hidden rounded-xl aspect-[4/3]">
+                <img
+                  src={img}
+                  alt={`${project.title} gallery image ${i + 1}`}
+                  loading="lazy"
+                  width="400"
+                  height="300"
+                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            ))
+          }
         </div>
       </div>
     </div>
@@ -123,24 +176,42 @@ const faqSchema = buildFAQSchema(faqs);
         <div class="lg:col-span-2 space-y-8">
           <!-- Title & Key Info -->
           <div>
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{project.title}</h1>
-            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+              {project.title}
+            </h1>
+            <div
+              class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4"
+            >
               <span class="flex items-center gap-1">
-                <svg class="w-4 h-4 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                <svg
+                  class="w-4 h-4 text-accent-500"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clip-rule="evenodd"></path>
                 </svg>
                 {project.location}, {city.name}
               </span>
-              <span>by <strong class="text-gray-700">{project.builder_name}</strong></span>
+              <span
+                >by <strong class="text-gray-700">{project.builder_name}</strong
+                ></span
+              >
             </div>
             <div class="flex flex-wrap gap-3">
               <div class="bg-primary-50 rounded-lg px-4 py-2">
                 <p class="text-xs text-gray-500">Price Range</p>
-                <p class="text-lg font-bold text-primary-700">{project.price_range}</p>
+                <p class="text-lg font-bold text-primary-700">
+                  {project.price_range}
+                </p>
               </div>
               <div class="bg-accent-50 rounded-lg px-4 py-2">
                 <p class="text-xs text-gray-500">Possession</p>
-                <p class="text-lg font-bold text-accent-700">{project.possession_date}</p>
+                <p class="text-lg font-bold text-accent-700">
+                  {project.possession_date}
+                </p>
               </div>
               <div class="bg-green-50 rounded-lg px-4 py-2">
                 <p class="text-xs text-gray-500">Status</p>
@@ -149,101 +220,179 @@ const faqSchema = buildFAQSchema(faqs);
             </div>
           </div>
 
-	          <!-- Overview -->
-	          <div>
-	            <h2 class="text-xl font-bold text-gray-900 mb-4">Project Overview</h2>
-	            <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed" set:html={project.full_description}></div>
-	          </div>
+          <!-- Overview -->
+          <div>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">
+              Project Overview
+            </h2>
+            <div
+              class="prose prose-sm max-w-none text-gray-600 leading-relaxed"
+              set:html={project.full_description}
+            />
+          </div>
 
           <!-- Highlights -->
-          {project.highlights.length > 0 && (
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Highlights</h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {project.highlights.map((h) => (
-                  <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3">
-                    <svg class="w-5 h-5 text-accent-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-sm text-gray-700">{h}</span>
-                  </div>
-                ))}
+          {
+            project.highlights.length > 0 && (
+              <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Highlights</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {project.highlights.map((h) => (
+                    <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3">
+                      <svg
+                        class="w-5 h-5 text-accent-500 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span class="text-sm text-gray-700">{h}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
 
           <!-- Amenities -->
-          {project.amenities.length > 0 && (
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {project.amenities.map((a) => (
-                  <div class="flex items-center gap-2 text-sm text-gray-700 bg-white border border-gray-100 rounded-lg px-3 py-2.5">
-                    <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    {a}
-                  </div>
-                ))}
+          {
+            project.amenities.length > 0 && (
+              <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {project.amenities.map((a) => (
+                    <div class="flex items-center gap-2 text-sm text-gray-700 bg-white border border-gray-100 rounded-lg px-3 py-2.5">
+                      <svg
+                        class="w-4 h-4 text-primary-500 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      {a}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
 
           <!-- Floor Plans -->
-          {floorPlans.length > 0 && (
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Floor Plans</h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {floorPlans.map((fp) => (
-                  <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
-                    <h3 class="font-semibold text-gray-900 mb-2">{fp.name}</h3>
-                    <p class="text-sm text-gray-500 mb-3">Size: {fp.size}</p>
-                    <p class="text-lg font-bold text-primary-700">{fp.price}</p>
-                  </div>
-                ))}
+          {
+            floorPlans.length > 0 && (
+              <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                  Floor Plans
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {floorPlans.map((fp) => (
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow">
+                      <h3 class="font-semibold text-gray-900 mb-2">
+                        {fp.name}
+                      </h3>
+                      <p class="text-sm text-gray-500 mb-3">Size: {fp.size}</p>
+                      <p class="text-lg font-bold text-primary-700">
+                        {fp.price}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
 
           <!-- Location Advantages -->
           <div>
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Location Advantages</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">
+              Location Advantages
+            </h2>
             <div class="bg-gray-50 rounded-xl p-6">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="flex items-start gap-3">
-                  <svg class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                  <svg
+                    class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clip-rule="evenodd"></path>
                   </svg>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Prime Location</p>
-                    <p class="text-xs text-gray-500">Located in {project.location}, {city.name}</p>
+                    <p class="text-sm font-medium text-gray-900">
+                      Prime Location
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Located in {project.location}, {city.name}
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
-                  <svg class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 16H6V4h2v12zm4 0h-2V4h2v12zm4 0h-2V4h2v12z"/>
+                  <svg
+                    class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M8 16H6V4h2v12zm4 0h-2V4h2v12zm4 0h-2V4h2v12z"
+                    ></path>
                   </svg>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Excellent Connectivity</p>
-                    <p class="text-xs text-gray-500">Well-connected to major city areas</p>
+                    <p class="text-sm font-medium text-gray-900">
+                      Excellent Connectivity
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Well-connected to major city areas
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
-                  <svg class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5 8.461V13a1 1 0 00.293.707l4 4a1 1 0 001.414 0l4-4A1 1 0 0015 13V8.46l2.394-1.54a1 1 0 000-1.84l-7-3z"/>
+                  <svg
+                    class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5 8.461V13a1 1 0 00.293.707l4 4a1 1 0 001.414 0l4-4A1 1 0 0015 13V8.46l2.394-1.54a1 1 0 000-1.84l-7-3z"
+                    ></path>
                   </svg>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Social Infrastructure</p>
-                    <p class="text-xs text-gray-500">Schools, hospitals, and malls nearby</p>
+                    <p class="text-sm font-medium text-gray-900">
+                      Social Infrastructure
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      Schools, hospitals, and malls nearby
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
-                  <svg class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1z" clip-rule="evenodd"/>
+                  <svg
+                    class="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1z"
+                      clip-rule="evenodd"></path>
                   </svg>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Growing Area</p>
-                    <p class="text-xs text-gray-500">{project.location} is a rapidly developing locality</p>
+                    <p class="text-sm font-medium text-gray-900">
+                      Growing Area
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {project.location} is a rapidly developing locality
+                    </p>
                   </div>
                 </div>
               </div>
@@ -251,23 +400,42 @@ const faqSchema = buildFAQSchema(faqs);
           </div>
 
           <!-- RERA Section -->
-          {project.rera_number && (
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">RERA Details</h2>
-              <div class="bg-green-50 border border-green-200 rounded-xl p-5">
-                <div class="flex items-start gap-3">
-                  <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <div>
-                    <p class="font-medium text-green-800">RERA Registered</p>
-                    <p class="text-sm text-green-700 mt-1">Registration Number: <strong>{project.rera_number}</strong></p>
-                    <p class="text-xs text-green-600 mt-2">This project is registered under Gujarat RERA. Always verify RERA details on the official RERA website before making any purchase decision.</p>
+          {
+            project.rera_number && (
+              <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                  RERA Details
+                </h2>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+                  <div class="flex items-start gap-3">
+                    <svg
+                      class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <div>
+                      <p class="font-medium text-green-800">RERA Registered</p>
+                      <p class="text-sm text-green-700 mt-1">
+                        Registration Number:{" "}
+                        <strong>{project.rera_number}</strong>
+                      </p>
+                      <p class="text-xs text-green-600 mt-2">
+                        This project is registered under Gujarat RERA. Always
+                        verify RERA details on the official RERA website before
+                        making any purchase decision.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )
+          }
 
           <!-- FAQs -->
           <FAQSection faqs={faqs} title={`${project.title} FAQs`} />
@@ -277,19 +445,32 @@ const faqSchema = buildFAQSchema(faqs);
         <div class="space-y-6">
           <!-- Contact CTA -->
           <div class="bg-primary-800 text-white rounded-xl p-6 sticky top-20">
-            <h3 class="text-lg font-bold mb-2">Interested in {project.title}?</h3>
-            <p class="text-sm text-gray-300 mb-4">Get complete details, pricing, and site visit arrangements</p>
+            <h3 class="text-lg font-bold mb-2">
+              Interested in {project.title}?
+            </h3>
+            <p class="text-sm text-gray-300 mb-4">
+              Get complete details, pricing, and site visit arrangements
+            </p>
             <div class="space-y-3">
-              <a href={`tel:${project.builder_phone}`} class="block w-full text-center px-4 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
+              <a
+                href={`tel:${project.builder_phone}`}
+                class="block w-full text-center px-4 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm"
+              >
                 Call: {project.builder_phone}
               </a>
-              <button class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-colors text-sm">
+              <button
+                class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-colors text-sm"
+              >
                 Request Callback
               </button>
             </div>
             <div class="mt-4 pt-4 border-t border-primary-700">
-              <p class="text-xs text-gray-400">Developer: {project.builder_name}</p>
-              <p class="text-xs text-gray-400 mt-1">Location: {project.location}, {city.name}</p>
+              <p class="text-xs text-gray-400">
+                Developer: {project.builder_name}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">
+                Location: {project.location}, {city.name}
+              </p>
               <p class="text-xs text-gray-400 mt-1">Status: {statusLabel}</p>
             </div>
           </div>
@@ -304,19 +485,26 @@ const faqSchema = buildFAQSchema(faqs);
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Builder</span>
-                <span class="font-medium text-gray-900">{project.builder_name}</span>
+                <span class="font-medium text-gray-900"
+                  >{project.builder_name}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Location</span>
-                <span class="font-medium text-gray-900">{project.location}</span>
+                <span class="font-medium text-gray-900">{project.location}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Price</span>
-                <span class="font-medium text-primary-700">{project.price_range}</span>
+                <span class="font-medium text-primary-700"
+                  >{project.price_range}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Possession</span>
-                <span class="font-medium text-gray-900">{project.possession_date}</span>
+                <span class="font-medium text-gray-900"
+                  >{project.possession_date}</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Status</span>
@@ -325,41 +513,74 @@ const faqSchema = buildFAQSchema(faqs);
             </div>
           </div>
 
-          {project.brochure_url && (
-            <a href={project.brochure_url} class="block bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow text-center">
-              <svg class="w-8 h-8 text-primary-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              <p class="text-sm font-medium text-gray-900">Download Brochure</p>
-            </a>
-          )}
+          {
+            project.brochure_url && (
+              <a
+                href={project.brochure_url}
+                class="block bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow text-center"
+              >
+                <svg
+                  class="w-8 h-8 text-primary-600 mx-auto mb-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <p class="text-sm font-medium text-gray-900">
+                  Download Brochure
+                </p>
+              </a>
+            )
+          }
         </div>
       </div>
     </div>
   </section>
 
   <!-- Related Projects -->
-  {relatedProjects.length > 0 && (
-    <section class="py-12 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Similar Projects in {city.name}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {relatedProjects.map((p) => (
-            <ProjectCard project={p} />
-          ))}
+  {
+    relatedProjects.length > 0 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Similar Projects in {city.name}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProjects.map((p) => (
+              <ProjectCard project={p} />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Internal Links -->
   <section class="py-10 bg-primary-800 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-lg font-bold mb-4">Explore More</h2>
       <div class="flex flex-wrap gap-3">
-        <a href={`/${city.slug}/${project.project_type}`} class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">More {typeLabel} in {city.name}</a>
-        <a href={`/${city.slug}`} class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">All Projects in {city.name}</a>
-        <a href="/" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">Home</a>
+        <a
+          href={`/${city.slug}/${project.project_type}`}
+          class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
+          >More {typeLabel} in {city.name}</a
+        >
+        <a
+          href={`/${city.slug}`}
+          class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
+          >All Projects in {city.name}</a
+        >
+        <a
+          href="/"
+          class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
+          >Home</a
+        >
       </div>
     </div>
   </section>

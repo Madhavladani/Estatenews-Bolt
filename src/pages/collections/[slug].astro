@@ -5,12 +5,20 @@ import ProjectCard from '../../components/ProjectCard.astro';
 import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildCollectionSchema, buildFAQSchema } from '../../lib/seo';
+import type { GetStaticPaths } from 'astro';
 import type { City, Project, Collection } from '../../lib/types';
 
-export async function getStaticPaths() {
+type Props = {
+  collection: Collection;
+  projects: Project[];
+  city: City | null;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const { data: collections } = await supabase.from('collections').select('*');
-  const paths = [];
+  const paths: { params: { slug: string }; props: Props }[] = [];
   for (const collection of collections || []) {
+    if (!collection?.slug) continue;
     const { data: cp } = await supabase
       .from('collection_projects')
       .select('project_id')
@@ -39,9 +47,9 @@ export async function getStaticPaths() {
     });
   }
   return paths;
-}
+};
 
-const { collection, projects, city } = Astro.props;
+const { collection, projects, city } = Astro.props as Props;
 
 const faqs = [
   {

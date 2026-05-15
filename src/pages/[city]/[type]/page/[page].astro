@@ -4,11 +4,18 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import ProjectCard from '../../../../components/ProjectCard.astro';
 import { supabase } from '../../../../lib/supabase';
 import { buildBreadcrumbSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../../lib/seo';
-import type { Project } from '../../../../lib/types';
+import type { GetStaticPaths } from 'astro';
+import type { City, Project } from '../../../../lib/types';
 
-export async function getStaticPaths() {
+type Props = {
+  city: City;
+  projectType: Project['project_type'];
+  page: number;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const { data: cities } = await supabase.from('cities').select('*');
-  const paths = [];
+  const paths: { params: { city: string; type: string; page: string }; props: Props }[] = [];
   for (const city of cities || []) {
     const { data: projects } = await supabase.from('projects').select('*').eq('city_id', city.id);
     const byType = new Map<string, number>();
@@ -16,6 +23,7 @@ export async function getStaticPaths() {
       byType.set(project.project_type, (byType.get(project.project_type) || 0) + 1);
     }
     for (const [type, total] of byType.entries()) {
+      if (!city?.slug || !type) continue;
       const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
       for (let page = 2; page <= totalPages; page++) {
         paths.push({
@@ -26,9 +34,9 @@ export async function getStaticPaths() {
     }
   }
   return paths;
-}
+};
 
-const { city, projectType, page } = Astro.props;
+const { city, projectType, page } = Astro.props as Props;
 const currentPage = Number(page);
 const typeLabel = formatProjectType(projectType);
 

@@ -6,17 +6,22 @@ import CollectionCard from '../../components/CollectionCard.astro';
 import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
+import type { GetStaticPaths } from 'astro';
 import type { City, Project, Collection } from '../../lib/types';
 
-export async function getStaticPaths() {
+type Props = {
+  city: City;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
   const { data: cities } = await supabase.from('cities').select('*');
   return (cities || []).map((city) => ({
     params: { city: city.slug },
     props: { city },
   }));
-}
+};
 
-const { city } = Astro.props;
+const { city } = Astro.props as Props;
 
 const [projectsRes, collectionsRes] = await Promise.all([
   supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
