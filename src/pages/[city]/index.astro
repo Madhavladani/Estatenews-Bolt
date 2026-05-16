@@ -7,7 +7,7 @@ import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
 import type { GetStaticPaths } from 'astro';
-import type { City, Project, Collection } from '../../lib/types';
+import type { City, Project, Collection, Locality } from '../../lib/types';
 
 type Props = {
   city: City;
@@ -23,16 +23,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const { city } = Astro.props as Props;
 
-const [projectsRes, collectionsRes] = await Promise.all([
+const [projectsRes, collectionsRes, localitiesRes] = await Promise.all([
   supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
   supabase.from('collections').select('*').eq('city_id', city.id).order('created_at', { ascending: false }),
+  supabase.from('localities').select('*').eq('city_id', city.id).order('name'),
 ]);
 
 const projects: Project[] = projectsRes.data || [];
 const collections: Collection[] = collectionsRes.data || [];
 const residentialProjects = projects.filter((p) => p.project_type === 'residential');
 const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
-const localities = [...new Set(projects.map((p) => p.location).filter(Boolean))];
+const localities: Locality[] = localitiesRes.data || [];
 
 const faqs = generateCityFAQs(city);
 const breadcrumbSchema = buildBreadcrumbSchema([
@@ -145,8 +146,8 @@ const faqSchema = buildFAQSchema(faqs);
         <h2 class="text-2xl font-bold text-gray-900 mb-6">Top Localities in {city.name}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {localities.map((loc) => (
-            <a href={`/${city.slug}/residential?location=${encodeURIComponent(loc)}`} class="bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
-              {loc}
+            <a href={`/${city.slug}/${loc.slug}`} class="bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+              {loc.name}
             </a>
           ))}
         </div>

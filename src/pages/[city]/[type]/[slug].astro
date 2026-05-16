@@ -14,12 +14,16 @@ import {
   formatProjectType,
 } from "../../../lib/seo";
 import type { GetStaticPaths } from "astro";
-import type { City, Project, FloorPlan } from "../../../lib/types";
+import type { City, Locality, Project, FloorPlan } from "../../../lib/types";
 
-type Props = {
+type ProjectProps = { kind: "project"; city: City; project: Project };
+type LocalityProps = {
+  kind: "locality";
   city: City;
-  project: Project;
+  projectType: Project["project_type"];
+  locality: Locality;
 };
+type Props = ProjectProps | LocalityProps;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { data: cities } = await supabase.from("cities").select("*");
@@ -40,64 +44,137 @@ export const getStaticPaths: GetStaticPaths = async () => {
           type: project.project_type,
           slug: project.slug,
         },
-        props: { city, project },
+        props: { kind: "project", city, project },
       });
+    }
+
+    const { data: localities } = await supabase
+      .from("localities")
+      .select("*")
+      .eq("city_id", city.id);
+
+    const projectSlugsByType = new Map<string, Set<string>>();
+    for (const project of projects || []) {
+      if (!project?.project_type || !project?.slug) continue;
+      const type = String(project.project_type);
+      if (!projectSlugsByType.has(type)) projectSlugsByType.set(type, new Set());
+      projectSlugsByType.get(type)!.add(String(project.slug));
+    }
+
+    for (const locality of localities || []) {
+      if (!city?.slug || !locality?.slug) continue;
+      for (const type of ["residential", "commercial"] as const) {
+        // Avoid overriding an existing project detail path (same slug) for this city+type
+        if (projectSlugsByType.get(type)?.has(String(locality.slug))) continue;
+        paths.push({
+          params: { city: city.slug, type, slug: locality.slug },
+          props: { kind: "locality", city, projectType: type, locality },
+        });
+      }
     }
   }
   return paths;
 };
 
-const { city, project } = Astro.props as Props;
+const props = Astro.props as Props;
 
-const { data: relatedData } = await supabase
-  .from("projects")
-  .select("*")
-  .eq("city_id", city.id)
-  .eq("project_type", project.project_type)
-  .neq("id", project.id)
-  .limit(4);
+const city = props.city;
+const localityProjectType =
+  props.kind === "locality" ? props.projectType : null;
 
-const relatedProjects: (Project & { city?: City })[] = (relatedData || []).map(
-  (p) => ({ ...p, city }),
-);
-const galleryImages: string[] = Array.isArray(project.gallery_images)
-  ? project.gallery_images.map((s) => String(s || "").trim()).filter(Boolean)
-  : typeof (project as any)?.gallery_images === "string"
-    ? String((project as any).gallery_images)
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
+let project: Project | null = null;
+let locality: Locality | null = null;
+let localityProjects: Project[] = [];
+let relatedProjects: (Project & { city?: City })[] = [];
+let galleryImages: string[] = [];
+let featuredImage = "";
+let floorPlans: FloorPlan[] = [];
+let faqs: { question: string; answer: string }[] = [];
+let statusLabel = "";
+let typeLabel = "";
+let breadcrumbSchema: any = null;
+let projectSchema: any = null;
+let faqSchema: any = null;
+let localityBreadcrumbSchema: any = null;
 
-const featuredImage =
-  typeof (project as any)?.featured_image === "string" &&
-  String((project as any).featured_image).trim()
-    ? String((project as any).featured_image).trim()
-    : galleryImages[0] || "";
+if (props.kind === "project") {
+  project = props.project;
 
-const floorPlans: FloorPlan[] = Array.isArray(project.floor_plans)
-  ? project.floor_plans
-  : [];
-const faqs = generateProjectFAQs(project, city);
-const statusLabel = formatStatus(project.project_status);
-const typeLabel = formatProjectType(project.project_type);
+  const { data: relatedData } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("city_id", city.id)
+    .eq("project_type", project.project_type)
+    .neq("id", project.id)
+    .limit(4);
 
-const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: "Home", url: "https://propdiscover.com" },
-  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
-  {
-    name: typeLabel,
-    url: `https://propdiscover.com/${city.slug}/${project.project_type}`,
-  },
-  {
-    name: project.title,
-    url: `https://propdiscover.com/${city.slug}/${project.project_type}/${project.slug}`,
-  },
-]);
-const projectSchema = buildProjectSchema(project, city);
-const faqSchema = buildFAQSchema(faqs);
+  relatedProjects = (relatedData || []).map((p) => ({ ...p, city }));
+
+  galleryImages = Array.isArray(project.gallery_images)
+    ? project.gallery_images.map((s) => String(s || "").trim()).filter(Boolean)
+    : typeof (project as any)?.gallery_images === "string"
+      ? String((project as any).gallery_images)
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+  featuredImage =
+    typeof (project as any)?.featured_image === "string" &&
+    String((project as any).featured_image).trim()
+      ? String((project as any).featured_image).trim()
+      : galleryImages[0] || "";
+
+  floorPlans = Array.isArray(project.floor_plans) ? project.floor_plans : [];
+  faqs = generateProjectFAQs(project, city);
+  statusLabel = formatStatus(project.project_status);
+  typeLabel = formatProjectType(project.project_type);
+
+  breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", url: "https://propdiscover.com" },
+    { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+    {
+      name: typeLabel,
+      url: `https://propdiscover.com/${city.slug}/${project.project_type}`,
+    },
+    {
+      name: project.title,
+      url: `https://propdiscover.com/${city.slug}/${project.project_type}/${project.slug}`,
+    },
+  ]);
+  projectSchema = buildProjectSchema(project, city);
+  faqSchema = buildFAQSchema(faqs);
+} else {
+  locality = props.locality;
+  const projectType = props.projectType;
+  typeLabel = formatProjectType(projectType);
+
+  const { data: projectsData } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("city_id", city.id)
+    .eq("project_type", projectType)
+    .or(`locality_id.eq.${locality.id},location.eq.${locality.name}`)
+    .order("published_at", { ascending: false });
+
+  localityProjects = projectsData || [];
+
+  localityBreadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", url: "https://propdiscover.com" },
+    { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+    {
+      name: typeLabel,
+      url: `https://propdiscover.com/${city.slug}/${projectType}`,
+    },
+    {
+      name: locality.name,
+      url: `https://propdiscover.com/${city.slug}/${projectType}/${locality.slug}`,
+    },
+  ]);
+}
 ---
 
+{props.kind === "project" && project ? (
 <BaseLayout
   title={project.meta_title ||
     `${project.title} ${city.name} | ${project.builder_name} - ${project.price_range}`}
@@ -471,6 +548,9 @@ const faqSchema = buildFAQSchema(faqs);
               <p class="text-xs text-gray-400 mt-1">
                 Location: {project.location}, {city.name}
               </p>
+              {project.address && (
+                <p class="text-xs text-gray-400 mt-1">Address: {project.address}</p>
+              )}
               <p class="text-xs text-gray-400 mt-1">Status: {statusLabel}</p>
             </div>
           </div>
@@ -489,16 +569,22 @@ const faqSchema = buildFAQSchema(faqs);
                   >{project.builder_name}</span
                 >
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Location</span>
-                <span class="font-medium text-gray-900">{project.location}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Price</span>
-                <span class="font-medium text-primary-700"
-                  >{project.price_range}</span
-                >
+	              <div class="flex justify-between">
+	                <span class="text-gray-500">Location</span>
+	                <span class="font-medium text-gray-900">{project.location}</span
+	                >
+	              </div>
+                {project.address && (
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Address</span>
+                    <span class="font-medium text-gray-900">{project.address}</span>
+                  </div>
+                )}
+	              <div class="flex justify-between">
+	                <span class="text-gray-500">Price</span>
+	                <span class="font-medium text-primary-700"
+	                  >{project.price_range}</span
+	                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-500">Possession</span>
@@ -585,3 +671,56 @@ const faqSchema = buildFAQSchema(faqs);
     </div>
   </section>
 </BaseLayout>
+):(
+<BaseLayout
+  title={`${typeLabel} Projects in ${locality?.name}, ${city.name} | Properties & Prices`}
+  description={`Explore ${typeLabel.toLowerCase()} projects in ${locality?.name}, ${city.name}. Compare prices, amenities, and project status.`}
+  canonical={`https://propdiscover.com/${city.slug}/${localityProjectType}/${locality?.slug}`}
+  jsonLd={[localityBreadcrumbSchema]}
+  breadcrumbs={[
+    { name: city.name, url: `/${city.slug}` },
+    { name: typeLabel, url: `/${city.slug}/${localityProjectType}` },
+    { name: locality?.name || 'Locality', url: `/${city.slug}/${localityProjectType}/${locality?.slug}` },
+  ]}
+>
+  <section class="bg-primary-800 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">
+        {typeLabel} Projects in {locality?.name}, {city.name}
+      </h1>
+      <p class="text-gray-300 text-lg">
+        {localityProjects.length} projects in this locality
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href={`/${city.slug}/${localityProjectType}`} class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
+          All {typeLabel} in {city.name}
+        </a>
+        <a href={`/${city.slug}/${locality?.slug}`} class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
+          All Properties in {locality?.name}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {localityProjects.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {localityProjects.map((p) => (
+            <ProjectCard project={{ ...p, city }} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-gray-500 text-lg">
+            No {typeLabel.toLowerCase()} projects found in {locality?.name}, {city.name}.
+          </p>
+          <a href={`/${city.slug}/${localityProjectType}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
+            Explore {typeLabel} in {city.name}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+)}

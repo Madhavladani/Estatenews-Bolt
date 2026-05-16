@@ -35,8 +35,9 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
           <input type="text" id="p-title" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
-        </div>
-        <div>
+	      </div>
+	      
+	      <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
           <input type="text" id="p-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
         </div>
@@ -69,18 +70,25 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
           <input type="text" id="p-phone" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
         </div>
       </div>
-      
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-          <input type="text" id="p-location" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Locality</label>
+          <select id="p-locality" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+            <option value="">Select Locality</option>
+          </select>
+          <input type="hidden" id="p-location" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-          <input type="text" id="p-price" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. ₹50 Lakh - ₹1 Cr" />
+          <input type="text" id="p-price" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. ?50 Lakh - ?1 Cr" />
         </div>
       </div>
-      
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+        <input type="text" id="p-address" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. Near XYZ Mall, Main Road" />
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Project Status</label>
@@ -95,8 +103,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
           <input type="text" id="p-possession" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. December 2026" />
         </div>
       </div>
-      
-      <div>
+<div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
         <textarea id="p-short-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
       </div>
@@ -207,10 +214,12 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	  const galleryInput = document.getElementById('p-gallery');
 	  const featuredFileInput = document.getElementById('p-featured-file');
 	  const galleryFileInput = document.getElementById('p-gallery-file');
-  const featuredStatus = document.getElementById('p-featured-status');
-  const galleryStatus = document.getElementById('p-gallery-status');
-  const galleryPreview = document.getElementById('p-gallery-preview');
-
+		  const featuredStatus = document.getElementById('p-featured-status');
+		  const galleryStatus = document.getElementById('p-gallery-status');
+		  const galleryPreview = document.getElementById('p-gallery-preview');
+		  const citySelect = document.getElementById('p-city');
+		  const localitySelect = document.getElementById('p-locality');
+		  const locationHidden = document.getElementById('p-location');
   function sanitizeSegment(value) {
     return String(value || '')
       .toLowerCase()
@@ -315,8 +324,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     document.getElementById('p-type').value = p.project_type;
     document.getElementById('p-builder').value = p.builder_name || '';
     document.getElementById('p-phone').value = p.builder_phone || '';
-    document.getElementById('p-location').value = p.location || '';
-    document.getElementById('p-price').value = p.price_range || '';
+    document.getElementById('p-location').value = p.location || '';    document.getElementById('p-address').value = p.address || '';    document.getElementById('p-price').value = p.price_range || '';
 	    document.getElementById('p-status').value = p.project_status;
 	    document.getElementById('p-possession').value = p.possession_date || '';
 	    document.getElementById('p-short-desc').value = p.short_description || '';
@@ -334,8 +342,53 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	    document.getElementById('p-meta-desc').value = p.meta_description || '';
 	  }
 	  if (!p) setFullDescHtml('');
-	  updateFeaturedPreview(featuredInput.value);
-	  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
+	    updateFeaturedPreview(featuredInput.value);
+  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
+
+  async function loadLocalities(cityId, selectedLocalityId, fallbackLocationName) {
+    if (!localitySelect) return;
+    localitySelect.innerHTML = '<option value="">Select Locality</option>';
+    if (!cityId) return;
+
+    try {
+      const res = await fetch(`/admin/api/localities?city_id=${encodeURIComponent(cityId)}`);
+      const list = res.ok ? await res.json() : [];
+      (Array.isArray(list) ? list : []).forEach((loc) => {
+        const opt = document.createElement('option');
+        opt.value = loc.id;
+        opt.textContent = loc.name;
+        localitySelect.appendChild(opt);
+      });
+
+      if (selectedLocalityId) {
+        localitySelect.value = selectedLocalityId;
+      } else if (fallbackLocationName) {
+        const match = Array.from(localitySelect.options).find(
+          (o) => o.textContent?.trim().toLowerCase() === String(fallbackLocationName).trim().toLowerCase(),
+        );
+        if (match) localitySelect.value = match.value;
+      }
+
+      const selected = localitySelect.options[localitySelect.selectedIndex];
+      locationHidden.value = selected?.textContent?.trim() || fallbackLocationName || '';
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  citySelect?.addEventListener('change', () => {
+    loadLocalities(citySelect.value, null, '');
+  });
+
+  localitySelect?.addEventListener('change', () => {
+    const selected = localitySelect.options[localitySelect.selectedIndex];
+    locationHidden.value = selected?.textContent?.trim() || '';
+  });
+
+  const initialCityId = citySelect?.value || '';
+  const initialLocalityId = p?.locality_id || null;
+  const initialLocationName = p?.location || '';
+  loadLocalities(initialCityId, initialLocalityId, initialLocationName);
 
   titleInput.addEventListener('input', (e) => {
     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -358,10 +411,12 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         slug: document.getElementById('p-slug').value,
         city_id: document.getElementById('p-city').value,
         project_type: document.getElementById('p-type').value,
-        builder_name: document.getElementById('p-builder').value,
-        builder_phone: document.getElementById('p-phone').value,
-        location: document.getElementById('p-location').value,
-        price_range: document.getElementById('p-price').value,
+	        builder_name: document.getElementById('p-builder').value,
+	        builder_phone: document.getElementById('p-phone').value,
+	        locality_id: document.getElementById('p-locality').value || null,
+	        location: document.getElementById('p-location').value,
+	        address: document.getElementById('p-address').value,
+	        price_range: document.getElementById('p-price').value,
         project_status: document.getElementById('p-status').value,
         possession_date: document.getElementById('p-possession').value,
         short_description: document.getElementById('p-short-desc').value,

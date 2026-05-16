@@ -13,12 +13,14 @@ export interface City {
 export interface Project {
   id: string;
   city_id: string;
+  locality_id?: string | null;
   project_type: 'residential' | 'commercial';
   title: string;
   slug: string;
   builder_name: string;
   builder_phone: string;
   location: string;
+  address?: string;
   short_description: string;
   full_description: string;
   featured_image: string;
@@ -38,6 +40,7 @@ export interface Project {
   published_at: string;
   created_at: string;
   city?: City;
+  locality?: Locality;
 }
 
 export interface FloorPlan {
@@ -58,6 +61,15 @@ export interface Collection {
   created_at: string;
   city?: City;
   projects?: Project[];
+}
+
+export interface Locality {
+  id: string;
+  city_id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+  city?: City;
 }
 
 export interface News {
@@ -92,6 +104,11 @@ export interface Database {
         Row: City;
         Insert: Omit<City, 'id' | 'created_at'>;
         Update: Partial<Omit<City, 'id' | 'created_at'>>;
+      };
+      localities: {
+        Row: Locality;
+        Insert: Omit<Locality, 'id' | 'created_at'>;
+        Update: Partial<Omit<Locality, 'id' | 'created_at'>>;
       };
       projects: {
         Row: Project;

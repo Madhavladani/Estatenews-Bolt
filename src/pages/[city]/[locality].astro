@@ -1,0 +1,120 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { supabase } from '../../lib/supabase';
+import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
+import type { GetStaticPaths } from 'astro';
+import type { City, Locality, Project } from '../../lib/types';
+
+type Props = {
+  city: City;
+  locality: Locality;
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data: cities } = await supabase.from('cities').select('*');
+  const paths: { params: { city: string; locality: string }; props: Props }[] = [];
+
+  for (const city of cities || []) {
+    const { data: localities } = await supabase
+      .from('localities')
+      .select('*')
+      .eq('city_id', city.id);
+
+    for (const locality of localities || []) {
+      if (!city?.slug || !locality?.slug) continue;
+      paths.push({
+        params: { city: city.slug, locality: locality.slug },
+        props: { city, locality },
+      });
+    }
+  }
+
+  return paths;
+};
+
+const { city, locality } = Astro.props as Props;
+
+const { data: projectsData } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('city_id', city.id)
+  .or(`locality_id.eq.${locality.id},location.eq.${locality.name}`)
+  .order('published_at', { ascending: false });
+
+const projects: Project[] = projectsData || [];
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+  {
+    name: locality.name,
+    url: `https://propdiscover.com/${city.slug}/${locality.slug}`,
+  },
+]);
+
+const faqs = [
+  {
+    question: `Which are the best projects in ${locality.name}, ${city.name}?`,
+    answer: `Explore the latest residential and commercial projects in ${locality.name}, ${city.name}. Compare prices, amenities, and project status to find the right option.`,
+  },
+  {
+    question: `Is ${locality.name} a good area for property investment?`,
+    answer: `${locality.name} is a popular locality in ${city.name}. Check the projects listed above for connectivity, amenities, and price range to evaluate investment potential.`,
+  },
+];
+const faqSchema = buildFAQSchema(faqs);
+---
+
+<BaseLayout
+  title={`${locality.name} Properties in ${city.name} | Projects & Prices`}
+  description={`Browse properties and projects in ${locality.name}, ${city.name}. Explore new launches, under-construction, and ready-to-move options with prices and amenities.`}
+  canonical={`https://propdiscover.com/${city.slug}/${locality.slug}`}
+  jsonLd={[breadcrumbSchema, faqSchema]}
+  breadcrumbs={[
+    { name: city.name, url: `/${city.slug}` },
+    { name: locality.name, url: `/${city.slug}/${locality.slug}` },
+  ]}
+>
+  <section class="bg-primary-800 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">
+        Properties in {locality.name}, {city.name}
+      </h1>
+      <p class="text-gray-300 text-lg">
+        {projects.length} projects in this locality
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href={`/${city.slug}/residential/${locality.slug}`} class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
+          Residential in {locality.name}
+        </a>
+        <a href={`/${city.slug}/commercial/${locality.slug}`} class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
+          Commercial in {locality.name}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {projects.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <ProjectCard project={{ ...project, city }} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <p class="text-gray-500 text-lg">
+            No projects found in {locality.name}, {city.name}.
+          </p>
+          <a href={`/${city.slug}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
+            Explore all projects in {city.name}
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+

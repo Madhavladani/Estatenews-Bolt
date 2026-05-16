@@ -6,6 +6,7 @@ const paths = [
   '/sitemap-projects.xml',
   '/sitemap-collections.xml',
   '/sitemap-news.xml',
+  '/sitemap-localities.xml',
 ];
 
 export async function GET() {

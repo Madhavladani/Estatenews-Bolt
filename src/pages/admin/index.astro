@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { supabase } from '../../lib/supabase';
 
-const [citiesRes, projectsRes, collectionsRes] = await Promise.all([
+  const [citiesRes, projectsRes, collectionsRes] = await Promise.all([
   supabase.from('cities').select('id', { count: 'exact', head: true }),
   supabase.from('projects').select('id', { count: 'exact', head: true }),
   supabase.from('collections').select('id', { count: 'exact', head: true }),
@@ -63,7 +63,7 @@ const [citiesRes, projectsRes, collectionsRes] = await Promise.all([
   </div>
 
   <!-- Quick Links -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
     <a href="/admin/cities" class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
       <div class="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center">
         <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -80,6 +80,15 @@ const [citiesRes, projectsRes, collectionsRes] = await Promise.all([
       <div>
         <p class="font-medium text-gray-900 text-sm">Manage Projects</p>
         <p class="text-xs text-gray-500">Add, edit, delete projects</p>
+      </div>
+    </a>
+    <a href="/admin/localities" class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+      <div class="w-10 h-10 bg-accent-50 rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414m0 0a4 4 0 10-5.657 5.657 4 4 0 005.657-5.657z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div>
+        <p class="font-medium text-gray-900 text-sm">Manage Localities</p>
+        <p class="text-xs text-gray-500">Add, edit, delete localities</p>
       </div>
     </a>
     <a href="/admin/collections" class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
