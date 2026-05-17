@@ -65,9 +65,6 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
 };
 
 const seoIntroRaw = String((locality as any)?.seo_intro || '').trim();
-const seoIntroParagraphs = seoIntroRaw
-  ? seoIntroRaw.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
-  : [];
 
 const infra = parseJsonLoose<any>((locality as any)?.infrastructure, {});
 const dbFaqs = parseJsonLoose<any>((locality as any)?.faqs, []);
@@ -203,17 +200,15 @@ const metaDescription =
 	          <h2 class="text-2xl font-bold text-gray-900 mb-3">
 	            About {locality.name} real estate market
 	          </h2>
-	          {seoIntroParagraphs.length > 0 ? (
-	            <div class="prose prose-gray max-w-none">
-	              {seoIntroParagraphs.map((p) => <p>{p}</p>)}
-	            </div>
-	          ) : (
-	            <p class="text-gray-600 leading-relaxed">
-	              {locality.name} is a key locality in {city.name} with a mix of residential projects and commercial developments.
-	              Use this page to explore listings by intent (commercial vs residential), check infrastructure and connectivity,
-	              and navigate to related localities and city collections for deeper research.
-	            </p>
-	          )}
+          {seoIntroRaw ? (
+            <div class="prose prose-gray max-w-none" set:html={seoIntroRaw} />
+          ) : (
+            <p class="text-gray-600 leading-relaxed">
+              {locality.name} is a key locality in {city.name} with a mix of residential projects and commercial developments.
+              Use this page to explore listings by intent (commercial vs residential), check infrastructure and connectivity,
+              and navigate to related localities and city collections for deeper research.
+            </p>
+          )}
 	        </div>
 
 	        <div class="bg-gray-50 rounded-2xl border border-gray-100 p-6">

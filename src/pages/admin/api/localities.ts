@@ -1,5 +1,13 @@
 import type { APIRoute } from 'astro';
 
+function pickDefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const [k, v] of Object.entries(obj || {})) {
+    if (v !== undefined) (out as any)[k] = v;
+  }
+  return out;
+}
+
 export const GET: APIRoute = async ({ url, locals }) => {
   const client = locals.supabase;
   if (!client) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
@@ -18,7 +26,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const client = locals.supabase;
   if (!client) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 
-  const body = await request.json();
+  const body = pickDefined(await request.json());
   const { data, error } = await client.from('localities').insert(body).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
@@ -32,7 +40,7 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   const id = url.searchParams.get('id');
   if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400 });
 
-  const body = await request.json();
+  const body = pickDefined(await request.json());
   const { data, error } = await client.from('localities').update(body).eq('id', id).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
