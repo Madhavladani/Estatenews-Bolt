@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS localities (
   city_id uuid NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
   name text NOT NULL,
   slug text NOT NULL,
+  seo_intro text DEFAULT '',
+  meta_title text DEFAULT '',
+  meta_description text DEFAULT '',
+  faqs jsonb DEFAULT '[]'::jsonb,
+  infrastructure jsonb DEFAULT '{}'::jsonb,
   created_at timestamptz DEFAULT now(),
   UNIQUE(city_id, slug)
 );
@@ -61,4 +66,16 @@ ALTER TABLE projects
   ADD COLUMN IF NOT EXISTS address text DEFAULT '';
 
 CREATE INDEX IF NOT EXISTS idx_projects_locality_id ON projects(locality_id);
+
+-- Backfill for existing installations (idempotent when re-run)
+ALTER TABLE localities
+  ADD COLUMN IF NOT EXISTS seo_intro text DEFAULT '';
+ALTER TABLE localities
+  ADD COLUMN IF NOT EXISTS meta_title text DEFAULT '';
+ALTER TABLE localities
+  ADD COLUMN IF NOT EXISTS meta_description text DEFAULT '';
+ALTER TABLE localities
+  ADD COLUMN IF NOT EXISTS faqs jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE localities
+  ADD COLUMN IF NOT EXISTS infrastructure jsonb DEFAULT '{}'::jsonb;
 

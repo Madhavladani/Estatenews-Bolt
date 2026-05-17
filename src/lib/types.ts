@@ -68,6 +68,11 @@ export interface Locality {
   city_id: string;
   name: string;
   slug: string;
+  seo_intro?: string;
+  meta_title?: string;
+  meta_description?: string;
+  faqs?: { question: string; answer: string }[] | any;
+  infrastructure?: any;
   created_at: string;
   city?: City;
 }

@@ -2,10 +2,11 @@
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
+import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
 import type { GetStaticPaths } from 'astro';
-import type { City, Locality, Project } from '../../lib/types';
+import type { City, Locality, Project, Collection } from '../../lib/types';
 
 type Props = {
   city: City;
@@ -36,6 +37,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const { city, locality } = Astro.props as Props;
 
+// Fetch projects for the current locality
 const { data: projectsData } = await supabase
   .from('projects')
   .select('*')
@@ -44,6 +46,58 @@ const { data: projectsData } = await supabase
   .order('published_at', { ascending: false });
 
 const projects: Project[] = projectsData || [];
+const residentialProjects = projects.filter((p) => p.project_type === 'residential');
+const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
+const builderNames = Array.from(
+  new Set(projects.map((p) => String(p.builder_name || '').trim()).filter(Boolean))
+).slice(0, 6);
+
+const parseJsonLoose = <T,>(value: any, fallback: T): T => {
+  if (!value) return fallback;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return value as T;
+};
+
+const seoIntroRaw = String((locality as any)?.seo_intro || '').trim();
+const seoIntroParagraphs = seoIntroRaw
+  ? seoIntroRaw.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+  : [];
+
+const infra = parseJsonLoose<any>((locality as any)?.infrastructure, {});
+const dbFaqs = parseJsonLoose<any>((locality as any)?.faqs, []);
+const localityFaqs: { question: string; answer: string }[] = Array.isArray(dbFaqs)
+  ? dbFaqs
+      .map((f) => ({
+        question: String(f?.question || '').trim(),
+        answer: String(f?.answer || '').trim(),
+      }))
+      .filter((f) => f.question && f.answer)
+  : [];
+
+// City collections for internal topical clustering
+const { data: cityCollectionsData } = await supabase
+  .from('collections')
+  .select('*')
+  .eq('city_id', city.id)
+  .order('created_at', { ascending: false })
+  .limit(6);
+const cityCollections: Collection[] = cityCollectionsData || [];
+
+// NEW: Fetch other popular localities in the same city (excluding the current one)
+const { data: otherLocalitiesData } = await supabase
+  .from('localities')
+  .select('*')
+  .eq('city_id', city.id)
+  .neq('id', locality.id)
+  .limit(6);
+
+const otherLocalities: Locality[] = otherLocalitiesData || [];
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://propdiscover.com' },
@@ -55,21 +109,45 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 ]);
 
 const faqs = [
-  {
-    question: `Which are the best projects in ${locality.name}, ${city.name}?`,
-    answer: `Explore the latest residential and commercial projects in ${locality.name}, ${city.name}. Compare prices, amenities, and project status to find the right option.`,
-  },
-  {
-    question: `Is ${locality.name} a good area for property investment?`,
-    answer: `${locality.name} is a popular locality in ${city.name}. Check the projects listed above for connectivity, amenities, and price range to evaluate investment potential.`,
-  },
+  ...localityFaqs,
+  ...(localityFaqs.length === 0
+    ? [
+        {
+          question: `What type of properties are available in ${locality.name}, ${city.name}?`,
+          answer: `${locality.name} offers both residential and commercial options. Explore commercial spaces (shops, offices, showrooms) and residential projects (apartments, villas) based on your need, budget, and connectivity preferences.`,
+        },
+        {
+          question: `Which are the best commercial projects in ${locality.name}?`,
+          answer: `Browse ${commercialProjects.length || 'the latest'} commercial listings in ${locality.name}, ${city.name}. Compare location, footfall potential, parking, access roads, and project status to shortlist the right option.`,
+        },
+        {
+          question: `Which are the best residential projects in ${locality.name}?`,
+          answer: `Explore ${residentialProjects.length || 'the latest'} residential projects in ${locality.name}, ${city.name}. Compare price ranges, amenities, project status, and nearby infrastructure to choose the right home.`,
+        },
+        {
+          question: `Is ${locality.name} good for commercial investment?`,
+          answer: `Commercial investment in ${locality.name} depends on access roads, nearby business hubs, and demand drivers. Shortlist projects and compare connectivity, visibility, and surrounding catchment before deciding.`,
+        },
+        {
+          question: `How do I compare projects in ${locality.name}, ${city.name}?`,
+          answer: `Compare project status (new launch/under construction/ready), developer track record, amenities, parking, and exact address. Use the commercial and residential sections on this page to narrow down relevant options.`,
+        },
+      ]
+    : []),
 ];
 const faqSchema = buildFAQSchema(faqs);
+
+const metaTitle =
+  String((locality as any)?.meta_title || '').trim() ||
+  `${locality.name}, ${city.name} Real Estate | Commercial & Residential Projects`;
+const metaDescription =
+  String((locality as any)?.meta_description || '').trim() ||
+  `Explore commercial property (shops, offices, showrooms) and residential projects in ${locality.name}, ${city.name}. Compare new launches, under-construction, and ready-to-move listings with builders, amenities, and locality insights.`;
 ---
 
 <BaseLayout
-  title={`${locality.name} Properties in ${city.name} | Projects & Prices`}
-  description={`Browse properties and projects in ${locality.name}, ${city.name}. Explore new launches, under-construction, and ready-to-move options with prices and amenities.`}
+  title={metaTitle}
+  description={metaDescription}
   canonical={`https://propdiscover.com/${city.slug}/${locality.slug}`}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
@@ -77,44 +155,380 @@ const faqSchema = buildFAQSchema(faqs);
     { name: locality.name, url: `/${city.slug}/${locality.slug}` },
   ]}
 >
-  <section class="bg-primary-800 text-white py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold mb-2">
-        Properties in {locality.name}, {city.name}
-      </h1>
-      <p class="text-gray-300 text-lg">
-        {projects.length} projects in this locality
-      </p>
-      <div class="mt-5 flex flex-wrap gap-3">
-        <a href={`/${city.slug}/residential/${locality.slug}`} class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
-          Residential in {locality.name}
-        </a>
-        <a href={`/${city.slug}/commercial/${locality.slug}`} class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
-          Commercial in {locality.name}
-        </a>
-      </div>
-    </div>
-  </section>
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white pt-16 pb-20 overflow-hidden border-b border-primary-700">
+    <div class="absolute inset-0 bg-[url('/pattern-grid.svg')] opacity-10"></div>
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-accent-500/10 blur-3xl"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm text-primary-100 mb-4 backdrop-blur-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          {city.name}
+	        </div>
+	        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 leading-tight">
+	          {locality.name}, <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-200">{city.name}</span>
+	        </h1>
+	        <p class="text-primary-100 text-lg md:text-xl font-light">
+	          Commercial property (shops, offices, showrooms) and residential projects with locality-level insights.
+	        </p>
+	      </div>
 
-  <section class="py-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {projects.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard project={{ ...project, city }} />
+	      <!-- Quick Filters -->
+	      <div class="flex flex-wrap justify-center md:justify-end gap-3 shrink-0">
+	        <a href={`/${city.slug}/commercial/${locality.slug}`} class="group flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl border border-white/20 backdrop-blur-md transition-all hover:-translate-y-0.5">
+	          <svg class="w-5 h-5 text-primary-200 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+	          </svg>
+	          Commercial
+	        </a>
+	        <a href={`/${city.slug}/residential/${locality.slug}`} class="group flex items-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-400 text-white font-medium rounded-xl transition-all shadow-lg shadow-accent-500/30 hover:-translate-y-0.5">
+	          <svg class="w-5 h-5 text-accent-100 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+	          </svg>
+	          Residential
+	        </a>
+	      </div>
+	    </div>
+	  </section>
+
+	  <!-- Locality SEO Intro -->
+	  <section class="py-10 bg-white border-b border-gray-100" id="locality-overview">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+	        <div class="lg:col-span-2">
+	          <h2 class="text-2xl font-bold text-gray-900 mb-3">
+	            About {locality.name} real estate market
+	          </h2>
+	          {seoIntroParagraphs.length > 0 ? (
+	            <div class="prose prose-gray max-w-none">
+	              {seoIntroParagraphs.map((p) => <p>{p}</p>)}
+	            </div>
+	          ) : (
+	            <p class="text-gray-600 leading-relaxed">
+	              {locality.name} is a key locality in {city.name} with a mix of residential projects and commercial developments.
+	              Use this page to explore listings by intent (commercial vs residential), check infrastructure and connectivity,
+	              and navigate to related localities and city collections for deeper research.
+	            </p>
+	          )}
+	        </div>
+
+	        <div class="bg-gray-50 rounded-2xl border border-gray-100 p-6">
+	          <h3 class="text-sm font-semibold text-gray-900 mb-4">Locality Snapshot</h3>
+	          <div class="space-y-3">
+	            <div class="flex items-center justify-between">
+	              <span class="text-sm text-gray-600">Commercial projects</span>
+	              <span class="text-sm font-semibold text-gray-900">{commercialProjects.length}</span>
+	            </div>
+	            <div class="flex items-center justify-between">
+	              <span class="text-sm text-gray-600">Residential projects</span>
+	              <span class="text-sm font-semibold text-gray-900">{residentialProjects.length}</span>
+	            </div>
+	            <div class="flex items-center justify-between">
+	              <span class="text-sm text-gray-600">Total listings</span>
+	              <span class="text-sm font-semibold text-gray-900">{projects.length}</span>
+	            </div>
+	            <div class="pt-3 border-t border-gray-200">
+	              <p class="text-xs text-gray-500 mb-2">Top builders</p>
+	              {builderNames.length > 0 ? (
+	                <div class="flex flex-wrap gap-2">
+	                  {builderNames.map((b) => (
+	                    <span class="px-2.5 py-1 rounded-full bg-white border border-gray-200 text-xs text-gray-700">{b}</span>
+	                  ))}
+	                </div>
+	              ) : (
+	                <p class="text-sm text-gray-600">Builders vary by project.</p>
+	              )}
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </section>
+
+	  <!-- Listings (Commercial + Residential) -->
+	  <section class="py-12 bg-gray-50 min-h-[50vh]" id="listings">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      {projects.length > 0 ? (
+	        <div class="space-y-12">
+	          <div id="commercial">
+	            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-gray-200">
+	              <div>
+	                <h2 class="text-2xl font-bold text-gray-900">
+	                  Commercial property in {locality.name}
+	                </h2>
+	                <p class="text-sm text-gray-600 mt-1">
+	                  Shops, offices, showrooms, and other commercial projects in {city.name}.
+	                </p>
+	              </div>
+	              <a
+	                href={`/${city.slug}/commercial/${locality.slug}`}
+	                class="inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800"
+	              >
+	                View commercial locality page
+	                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+	                </svg>
+	              </a>
+	            </div>
+
+	            {commercialProjects.length > 0 ? (
+	              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
+	                {commercialProjects.map((project) => (
+	                  <ProjectCard project={{ ...project, city }} />
+	                ))}
+	              </div>
+	            ) : (
+	              <div class="bg-white rounded-2xl border border-gray-100 p-8 mt-6">
+	                <p class="text-gray-600">
+	                  No commercial listings found in {locality.name} right now. Explore commercial projects in {city.name} or nearby localities.
+	                </p>
+	                <div class="mt-4 flex flex-wrap gap-3">
+	                  <a href={`/${city.slug}/commercial`} class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-semibold transition-colors">
+	                    Explore {city.name} commercial
+	                  </a>
+	                  <a href={`/${city.slug}/${locality.slug}`} class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold transition-colors">
+	                    View all listings
+	                  </a>
+	                </div>
+	              </div>
+	            )}
+	          </div>
+
+	          <div id="residential">
+	            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-gray-200">
+	              <div>
+	                <h2 class="text-2xl font-bold text-gray-900">
+	                  Residential projects in {locality.name}
+	                </h2>
+	                <p class="text-sm text-gray-600 mt-1">
+	                  Apartments, villas, and family homes across {locality.name}, {city.name}.
+	                </p>
+	              </div>
+	              <a
+	                href={`/${city.slug}/residential/${locality.slug}`}
+	                class="inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800"
+	              >
+	                View residential locality page
+	                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+	                </svg>
+	              </a>
+	            </div>
+
+	            {residentialProjects.length > 0 ? (
+	              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
+	                {residentialProjects.map((project) => (
+	                  <ProjectCard project={{ ...project, city }} />
+	                ))}
+	              </div>
+	            ) : (
+	              <div class="bg-white rounded-2xl border border-gray-100 p-8 mt-6">
+	                <p class="text-gray-600">
+	                  No residential listings found in {locality.name} right now. Explore residential projects in {city.name} or nearby localities.
+	                </p>
+	                <div class="mt-4 flex flex-wrap gap-3">
+	                  <a href={`/${city.slug}/residential`} class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-semibold transition-colors">
+	                    Explore {city.name} residential
+	                  </a>
+	                  <a href={`/${city.slug}/${locality.slug}`} class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold transition-colors">
+	                    View all listings
+	                  </a>
+	                </div>
+	              </div>
+	            )}
+	          </div>
+	        </div>
+	      ) : (
+	        <!-- Empty State -->
+	        <div class="flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
+	          <div class="w-24 h-24 mb-6 rounded-full bg-primary-50 flex items-center justify-center text-primary-500">
+	            <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+	            </svg>
+	          </div>
+	          <h3 class="text-2xl font-bold text-gray-900 mb-2">No projects found</h3>
+	          <p class="text-gray-500 text-lg mb-8 max-w-md">
+	            We couldn't find any active listings in <span class="font-medium text-gray-700">{locality.name}</span> right now. Try exploring nearby areas below.
+	          </p>
+	        </div>
+	      )}
+	    </div>
+	  </section>
+
+	  <!-- Infrastructure & Locality Intelligence -->
+	  <section class="py-14 bg-white border-t border-gray-100" id="infrastructure">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <div class="flex items-end justify-between gap-6 flex-wrap mb-8">
+	        <div>
+	          <h2 class="text-3xl font-bold text-gray-900">Infrastructure around {locality.name}</h2>
+	          <p class="text-gray-600 mt-2">Connectivity, daily needs, and commercial drivers that shape demand.</p>
+	        </div>
+	        <div class="flex flex-wrap gap-2">
+	          <a href="#commercial" class="px-4 py-2 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-sm font-semibold text-gray-800 transition-colors">Commercial</a>
+	          <a href="#residential" class="px-4 py-2 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-sm font-semibold text-gray-800 transition-colors">Residential</a>
+	          <a href={`/${city.slug}`} class="px-4 py-2 rounded-full bg-primary-50 hover:bg-primary-100 border border-primary-200 text-sm font-semibold text-primary-700 transition-colors">{city.name} overview</a>
+	        </div>
+	      </div>
+
+	      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+	        {[
+	          { key: 'connectivity', title: 'Connectivity', icon: 'M3 10h18M7 15h10M5 6h14M5 19h14', fallback: [`Road access across ${city.name}`, 'Public transport and key junctions', 'Commute to business hubs and markets'] },
+	          { key: 'social', title: 'Social Infrastructure', icon: 'M12 21l-1.5-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.5 11.18L12 21z', fallback: ['Schools & colleges', 'Hospitals & clinics', 'Parks & community spaces'] },
+	          { key: 'business_hubs', title: 'Business & Footfall', icon: 'M3 7h18M5 7V5a2 2 0 012-2h10a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V7m4 4h6', fallback: ['Retail streets & market catchment', 'Nearby offices and employment zones', 'Visibility, frontage, and parking factors'] },
+	          { key: 'lifestyle', title: 'Lifestyle', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', fallback: ['Restaurants & cafes', 'Malls & entertainment', 'Everyday convenience and services'] },
+	          { key: 'upcoming', title: 'Upcoming Growth', icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', fallback: ['New roads and junction upgrades', 'Upcoming commercial clusters', 'Demand pockets to watch'] },
+	        ].map((card) => {
+	          const items = Array.isArray((infra as any)?.[card.key]) ? (infra as any)[card.key] : card.fallback;
+	          return (
+	            <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+	              <div class="flex items-center gap-3 mb-4">
+	                <div class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center">
+	                  <svg class="w-5 h-5 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={card.icon} />
+	                  </svg>
+	                </div>
+	                <h3 class="text-base font-bold text-gray-900">{card.title}</h3>
+	              </div>
+	              <ul class="space-y-2">
+	                {items.slice(0, 5).map((t: any) => (
+	                  <li class="text-sm text-gray-700 flex gap-2">
+	                    <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0"></span>
+	                    <span>{String(t)}</span>
+	                  </li>
+	                ))}
+	              </ul>
+	            </div>
+	          );
+	        })}
+	      </div>
+	    </div>
+	  </section>
+
+	  <!-- Buyer Intent Blocks -->
+	  <section class="py-14 bg-gray-50 border-t border-gray-100" id="buyer-intent">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <h2 class="text-3xl font-bold text-gray-900 mb-3">Find the right property in {locality.name}</h2>
+	      <p class="text-gray-600 mb-8">Quick paths for buyers, businesses, and investors searching with intent.</p>
+
+	      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+	        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+	          <h3 class="text-lg font-bold text-gray-900 mb-2">For Businesses</h3>
+	          <p class="text-sm text-gray-600 mb-4">Looking for a shop, office, showroom, or commercial unit?</p>
+	          <ul class="space-y-2 text-sm text-gray-700">
+	            <li>Prioritize frontage, visibility, and parking</li>
+	            <li>Check access roads and footfall drivers</li>
+	            <li>Shortlist ready-to-move for faster setup</li>
+	          </ul>
+	          <a href={`/${city.slug}/commercial/${locality.slug}`} class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+	            Explore commercial in {locality.name}
+	            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+	          </a>
+	        </div>
+
+	        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+	          <h3 class="text-lg font-bold text-gray-900 mb-2">For Homebuyers</h3>
+	          <p class="text-sm text-gray-600 mb-4">Searching for apartments or villas near daily essentials?</p>
+	          <ul class="space-y-2 text-sm text-gray-700">
+	            <li>Compare amenities and community features</li>
+	            <li>Check schools, hospitals, and commute</li>
+	            <li>Prefer verified builders and clear RERA info</li>
+	          </ul>
+	          <a href={`/${city.slug}/residential/${locality.slug}`} class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+	            Explore residential in {locality.name}
+	            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+	          </a>
+	        </div>
+
+	        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+	          <h3 class="text-lg font-bold text-gray-900 mb-2">For Investors</h3>
+	          <p class="text-sm text-gray-600 mb-4">Evaluating investment potential and future growth?</p>
+	          <ul class="space-y-2 text-sm text-gray-700">
+	            <li>Compare locality demand drivers and supply</li>
+	            <li>Look for upcoming infrastructure upgrades</li>
+	            <li>Balance rentability vs. appreciation thesis</li>
+	          </ul>
+	          <a href={`/${city.slug}`} class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+	            Explore {city.name} market
+	            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+	          </a>
+	        </div>
+	      </div>
+	    </div>
+	  </section>
+
+	  <!-- FAQs -->
+	  <FAQSection faqs={faqs} />
+
+	  <!-- City Collections (Internal Linking) -->
+	  {cityCollections.length > 0 && (
+	    <section class="py-16 bg-white border-t border-gray-100" id="city-collections">
+	      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	        <div class="flex items-end justify-between gap-6 flex-wrap mb-10">
+	          <div>
+	            <h2 class="text-3xl font-bold text-gray-900 mb-2">Explore {city.name} collections</h2>
+	            <p class="text-gray-600">Curated shortlists to build topical depth and help you compare faster.</p>
+	          </div>
+	          <a href="/collections" class="inline-flex items-center gap-2 text-primary-700 hover:text-primary-800 font-semibold">
+	            View all collections
+	            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+	          </a>
+	        </div>
+
+	        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+	          {cityCollections.map((c) => (
+	            <a href={`/collections/${c.slug}`} class="group rounded-2xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all p-6">
+	              <p class="text-xs font-semibold tracking-wide text-primary-700 mb-2 uppercase">Collection</p>
+	              <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-800 transition-colors line-clamp-2">{c.title}</h3>
+	              <p class="text-sm text-gray-600 mt-2 line-clamp-3">{c.intro_content}</p>
+	              <div class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary-700">
+	                Explore
+	                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+	              </div>
+	            </a>
+	          ))}
+	        </div>
+	      </div>
+	    </section>
+	  )}
+
+  <!-- NEW: Explore Other Localities Section -->
+  {otherLocalities.length > 0 && (
+    <section class="py-16 bg-white border-t border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-gray-900 mb-3">Explore More in {city.name}</h2>
+          <p class="text-gray-500">Discover properties in other popular neighborhoods nearby.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {otherLocalities.map((loc) => (
+            <a 
+              href={`/${city.slug}/${loc.slug}`}
+              class="group flex flex-col items-center justify-center p-6 bg-gray-50 hover:bg-primary-50 rounded-2xl border border-gray-100 hover:border-primary-200 transition-all text-center"
+            >
+              <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <span class="font-medium text-gray-800 group-hover:text-primary-700 transition-colors line-clamp-1">{loc.name}</span>
+            </a>
           ))}
         </div>
-      ) : (
-        <div class="text-center py-16">
-          <p class="text-gray-500 text-lg">
-            No projects found in {locality.name}, {city.name}.
-          </p>
-          <a href={`/${city.slug}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
-            Explore all projects in {city.name}
+        
+        <div class="mt-10 text-center">
+          <a href={`/${city.slug}`} class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold">
+            View all {city.name} localities
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
           </a>
         </div>
-      )}
-    </div>
-  </section>
+      </div>
+    </section>
+  )}
 </BaseLayout>
-

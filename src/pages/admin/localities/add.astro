@@ -49,6 +49,39 @@ const pageTitle = localityToEdit ? 'Edit Locality' : 'Add Locality';
         <p class="mt-1 text-xs text-gray-500">Used in URLs like `/[city]/residential/[locality]` and `/[city]/[locality]`.</p>
       </div>
 
+      <div class="pt-2 border-t border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900 mb-2">Locality SEO</h2>
+        <p class="text-xs text-gray-500 mb-3">Optional, but recommended for locality pages and FAQs.</p>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+            <input type="text" id="loc-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. Kalawad Road Commercial Property in Rajkot | Shops & Offices" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+            <textarea id="loc-meta-description" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="One short, location-rich summary for Google."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">SEO Intro</label>
+            <textarea id="loc-seo-intro" rows="6" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="Write 2–4 short paragraphs: overview, connectivity, best fit (shops/offices/residential), and nearby hubs."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Infrastructure (JSON)</label>
+            <textarea id="loc-infra" rows="6" class="w-full px-4 py-2 border border-gray-200 rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder='{"connectivity":["..."],"social":["..."],"business_hubs":["..."],"lifestyle":["..."]}'></textarea>
+            <p class="mt-1 text-xs text-gray-500">Keys supported: connectivity, social, business_hubs, lifestyle, upcoming.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">FAQs (JSON)</label>
+            <textarea id="loc-faqs" rows="6" class="w-full px-4 py-2 border border-gray-200 rounded-lg font-mono text-xs focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder='[{"question":"...","answer":"..."}]'></textarea>
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end gap-3 pt-2">
         <a href="/admin/localities" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
         <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm">Save Locality</button>
@@ -67,6 +100,11 @@ const pageTitle = localityToEdit ? 'Edit Locality' : 'Add Locality';
     document.getElementById('loc-city').value = locality.city_id;
     document.getElementById('loc-name').value = locality.name;
     document.getElementById('loc-slug').value = locality.slug;
+    if (document.getElementById('loc-seo-intro')) document.getElementById('loc-seo-intro').value = locality.seo_intro || '';
+    if (document.getElementById('loc-meta-title')) document.getElementById('loc-meta-title').value = locality.meta_title || '';
+    if (document.getElementById('loc-meta-description')) document.getElementById('loc-meta-description').value = locality.meta_description || '';
+    if (document.getElementById('loc-infra')) document.getElementById('loc-infra').value = locality.infrastructure ? JSON.stringify(locality.infrastructure, null, 2) : '';
+    if (document.getElementById('loc-faqs')) document.getElementById('loc-faqs').value = locality.faqs ? JSON.stringify(locality.faqs, null, 2) : '';
   }
 
   nameInput?.addEventListener('input', (e) => {
@@ -85,10 +123,39 @@ const pageTitle = localityToEdit ? 'Edit Locality' : 'Add Locality';
 
     try {
       const id = (document.getElementById('loc-id') as HTMLInputElement).value;
+      const infraRaw = (document.getElementById('loc-infra') as HTMLTextAreaElement)?.value || '';
+      const faqsRaw = (document.getElementById('loc-faqs') as HTMLTextAreaElement)?.value || '';
+
+      let infrastructure: any = undefined;
+      let faqs: any = undefined;
+
+      try {
+        infrastructure = infraRaw.trim() ? JSON.parse(infraRaw) : undefined;
+      } catch {
+        alert('Infrastructure JSON is invalid.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+      }
+
+      try {
+        faqs = faqsRaw.trim() ? JSON.parse(faqsRaw) : undefined;
+      } catch {
+        alert('FAQs JSON is invalid.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        return;
+      }
+
       const body = {
         city_id: (document.getElementById('loc-city') as HTMLSelectElement).value,
         name: (document.getElementById('loc-name') as HTMLInputElement).value,
         slug: (document.getElementById('loc-slug') as HTMLInputElement).value,
+        seo_intro: (document.getElementById('loc-seo-intro') as HTMLTextAreaElement)?.value || '',
+        meta_title: (document.getElementById('loc-meta-title') as HTMLInputElement)?.value || '',
+        meta_description: (document.getElementById('loc-meta-description') as HTMLTextAreaElement)?.value || '',
+        infrastructure,
+        faqs,
       };
 
       const res = await fetch(id ? `/admin/api/localities?id=${id}` : '/admin/api/localities', {
