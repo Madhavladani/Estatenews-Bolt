@@ -171,6 +171,22 @@ if (props.kind === "project") {
       url: `https://propdiscover.com/${city.slug}/${projectType}/${locality.slug}`,
     },
   ]);
+
+  faqs = [
+    {
+      question: `What are the best ${typeLabel.toLowerCase()} projects in ${locality.name}, ${city.name}?`,
+      answer: `There are currently ${localityProjects.length} ${typeLabel.toLowerCase()} properties listed in ${locality.name}. Explore the listings above to find projects matching your budget and lifestyle requirements.`,
+    },
+    {
+      question: `Is ${locality.name} a good location for ${typeLabel.toLowerCase()} investment?`,
+      answer: `Yes, ${locality.name} in ${city.name} has seen substantial demand for ${typeLabel.toLowerCase()} real estate from both end-users and investors. The area offers great connectivity and infrastructure.`,
+    },
+    {
+      question: `How do I find ${typeLabel.toLowerCase()} properties in ${locality.name}?`,
+      answer: `You can browse the verified ${typeLabel.toLowerCase()} project listings on this page. Sort by latest or compare prices to find the most suitable property in ${locality.name}.`,
+    }
+  ];
+  faqSchema = buildFAQSchema(faqs);
 }
 ---
 
@@ -676,7 +692,7 @@ if (props.kind === "project") {
   title={`${typeLabel} Projects in ${locality?.name}, ${city.name} | Properties & Prices`}
   description={`Explore ${typeLabel.toLowerCase()} projects in ${locality?.name}, ${city.name}. Compare prices, amenities, and project status.`}
   canonical={`https://propdiscover.com/${city.slug}/${localityProjectType}/${locality?.slug}`}
-  jsonLd={[localityBreadcrumbSchema]}
+  jsonLd={[localityBreadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },
     { name: typeLabel, url: `/${city.slug}/${localityProjectType}` },
@@ -722,5 +738,22 @@ if (props.kind === "project") {
       )}
     </div>
   </section>
+
+  {/* SEO Intro Section for Uniqueness */}
+  <section class="py-12 bg-white border-t border-gray-100">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        Everything about {typeLabel} properties in {locality?.name}
+      </h2>
+      <p class="text-gray-600 text-base leading-relaxed mb-6">
+        When searching for the perfect {typeLabel.toLowerCase()} property, {locality?.name} in {city.name} presents {localityProjects.length > 0 ? "an impressive array of options" : "a highly sought-after market"}. 
+        Investors and buyers alike are drawn to {locality?.name} for its unique blend of connectivity, 
+        infrastructure, and community life. Keep track of the latest developments in 
+        {typeLabel.toLowerCase()} real estate right here.
+      </p>
+    </div>
+  </section>
+
+  <FAQSection faqs={faqs} />
 </BaseLayout>
 )}

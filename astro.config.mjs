@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import sitemap from '@astrojs/sitemap';
 import node from '@astrojs/node';
 
 export default defineConfig({
@@ -11,13 +10,6 @@ export default defineConfig({
 
   integrations: [
     tailwind(),
-    sitemap({
-      filter: (page) => {
-        const pathname = new URL(page).pathname;
-        const excluded = ['/admin', '/privacy-policy', '/terms-and-conditions'];
-        return !excluded.some((path) => pathname.startsWith(path));
-      },
-    })
   ],
 
   adapter: node({
