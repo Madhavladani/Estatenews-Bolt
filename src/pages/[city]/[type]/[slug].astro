@@ -536,41 +536,6 @@ if (props.kind === "project") {
 
         <!-- Sidebar -->
         <div class="space-y-6 sticky top-20 self-start">
-          <!-- Contact CTA -->
-          <div class="bg-primary-800 text-white rounded-xl p-6">
-            <h3 class="text-lg font-bold mb-2">
-              Interested in {project.title}?
-            </h3>
-            <p class="text-sm text-gray-300 mb-4">
-              Get complete details, pricing, and site visit arrangements
-            </p>
-            <div class="space-y-3">
-              <a
-                href={`tel:${project.builder_phone}`}
-                class="block w-full text-center px-4 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm"
-              >
-                Call: {project.builder_phone}
-              </a>
-              <button
-                class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-colors text-sm"
-              >
-                Request Callback
-              </button>
-            </div>
-            <div class="mt-4 pt-4 border-t border-primary-700">
-              <p class="text-xs text-gray-400">
-                Developer: {project.builder_name}
-              </p>
-              <p class="text-xs text-gray-400 mt-1">
-                Location: {project.location}, {city.name}
-              </p>
-              {project.address && (
-                <p class="text-xs text-gray-400 mt-1">Address: {project.address}</p>
-              )}
-              <p class="text-xs text-gray-400 mt-1">Status: {statusLabel}</p>
-            </div>
-          </div>
-
           <!-- Quick Facts -->
           <div class="bg-white border border-gray-200 rounded-xl p-6">
             <h3 class="font-semibold text-gray-900 mb-4">Quick Facts</h3>
@@ -614,8 +579,7 @@ if (props.kind === "project") {
               </div>
             </div>
           </div>
-
-          {
+{
             project.brochure_url && (
               <a
                 href={project.brochure_url}
@@ -640,6 +604,42 @@ if (props.kind === "project") {
               </a>
             )
           }
+          <!-- Contact CTA -->
+          <div class="bg-primary-800 text-white rounded-xl p-6">
+            <h3 class="text-lg font-bold mb-2">
+              Interested in {project.title}?
+            </h3>
+            <p class="text-sm text-gray-300 mb-4">
+              Get complete details, pricing, and site visit arrangements
+            </p>
+            <div class="space-y-3">
+              <a
+                href={`tel:${project.builder_phone}`}
+                class="block w-full text-center px-4 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm"
+              >
+                Call: {project.builder_phone}
+              </a>
+              <button
+                class="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-colors text-sm"
+              >
+                Request Callback
+              </button>
+            </div>
+            <div class="mt-4 pt-4 border-t border-primary-700">
+              <p class="text-xs text-gray-400">
+                Developer: {project.builder_name}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">
+                Location: {project.location}, {city.name}
+              </p>
+              {project.address && (
+                <p class="text-xs text-gray-400 mt-1">Address: {project.address}</p>
+              )}
+              <p class="text-xs text-gray-400 mt-1">Status: {statusLabel}</p>
+            </div>
+          </div>
+
+          
         </div>
       </div>
     </div>
