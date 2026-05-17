@@ -168,8 +168,16 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
           <input type="text" id="p-rera" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Brochure URL</label>
-          <input type="text" id="p-brochure" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Brochure (PDF)</label>
+          <input type="file" id="p-brochure-file" accept="application/pdf" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+          <p id="p-brochure-status" class="mt-2 text-xs text-gray-500"></p>
+          <input type="hidden" id="p-brochure" />
+          <div id="p-brochure-preview" class="mt-2 hidden">
+            <a href="#" id="p-brochure-link" target="_blank" class="text-sm text-primary-700 font-medium hover:underline inline-flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              View Brochure
+            </a>
+          </div>
         </div>
       </div>
       
@@ -212,11 +220,16 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	  const featuredInput = document.getElementById('p-image');
 	  const featuredPreview = document.getElementById('p-featured-preview');
 	  const galleryInput = document.getElementById('p-gallery');
+	  const brochureInput = document.getElementById('p-brochure');
 	  const featuredFileInput = document.getElementById('p-featured-file');
 	  const galleryFileInput = document.getElementById('p-gallery-file');
+	  const brochureFileInput = document.getElementById('p-brochure-file');
 		  const featuredStatus = document.getElementById('p-featured-status');
 		  const galleryStatus = document.getElementById('p-gallery-status');
+		  const brochureStatus = document.getElementById('p-brochure-status');
 		  const galleryPreview = document.getElementById('p-gallery-preview');
+		  const brochurePreview = document.getElementById('p-brochure-preview');
+		  const brochureLink = document.getElementById('p-brochure-link');
 		  const citySelect = document.getElementById('p-city');
 		  const localitySelect = document.getElementById('p-locality');
 		  const locationHidden = document.getElementById('p-location');
@@ -251,6 +264,16 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	    }
 	    featuredPreview.src = url;
 	    featuredPreview.classList.remove('hidden');
+	  }
+
+	  function updateBrochurePreview(url) {
+	    if (!url) {
+	      brochurePreview.classList.add('hidden');
+	      brochureLink.removeAttribute('href');
+	      return;
+	    }
+	    brochureLink.href = url;
+	    brochurePreview.classList.remove('hidden');
 	  }
 
 	  function syncFullDescToHidden() {
@@ -343,6 +366,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	  }
 	  if (!p) setFullDescHtml('');
 	    updateFeaturedPreview(featuredInput.value);
+      updateBrochurePreview(brochureInput.value);
   renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
 
   async function loadLocalities(cityId, selectedLocalityId, fallbackLocationName) {
@@ -481,6 +505,31 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     return data.url;
   }
 
+  async function uploadProjectFile(fileInputId, folder) {
+    const fileInput = document.getElementById(fileInputId);
+    const file = fileInput.files?.[0];
+    if (!file) {
+      alert('Please choose a file first.');
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    const res = await fetch('/admin/api/upload-file', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Upload failed');
+    }
+
+    return data.url;
+  }
+
   featuredFileInput?.addEventListener('change', async () => {
     const file = featuredFileInput.files?.[0];
     if (!file) return;
@@ -558,6 +607,39 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     } catch (error) {
       console.error(error);
       galleryStatus.textContent = 'Gallery upload failed.';
+    }
+  });
+
+  brochureFileInput?.addEventListener('change', async () => {
+    const file = brochureFileInput.files?.[0];
+    if (!file) return;
+    const id = document.getElementById('p-id').value;
+    brochureStatus.textContent = 'Uploading brochure PDF...';
+    try {
+      const url = await uploadProjectFile('p-brochure-file', `${getProjectFolderBase()}/brochures`);
+      if (!url) return;
+      brochureInput.value = url;
+      updateBrochurePreview(url);
+
+      if (id) {
+        const saveRes = await fetch(`/admin/api/projects?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brochure_url: url }),
+        });
+        if (!saveRes.ok) {
+          const saveErr = await saveRes.json();
+          alert(saveErr.error || 'Brochure uploaded, but database update failed.');
+          return;
+        }
+      }
+
+      brochureStatus.textContent = id
+        ? 'Brochure uploaded and saved to database.'
+        : 'Brochure uploaded. Save project to persist.';
+    } catch (error) {
+      console.error(error);
+      brochureStatus.textContent = 'Brochure upload failed.';
     }
   });
 </script>
