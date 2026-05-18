@@ -1,0 +1,38 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Advertise With Us | PropDiscover"
+  description="Advertise on PropDiscover and reach high-intent real estate audiences."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Advertise With Us</h1>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <p>
+          PropDiscover helps users research real estate projects and localities. We offer advertising and partnership options suited for
+          developers, brokers, and service providers.
+        </p>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What You Can Promote</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>New launches and featured projects</li>
+            <li>Locality or city-level campaigns</li>
+            <li>Content partnerships and sponsored guides</li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Start a Conversation</h2>
+          <p>
+            Email us at{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:ads@propdiscover.com">ads@propdiscover.com</a>
+            {' '}with your requirements and timeline.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

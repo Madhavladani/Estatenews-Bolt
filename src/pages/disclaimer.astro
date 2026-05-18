@@ -1,0 +1,44 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Disclaimer | PropDiscover"
+  description="Read the PropDiscover disclaimer regarding content accuracy, third-party sources, and liability limitations."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Disclaimer</h1>
+      <p class="text-sm text-gray-500 mb-8">Last updated: May 18, 2026</p>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <p>
+          The information on PropDiscover is provided for general informational purposes only. While we aim to keep information accurate
+          and up to date, we make no warranties of any kind about completeness, reliability, or availability.
+        </p>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">No Professional Advice</h2>
+          <p>
+            Content on this website should not be considered legal, financial, investment, or real estate advice. You should consult
+            qualified professionals before making decisions.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Third-Party Content</h2>
+          <p>
+            Property data, images, brochures, and external links may be sourced from third parties. PropDiscover is not responsible for
+            third-party content or any outcomes resulting from its use.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Limitation of Liability</h2>
+          <p>
+            PropDiscover will not be liable for any loss or damage arising from the use of the website, including indirect or
+            consequential loss or damage.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

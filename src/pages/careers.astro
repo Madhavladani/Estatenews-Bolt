@@ -1,0 +1,34 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Careers | PropDiscover"
+  description="Explore career opportunities at PropDiscover."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Careers</h1>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <p>
+          We’re always interested in meeting people who care about building helpful products and content for homebuyers and investors.
+        </p>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Open Roles</h2>
+          <p>
+            If there are no roles listed here, you can still share your profile and area of interest.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">How to Apply</h2>
+          <p>
+            Email your resume and a short note to{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:careers@propdiscover.com">careers@propdiscover.com</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

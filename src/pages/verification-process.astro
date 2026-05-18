@@ -1,0 +1,46 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Verification Process | PropDiscover"
+  description="Learn how PropDiscover verifies project information and handles updates."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Verification Process</h1>
+      <p class="text-sm text-gray-500 mb-8">Last updated: May 18, 2026</p>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <p>
+          We aim to keep project information useful and current. However, real estate details can change quickly. This page outlines our
+          general verification approach.
+        </p>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">How We Verify</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Cross-check details from multiple sources where possible.</li>
+            <li>Review developer-provided materials for consistency and completeness.</li>
+            <li>Update listings when new information becomes available.</li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What We Don’t Guarantee</h2>
+          <p>
+            We cannot guarantee real-time availability, pricing, approvals status, or exact specifications. Always confirm critical
+            details directly with the developer/seller or relevant authorities.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Report an Issue</h2>
+          <p>
+            If something looks incorrect, email{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:support@propdiscover.com">support@propdiscover.com</a>
+            {' '}with the page link and the correction.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

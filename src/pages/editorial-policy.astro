@@ -1,0 +1,45 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Editorial Policy | PropDiscover"
+  description="Understand how PropDiscover creates, reviews, and updates content to maintain quality and transparency."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Editorial Policy</h1>
+      <p class="text-sm text-gray-500 mb-8">Last updated: May 18, 2026</p>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <p>
+          Our goal is to publish helpful, accurate, and easy-to-understand real estate content. This policy explains how we create and
+          maintain content on PropDiscover.
+        </p>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Content Standards</h2>
+          <p>
+            We prioritize clarity, relevance, and factual accuracy. We avoid sensational claims and clearly separate informational
+            content from promotional material.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Sources</h2>
+          <p>
+            Sources may include publicly available information, developer-provided materials, and on-ground inputs. Where details are
+            uncertain or subject to change, we aim to state that clearly.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Corrections</h2>
+          <p>
+            If you notice an error, please contact{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:editorial@propdiscover.com">editorial@propdiscover.com</a>.
+            We review and update content when warranted.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

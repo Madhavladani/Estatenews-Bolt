@@ -1,0 +1,45 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Contact Us | PropDiscover"
+  description="Contact PropDiscover for support, partnerships, and advertising inquiries."
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-6 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Support</h2>
+          <p>
+            Email:{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:support@propdiscover.com">support@propdiscover.com</a>
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Partnerships</h2>
+          <p>
+            Email:{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:partners@propdiscover.com">partners@propdiscover.com</a>
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Advertise</h2>
+          <p>
+            To advertise with us, visit{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="/advertise-with-us">Advertise With Us</a>
+            {' '}or email{' '}
+            <a class="text-primary-700 hover:text-primary-800" href="mailto:ads@propdiscover.com">ads@propdiscover.com</a>.
+          </p>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Response Time</h2>
+          <p>We typically respond within 1–2 business days.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
