@@ -10,6 +10,7 @@ Sitemap: https://propdiscover.com/sitemap-cities.xml
 Sitemap: https://propdiscover.com/sitemap-projects.xml
 Sitemap: https://propdiscover.com/sitemap-collections.xml
 Sitemap: https://propdiscover.com/sitemap-news.xml
+Sitemap: https://propdiscover.com/sitemap-guides.xml
 Host: propdiscover.com
 `;
   return new Response(robotsTxt, {

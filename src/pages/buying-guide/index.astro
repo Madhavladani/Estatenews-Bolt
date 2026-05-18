@@ -1,0 +1,62 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+];
+---
+
+<BaseLayout
+  title="Buying Guide | PropDiscover"
+  description="Helpful property buying guides: how to buy property, home loans, RERA checks, stamp duty & registration, property tax, and document checklists."
+  breadcrumbs={breadcrumbs}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": b.name,
+      "item": `https://propdiscover.com${b.url}`,
+    })),
+  }}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Buying Guide</h1>
+        <p class="text-gray-600 mt-2">Clear, practical guides for homebuyers and investors.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <a href="/buying-guide/how-to-buy-property" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">How to buy property</h2>
+          <p class="text-sm text-gray-600 mt-2">A step-by-step purchase process with a checklist you can follow.</p>
+        </a>
+        <a href="/buying-guide/home-loan-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Home loan guide</h2>
+          <p class="text-sm text-gray-600 mt-2">Eligibility, documents, down payment planning, and rate basics.</p>
+        </a>
+        <a href="/buying-guide/rera-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">RERA guide</h2>
+          <p class="text-sm text-gray-600 mt-2">What to verify on the RERA portal and what red flags to avoid.</p>
+        </a>
+        <a href="/buying-guide/stamp-duty-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Stamp duty guide</h2>
+          <p class="text-sm text-gray-600 mt-2">Stamp duty, registration charges, and how the payment usually works.</p>
+        </a>
+        <a href="/buying-guide/property-tax-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property tax guide</h2>
+          <p class="text-sm text-gray-600 mt-2">How property tax is calculated, who pays it, and payment reminders.</p>
+        </a>
+        <a href="/buying-guide/property-documents-checklist" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property documents checklist</h2>
+          <p class="text-sm text-gray-600 mt-2">Documents to collect and verify before you pay any booking amount.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

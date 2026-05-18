@@ -1,0 +1,92 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+  { name: 'Home loan guide', url: '/buying-guide/home-loan-guide' },
+];
+---
+
+<BaseLayout
+  title="Home Loan Guide (Eligibility, EMI, Documents) | PropDiscover"
+  description="Home loan guide for property buyers: eligibility, required documents, fixed vs floating rates, pre-approval, down payment, and common mistakes."
+  breadcrumbs={breadcrumbs}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": b.name,
+      "item": `https://propdiscover.com${b.url}`,
+    })),
+  }}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Home loan guide</h1>
+      <p class="text-gray-600 mb-8">
+        Use this guide to understand eligibility, documents, and how to compare lenders beyond just the interest rate.
+      </p>
+
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Before you apply</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Check your credit score and clear small dues if possible.</li>
+            <li>Plan your down payment and keep extra funds for registration & interiors.</li>
+            <li>Prefer a pre-approval / sanction to negotiate confidently.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Eligibility factors (what lenders look at)</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Income stability, existing EMIs, and employer/business profile.</li>
+            <li>Age and remaining earning years (loan tenure fit).</li>
+            <li>Property type, builder profile, and legal/technical clearance.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Fixed vs floating interest</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Fixed can help predict EMIs early on; floating can benefit when rates fall.</li>
+            <li>Compare the spread, reset frequency, and switching terms.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Documents you’ll usually need</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>KYC: PAN, Aadhaar, address proof, photos.</li>
+            <li>Income: salary slips / ITRs, bank statements, Form 16 (as applicable).</li>
+            <li>Property: allotment/booking, agreement draft, approvals, and builder papers.</li>
+          </ul>
+          <p class="mt-3">
+            For deeper due diligence: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-documents-checklist">Property documents checklist</a>.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Compare lenders using the total cost</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Processing fee, legal/technical charges, and insurance add-ons.</li>
+            <li>Part-prepayment rules, foreclosure charges, and conversion fees.</li>
+          </ul>
+        </div>
+
+        <div class="pt-2">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Useful tools</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><a class="text-primary-700 hover:text-primary-800" href="/loan-emi-calculator">Loan EMI calculator</a></li>
+            <li><a class="text-primary-700 hover:text-primary-800" href="/properties-roi-calculator">Property ROI calculator</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

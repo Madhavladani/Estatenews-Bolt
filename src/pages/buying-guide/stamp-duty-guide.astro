@@ -1,0 +1,74 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+  { name: 'Stamp duty guide', url: '/buying-guide/stamp-duty-guide' },
+];
+---
+
+<BaseLayout
+  title="Stamp Duty & Registration Guide | PropDiscover"
+  description="Stamp duty & registration guide: what charges to expect, how registration works, and practical tips for a smooth property registration process."
+  breadcrumbs={breadcrumbs}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": b.name,
+      "item": `https://propdiscover.com${b.url}`,
+    })),
+  }}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Stamp duty & registration guide</h1>
+      <p class="text-gray-600 mb-8">
+        Stamp duty and registration are mandatory steps for transferring property ownership. Plan these costs early to avoid last-minute surprises.
+      </p>
+
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What charges are usually involved</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Stamp duty (varies by state, property type, and buyer category).</li>
+            <li>Registration fee (usually a percentage or capped amount).</li>
+            <li>Misc. costs: advocate, documentation, and bank/legal charges (if financed).</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Typical registration flow</h2>
+          <ol class="list-decimal pl-5 space-y-2">
+            <li>Finalize agreement / sale deed draft.</li>
+            <li>Pay stamp duty and book registration slot (where applicable).</li>
+            <li>Visit registrar office with witnesses and originals.</li>
+            <li>Submit biometric/verification and collect acknowledgement.</li>
+          </ol>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Practical tips</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Keep all payments traceable and preserve receipts.</li>
+            <li>Ensure names, carpet area, and property identifiers match across documents.</li>
+            <li>Confirm possession date and penalty clauses in the agreement.</li>
+          </ul>
+        </div>
+
+        <div class="pt-2">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-tax-guide">Property tax guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

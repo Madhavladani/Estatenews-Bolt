@@ -1,0 +1,122 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+  { name: 'How to buy property', url: '/buying-guide/how-to-buy-property' },
+];
+---
+
+<BaseLayout
+  title="How to Buy Property (Step-by-step) | PropDiscover"
+  description="A practical, step-by-step guide on how to buy property in India: budget, shortlist, site visit, legal checks, agreement, payments, and registration."
+  breadcrumbs={breadcrumbs}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "name": b.name,
+        "item": `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "How to Buy Property (Step-by-step)",
+      "url": "https://propdiscover.com/buying-guide/how-to-buy-property",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "PropDiscover",
+        "url": "https://propdiscover.com",
+      },
+    },
+  ]}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How to buy property (step-by-step)</h1>
+      <p class="text-gray-600 mb-8">
+        Use this checklist to plan your purchase, avoid surprises, and keep documentation ready from day one.
+      </p>
+
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">1) Fix your budget (the right way)</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Down payment + registration costs (stamp duty, registration, legal, broker, moving).</li>
+            <li>Monthly comfort: EMI + maintenance + utilities.</li>
+            <li>Keep a buffer for interior work and emergencies.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">2) Shortlist locations and projects</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Commute, schools, hospitals, and upcoming infrastructure.</li>
+            <li>Builder reputation and track record for on-time delivery.</li>
+            <li>Compare price trends and resale / rental demand.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">3) Do a proper site visit</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Visit at different times (traffic, noise, waterlogging).</li>
+            <li>Check parking, ventilation, sunlight, and amenities quality.</li>
+            <li>Ask for detailed payment schedule and possession timeline in writing.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">4) Legal & due diligence checks</h2>
+          <p class="mb-3">Before paying a booking amount, verify the basics:</p>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Title/ownership and chain of documents.</li>
+            <li>Approvals (layout/building), occupancy status, and encumbrances.</li>
+            <li>RERA registration details (for applicable projects).</li>
+          </ul>
+          <p class="mt-3">
+            Use the dedicated checklist: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-documents-checklist">Property documents checklist</a>.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">5) Home loan (if applicable)</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Compare rates, processing fees, and prepayment rules.</li>
+            <li>Prefer a sanction letter before committing to large payments.</li>
+          </ul>
+          <p class="mt-3">
+            Next: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/home-loan-guide">Home loan guide</a>.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">6) Agreement, payments, and registration</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Read the agreement carefully (carpet area, possession date, penalties, refund clauses).</li>
+            <li>Make payments via traceable methods and collect receipts.</li>
+            <li>Plan stamp duty and registration in advance.</li>
+          </ul>
+          <p class="mt-3">
+            Next: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty guide</a>.
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Quick next reads</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/rera-guide">RERA guide</a></li>
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-tax-guide">Property tax guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

@@ -1,0 +1,69 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+  { name: 'Property tax guide', url: '/buying-guide/property-tax-guide' },
+];
+---
+
+<BaseLayout
+  title="Property Tax Guide (What, Why, How to Pay) | PropDiscover"
+  description="Property tax guide for homeowners: what it is, who pays it, what affects it, documents to keep, and how to avoid penalties."
+  breadcrumbs={breadcrumbs}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": b.name,
+      "item": `https://propdiscover.com${b.url}`,
+    })),
+  }}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Property tax guide</h1>
+      <p class="text-gray-600 mb-8">
+        Property tax is typically paid to your local municipal body. Keeping payments current helps avoid penalties and makes resale smoother.
+      </p>
+
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Who pays property tax?</h2>
+          <p>Usually, the owner of the property is responsible. In some rental arrangements, tenants may pay it contractually, but ownership liability remains important.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What affects the tax amount</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Location (zone/ward), property usage (residential/commercial).</li>
+            <li>Built-up area / carpet area and construction type.</li>
+            <li>Municipal valuation method and rebates/penalties.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What to keep for records</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Latest paid receipts and challans.</li>
+            <li>Mutation/khata details (where applicable).</li>
+            <li>Sale deed and basic property identifiers (door no./plot no.).</li>
+          </ul>
+        </div>
+
+        <div class="pt-2">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty & registration guide</a></li>
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+

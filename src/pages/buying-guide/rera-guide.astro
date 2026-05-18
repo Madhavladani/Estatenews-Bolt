@@ -1,0 +1,73 @@
+---
+export const prerender = true;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const breadcrumbs = [
+  { name: 'Home', url: '/' },
+  { name: 'Buying Guide', url: '/buying-guide' },
+  { name: 'RERA guide', url: '/buying-guide/rera-guide' },
+];
+---
+
+<BaseLayout
+  title="RERA Guide: What to Check Before Buying | PropDiscover"
+  description="RERA guide for property buyers: what RERA means, how to verify a project and promoter on the RERA portal, and red flags to avoid."
+  breadcrumbs={breadcrumbs}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": b.name,
+      "item": `https://propdiscover.com${b.url}`,
+    })),
+  }}
+>
+  <section class="py-14 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">RERA guide</h1>
+      <p class="text-gray-600 mb-8">
+        RERA helps protect homebuyers by bringing transparency to project approvals, timelines, and disclosures.
+      </p>
+
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">What to check on the RERA portal</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Project registration number and validity.</li>
+            <li>Promoter details, past projects, and litigation disclosures (if listed).</li>
+            <li>Approved plans, number of units, and promised amenities.</li>
+            <li>Quarterly progress updates / construction status (where available).</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Common red flags</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li>Missing registration details or mismatched project name/phase.</li>
+            <li>Unclear possession dates or vague payment milestones.</li>
+            <li>Verbal promises that are not reflected in brochures/agreements.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Documents still matter</h2>
+          <p>
+            Even for RERA-registered projects, verify core documents and approvals before paying a large amount.
+            Use: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-documents-checklist">Property documents checklist</a>.
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
+          <ul class="list-disc pl-5 space-y-2">
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
+            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
