@@ -6,38 +6,85 @@ interface Props {
   viewAllText?: string;
 }
 
-const { faqs, title = 'Frequently Asked Questions', viewAllHref, viewAllText = 'View all FAQs' } = Astro.props;
+const {
+  faqs,
+  title = "Frequently Asked Questions",
+  viewAllHref,
+  viewAllText = "View all FAQs",
+} = Astro.props;
 ---
 
 <section class="py-12 bg-gray-50">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    {(title || viewAllHref) && (
-      <div class={`flex flex-col sm:flex-row sm:items-center ${title ? 'sm:justify-between' : 'sm:justify-end'} gap-3 mb-8`}>
-        {title && <h2 class="text-2xl font-bold text-gray-900 text-center sm:text-left">{title}</h2>}
-        {viewAllHref && (
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {
+      (title || viewAllHref) && (
+        <div
+          class={`flex flex-col sm:flex-row sm:items-center ${title ? "sm:justify-between" : "sm:justify-end"} gap-3 mb-8`}
+        >
+          {title && (
+            <h2 class="text-2xl font-bold text-gray-900 text-center sm:text-left">
+              {title}
+            </h2>
+          )}
+
+          {/* Desktop Button */}
+          {viewAllHref && (
+            <a
+              href={viewAllHref}
+              class="hidden sm:inline-flex items-center justify-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors sm:ml-auto"
+            >
+              {viewAllText}
+            </a>
+          )}
+        </div>
+      )
+    }
+
+    <div class="space-y-4">
+      {
+        faqs.map((faq, i) => (
+          <details
+            class="bg-white rounded-lg shadow-sm border border-gray-100 group"
+            open={i === 0}
+          >
+            <summary class="px-6 py-4 cursor-pointer flex items-center justify-between text-left font-medium text-gray-900 hover:text-primary-700 transition-colors">
+              <span>{faq.question}</span>
+
+              <svg
+                class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </summary>
+
+            <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed">
+              {faq.answer}
+            </div>
+          </details>
+        ))
+      }
+    </div>
+
+    {/* Mobile Button */}
+    {
+      viewAllHref && (
+        <div class="sm:hidden mt-6 text-center">
           <a
             href={viewAllHref}
-            class="inline-flex items-center justify-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors sm:ml-auto"
+            class="inline-flex items-center justify-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
           >
             {viewAllText}
           </a>
-        )}
-      </div>
-    )}
-    <div class="space-y-4">
-      {faqs.map((faq, i) => (
-        <details class="bg-white rounded-lg shadow-sm border border-gray-100 group" open={i === 0}>
-          <summary class="px-6 py-4 cursor-pointer flex items-center justify-between text-left font-medium text-gray-900 hover:text-primary-700 transition-colors">
-            <span>{faq.question}</span>
-            <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </summary>
-          <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed">
-            {faq.answer}
-          </div>
-        </details>
-      ))}
-    </div>
+        </div>
+      )
+    }
   </div>
 </section>
