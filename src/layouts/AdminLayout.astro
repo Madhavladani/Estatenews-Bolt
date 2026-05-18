@@ -44,6 +44,10 @@ const user = Astro.locals.user as User | undefined;
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h2"/></svg>
           News
         </a>
+        <a href="/admin/faqs" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'faqs' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8M8 14h6M10 3h4a2 2 0 012 2v2h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V5a2 2 0 012-2z"/></svg>
+          FAQs
+        </a>
       </nav>
       <div class="absolute bottom-0 left-0 w-64 p-4 border-t border-primary-700">
         <form method="POST" action="/admin/api/logout">
@@ -81,6 +85,10 @@ const user = Astro.locals.user as User | undefined;
         <a href="/admin/news" class="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white px-2 py-1">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h2"/></svg>
           News
+        </a>
+        <a href="/admin/faqs" class="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white px-2 py-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8M8 14h6M10 3h4a2 2 0 012 2v2h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V5a2 2 0 012-2z"/></svg>
+          FAQs
         </a>
       </div>
     </div>

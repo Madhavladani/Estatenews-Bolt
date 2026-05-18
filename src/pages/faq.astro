@@ -1,0 +1,136 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+import { buildBreadcrumbSchema, buildFAQSchema } from '../lib/seo';
+import type { City, Faq } from '../lib/types';
+
+const [citiesRes, faqsRes] = await Promise.all([
+  supabase.from('cities').select('id,name,slug').order('name'),
+  supabase
+    .from('faqs')
+    .select('id,city_id,question,answer,is_homepage,sort_order,is_active,created_at,updated_at, city:cities(id,name,slug)')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false }),
+]);
+
+const cities: Pick<City, 'id' | 'name' | 'slug'>[] = (citiesRes.data as any) || [];
+const faqs: (Faq & { city?: Pick<City, 'id' | 'name' | 'slug'> | null })[] = (faqsRes.data as any) || [];
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: 'FAQs', url: 'https://propdiscover.com/faq' },
+]);
+
+const faqSchema = buildFAQSchema(faqs.map((f) => ({ question: f.question, answer: f.answer })));
+---
+
+<BaseLayout
+  title="FAQs | PropDiscover"
+  description="Frequently asked questions about PropDiscover, real estate projects, and city-wise property information."
+  canonical="https://propdiscover.com/faq"
+  jsonLd={[breadcrumbSchema, faqSchema]}
+  breadcrumbs={[{ name: 'FAQs', url: '/faq' }]}
+>
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Frequently Asked Questions</h1>
+          <p class="text-gray-600 mt-2">Filter FAQs by city, or browse all.</p>
+        </div>
+
+        <div class="relative min-w-[240px]">
+          <label for="faq-city-filter" class="sr-only">Filter by city</label>
+          <select
+            id="faq-city-filter"
+            class="block w-full px-4 py-2.5 text-sm text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-primary-500 focus:border-primary-500 appearance-none cursor-pointer"
+          >
+            <option value="all" selected>All</option>
+            <option value="general">General</option>
+            {cities.map((c) => (
+              <option value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div id="faq-empty" class="hidden text-center py-12 text-gray-500 text-sm bg-white rounded-2xl border border-gray-100">
+        No FAQs found for this filter.
+      </div>
+
+      <div id="faq-list">
+        <div class="space-y-4">
+          {faqs.map((faq, i) => (
+            <details class="bg-white rounded-lg shadow-sm border border-gray-100 group" open={i === 0}>
+              <summary class="px-6 py-4 cursor-pointer flex items-center justify-between text-left font-medium text-gray-900 hover:text-primary-700 transition-colors">
+                <span>{faq.question}</span>
+                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </summary>
+              <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed">{faq.answer}</div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ faqs }}>
+  const select = document.getElementById('faq-city-filter');
+  const listRoot = document.getElementById('faq-list');
+  const empty = document.getElementById('faq-empty');
+
+  function renderFaqs(items) {
+    if (!listRoot) return;
+    const container = listRoot.querySelector('.space-y-4');
+    if (!container) return;
+
+    container.innerHTML = items
+      .map((faq, i) => {
+        const open = i === 0 ? ' open' : '';
+        return `
+          <details class="bg-white rounded-lg shadow-sm border border-gray-100 group"${open}>
+            <summary class="px-6 py-4 cursor-pointer flex items-center justify-between text-left font-medium text-gray-900 hover:text-primary-700 transition-colors">
+              <span>${escapeHtml(faq.question)}</span>
+              <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </summary>
+            <div class="px-6 pb-4 text-sm text-gray-600 leading-relaxed">${escapeHtml(faq.answer)}</div>
+          </details>
+        `;
+      })
+      .join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>\"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' }[c]));
+  }
+
+  function applyFilter() {
+    const val = select?.value || 'all';
+    let filtered = faqs || [];
+
+    if (val === 'general') {
+      filtered = filtered.filter((f) => !f.city_id);
+    } else if (val !== 'all') {
+      // City filter shows both city-wise + general
+      filtered = filtered.filter((f) => f.city_id === val || !f.city_id);
+    }
+
+    if (empty) empty.classList.toggle('hidden', filtered.length > 0);
+    if (listRoot) listRoot.classList.toggle('hidden', filtered.length === 0);
+
+    renderFaqs(filtered.map((f) => ({ question: f.question, answer: f.answer })));
+  }
+
+  select?.addEventListener('change', applyFilter);
+  applyFilter();
+</script>

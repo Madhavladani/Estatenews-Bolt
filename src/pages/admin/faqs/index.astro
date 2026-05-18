@@ -1,0 +1,111 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City, Faq } from '../../../lib/types';
+
+const url = new URL(Astro.request.url);
+const selectedCity = url.searchParams.get('city') || '';
+
+const [citiesRes, faqsRes] = await Promise.all([
+  supabase.from('cities').select('id,name,slug').order('name'),
+  supabase
+    .from('faqs')
+    .select('*, city:cities(id,name,slug)')
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false }),
+]);
+
+const cities: Pick<City, 'id' | 'name' | 'slug'>[] = (citiesRes.data as any) || [];
+let faqs: (Faq & { city?: Pick<City, 'id' | 'name' | 'slug'> | null })[] = (faqsRes.data as any) || [];
+
+if (selectedCity === 'general') {
+  faqs = faqs.filter((f) => !f.city_id);
+} else if (selectedCity) {
+  faqs = faqs.filter((f) => f.city_id === selectedCity);
+}
+---
+
+<AdminLayout title="FAQs" activeTab="faqs">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <h1 class="text-2xl font-bold text-gray-900">FAQs</h1>
+
+    <div class="flex items-center gap-3">
+      <div class="relative min-w-[220px]">
+        <select
+          id="city-filter"
+          class="block w-full px-4 py-2 text-sm text-gray-900 bg-white border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500 appearance-none cursor-pointer"
+        >
+          <option value="" selected={!selectedCity}>All</option>
+          <option value="general" selected={selectedCity === 'general'}>General</option>
+          {cities.map((city) => (
+            <option value={city.id} selected={city.id === selectedCity}>{city.name}</option>
+          ))}
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <a href="/admin/faqs/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add FAQ
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50 border-b border-gray-100">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Question</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Homepage</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Active</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50" id="faqs-table-body">
+        {(faqs || []).map((faq) => (
+          <tr class="hover:bg-gray-50" data-id={faq.id}>
+            <td class="px-4 py-3 text-sm font-medium text-gray-900">{faq.question}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{faq.city_id ? (faq.city?.name ?? 'City') : 'General'}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{faq.is_homepage ? 'Yes' : 'No'}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{faq.is_active ? 'Yes' : 'No'}</td>
+            <td class="px-4 py-3 text-right">
+              <a href={`/admin/faqs/add?id=${faq.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
+              <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={faq.id} data-name={faq.question}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {(!faqs || faqs.length === 0) && (
+      <div class="text-center py-12 text-gray-500 text-sm">No FAQs found. Add your first FAQ.</div>
+    )}
+  </div>
+</AdminLayout>
+
+<script>
+  const cityFilter = document.getElementById('city-filter') as HTMLSelectElement;
+  cityFilter?.addEventListener('change', () => {
+    const selectedCity = cityFilter.value;
+    const url = new URL(window.location.href);
+    if (selectedCity) url.searchParams.set('city', selectedCity);
+    else url.searchParams.delete('city');
+    window.location.href = url.toString();
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
+      const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
+      const res = await fetch(`/admin/api/faqs?id=${(btn as HTMLElement).dataset.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (res.ok) { window.location.reload(); }
+      else { alert('Failed to delete'); }
+    });
+  });
+</script>
+

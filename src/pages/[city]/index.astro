@@ -23,10 +23,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const { city } = Astro.props as Props;
 
-const [projectsRes, collectionsRes, localitiesRes] = await Promise.all([
+const [projectsRes, collectionsRes, localitiesRes, faqsRes] = await Promise.all([
   supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
   supabase.from('collections').select('*').eq('city_id', city.id).order('created_at', { ascending: false }),
   supabase.from('localities').select('*').eq('city_id', city.id).order('name'),
+  supabase
+    .from('faqs')
+    .select('question,answer,city_id,sort_order,created_at')
+    .eq('is_active', true)
+    .or(`city_id.eq.${city.id},city_id.is.null`)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false }),
 ]);
 
 const projects: Project[] = projectsRes.data || [];
@@ -35,7 +42,8 @@ const residentialProjects = projects.filter((p) => p.project_type === 'residenti
 const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
 const localities: Locality[] = localitiesRes.data || [];
 
-const faqs = generateCityFAQs(city);
+const faqsFromDb = (faqsRes.data || []).map((f: any) => ({ question: f.question, answer: f.answer }));
+const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://propdiscover.com' },
   { name: city.name, url: `https://propdiscover.com/${city.slug}` },

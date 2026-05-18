@@ -119,95 +119,105 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
 </AdminLayout>
 
 <script define:vars={{ city: cityToEdit }}>
-  const form = document.getElementById('city-form') as HTMLFormElement;
-  const nameInput = document.getElementById('city-name') as HTMLInputElement;
-  const slugInput = document.getElementById('city-slug') as HTMLInputElement;
-  const heroInput = document.getElementById('city-hero') as HTMLInputElement;
-  const heroPreview = document.getElementById('city-hero-preview') as HTMLImageElement;
-  const heroFileInput = document.getElementById('city-hero-file') as HTMLInputElement;
-  const uploadStatus = document.getElementById('city-upload-status') as HTMLElement;
+  window.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('city-form');
+    const nameInput = document.getElementById('city-name');
+    const slugInput = document.getElementById('city-slug');
+    const heroInput = document.getElementById('city-hero');
+    const heroPreview = document.getElementById('city-hero-preview');
+    const heroFileInput = document.getElementById('city-hero-file');
+    const uploadStatus = document.getElementById('city-upload-status');
 
-  const cityImageInput = document.getElementById('city-image') as HTMLInputElement;
-  const cityImagePreview = document.getElementById('city-image-preview') as HTMLImageElement;
-  const cityImageFileInput = document.getElementById('city-image-file') as HTMLInputElement;
-  const cityImageUploadStatus = document.getElementById('city-image-upload-status') as HTMLElement;
-  const indexCheckbox = document.getElementById('city-index') as HTMLInputElement;
+    const cityImageInput = document.getElementById('city-image');
+    const cityImagePreview = document.getElementById('city-image-preview');
+    const cityImageFileInput = document.getElementById('city-image-file');
+    const cityImageUploadStatus = document.getElementById('city-image-upload-status');
+    const indexCheckbox = document.getElementById('city-index');
 
-  function updateCityPreview(url) {
-    if (!url) {
-      heroPreview.classList.add('hidden');
-      heroPreview.removeAttribute('src');
-      return;
-    }
-    heroPreview.src = url;
-    heroPreview.classList.remove('hidden');
-  }
+    if (!form || !nameInput || !slugInput || !heroInput || !heroPreview || !heroFileInput || !uploadStatus) return;
+    if (!cityImageInput || !cityImagePreview || !cityImageFileInput || !cityImageUploadStatus || !indexCheckbox) return;
 
-  function updateCityImagePreview(url) {
-    if (!url) {
-      cityImagePreview.classList.add('hidden');
-      cityImagePreview.removeAttribute('src');
-      return;
-    }
-    cityImagePreview.src = url;
-    cityImagePreview.classList.remove('hidden');
-  }
-
-	  updateCityPreview(heroInput.value);
-	  updateCityImagePreview(cityImageInput.value);
-
-  // Auto-generate slug from name
-  nameInput.addEventListener('input', (e) => {
-    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    slugInput.value = slug;
-  });
-  heroInput.addEventListener('input', (e) => updateCityPreview(e.target.value));
-  cityImageInput.addEventListener('input', (e) => updateCityImagePreview(e.target.value));
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Saving...';
-    submitBtn.disabled = true;
-
-    try {
-      const id = document.getElementById('city-id').value;
-      const body = {
-        name: document.getElementById('city-name').value,
-        slug: document.getElementById('city-slug').value,
-        state: document.getElementById('city-state').value,
-        hero_image: document.getElementById('city-hero').value,
-        city_image: cityImageInput.value,
-        index_city: indexCheckbox.checked,
-        overview: document.getElementById('city-overview').value,
-        meta_title: document.getElementById('city-meta-title').value,
-        meta_description: document.getElementById('city-meta-desc').value,
-      };
-
-      const res = await fetch(id ? `/admin/api/cities?id=${id}` : '/admin/api/cities', {
-        method: id ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (res.ok) { 
-        window.location.href = '/admin/cities';
-      } else { 
-        const d = await res.json(); 
-        alert(d.error || 'Failed to save'); 
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
+    function updateHeroPreview(url) {
+      if (!url) {
+        heroPreview.classList.add('hidden');
+        heroPreview.removeAttribute('src');
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      alert('An external error occurred.');
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
+      heroPreview.src = url;
+      heroPreview.classList.remove('hidden');
     }
-  });
-  heroFileInput?.addEventListener('change', async () => {
+
+    function updateCityImagePreview(url) {
+      if (!url) {
+        cityImagePreview.classList.add('hidden');
+        cityImagePreview.removeAttribute('src');
+        return;
+      }
+      cityImagePreview.src = url;
+      cityImagePreview.classList.remove('hidden');
+    }
+
+    updateHeroPreview(heroInput.value);
+    updateCityImagePreview(cityImageInput.value);
+
+    // Auto-generate slug from name
+    nameInput.addEventListener('input', (e) => {
+      const value = e.target.value || '';
+      const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      slugInput.value = slug;
+    });
+    heroInput.addEventListener('input', (e) => updateHeroPreview(e.target.value));
+    cityImageInput.addEventListener('input', (e) => updateCityImagePreview(e.target.value));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn?.textContent || 'Save City';
+      if (submitBtn) {
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+      }
+
+      try {
+        const id = document.getElementById('city-id')?.value || '';
+        const body = {
+          name: document.getElementById('city-name')?.value || '',
+          slug: document.getElementById('city-slug')?.value || '',
+          state: document.getElementById('city-state')?.value || 'Gujarat',
+          hero_image: document.getElementById('city-hero')?.value || '',
+          city_image: cityImageInput.value || '',
+          index_city: !!indexCheckbox.checked,
+          overview: document.getElementById('city-overview')?.value || '',
+          meta_title: document.getElementById('city-meta-title')?.value || '',
+          meta_description: document.getElementById('city-meta-desc')?.value || '',
+        };
+
+        const res = await fetch(id ? `/admin/api/cities?id=${id}` : '/admin/api/cities', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (res.ok) {
+          window.location.href = '/admin/cities';
+          return;
+        }
+
+        const d = await res.json().catch(() => ({}));
+        alert(d.error || 'Failed to save');
+      } catch (err) {
+        console.error(err);
+        alert('An external error occurred.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      }
+    });
+
+    heroFileInput?.addEventListener('change', async () => {
     const file = heroFileInput.files?.[0];
     const id = document.getElementById('city-id').value;
 
@@ -216,7 +226,7 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
       return;
     }
     const localPreview = URL.createObjectURL(file);
-    updateCityPreview(localPreview);
+    updateHeroPreview(localPreview);
     uploadStatus.textContent = 'Uploading image...';
 
     try {
@@ -236,7 +246,7 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
       }
 
       heroInput.value = data.url;
-      updateCityPreview(data.url);
+      updateHeroPreview(data.url);
 
       if (id) {
         const saveRes = await fetch(`/admin/api/cities?id=${id}`, {
@@ -258,7 +268,7 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     }
   });
 
-  cityImageFileInput?.addEventListener('change', async () => {
+    cityImageFileInput?.addEventListener('change', async () => {
     const file = cityImageFileInput.files?.[0];
     const id = document.getElementById('city-id').value;
 
@@ -307,5 +317,6 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
       console.error(error);
       cityImageUploadStatus.textContent = 'Upload failed.';
     }
+  });
   });
 </script>

@@ -2,14 +2,28 @@
 interface Props {
   faqs: { question: string; answer: string }[];
   title?: string;
+  viewAllHref?: string;
+  viewAllText?: string;
 }
 
-const { faqs, title = 'Frequently Asked Questions' } = Astro.props;
+const { faqs, title = 'Frequently Asked Questions', viewAllHref, viewAllText = 'View all FAQs' } = Astro.props;
 ---
 
 <section class="py-12 bg-gray-50">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">{title}</h2>
+    {(title || viewAllHref) && (
+      <div class={`flex flex-col sm:flex-row sm:items-center ${title ? 'sm:justify-between' : 'sm:justify-end'} gap-3 mb-8`}>
+        {title && <h2 class="text-2xl font-bold text-gray-900 text-center sm:text-left">{title}</h2>}
+        {viewAllHref && (
+          <a
+            href={viewAllHref}
+            class="inline-flex items-center justify-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors sm:ml-auto"
+          >
+            {viewAllText}
+          </a>
+        )}
+      </div>
+    )}
     <div class="space-y-4">
       {faqs.map((faq, i) => (
         <details class="bg-white rounded-lg shadow-sm border border-gray-100 group" open={i === 0}>

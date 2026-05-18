@@ -9,18 +9,27 @@ import { supabase } from '../lib/supabase';
 import { buildBreadcrumbSchema } from '../lib/seo';
 import type { City, Project, Collection, News } from '../lib/types';
 
-const [citiesRes, projectsRes, collectionsRes, newsRes] = await Promise.all([
+const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Promise.all([
   // Build-time fetch only; page is prerendered.
   supabase.from('cities').select('*').order('name'),
   supabase.from('projects').select('*, city:cities(*)').order('published_at', { ascending: false }),
   supabase.from('collections').select('*, city:cities(*)').order('created_at', { ascending: false }),
   supabase.from('news').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(6),
+  supabase
+    .from('faqs')
+    .select('question,answer')
+    .eq('is_active', true)
+    .eq('is_homepage', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
+    .limit(8),
 ]);
 
 const cities: City[] = citiesRes.data || [];
 const allProjects: (Project & { city?: City })[] = projectsRes.data || [];
 const collections: (Collection & { city?: City })[] = collectionsRes.data || [];
 const latestNews: News[] = newsRes.data || [];
+const homeFaqs = (homeFaqsRes.data || []) as { question: string; answer: string }[];
 
 const residentialProjects = allProjects.filter((p) => p.project_type === 'residential');
 const commercialProjects = allProjects.filter((p) => p.project_type === 'commercial');
@@ -70,6 +79,8 @@ const listingFaqs = [
     answer: 'Basic listings can be supported; featured placements and premium promotion may be available on request.',
   },
 ];
+
+const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 ---
 
 <BaseLayout
@@ -116,96 +127,69 @@ const listingFaqs = [
     </div>
   </section>
 
-  <!-- Featured Cities -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-gray-900 mb-3">Explore by City</h2>
-        <p class="text-gray-600">Find the best properties in Gujarat's top real estate destinations</p>
-      </div>
+	  <!-- Featured Cities -->
+	  <section class="py-16 bg-gray-50">
+	    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	      <div class="text-center mb-10">
+	        <h2 class="text-3xl font-bold text-gray-900 mb-3">Explore by City</h2>
+	        <p class="text-gray-600">Browse city-wise properties and projects</p>
+	      </div>
 
-      <div class="md:hidden overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div class="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 min-w-max">
-          {featuredCities.map((city) => (
-            <a
-              href={`/${city.slug}`}
-              class="group inline-flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all whitespace-nowrap"
-            >
-              {city.city_image || city.hero_image ? (
-                <img
-                  src={city.city_image || city.hero_image}
-                  alt={city.name}
-                  loading="lazy"
-                  width="40"
-                  height="40"
-                  class="w-10 h-10 rounded-full object-cover border border-gray-200"
-                />
-              ) : (
-                <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
-                  <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <span>{city.initials}</span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {featuredCities.map((city) => {
+            const count = projectCounts[city.slug] || 0;
+            const imageUrl = city.city_image || city.hero_image || '';
+            return (
+              <a
+                href={`/${city.slug}`}
+                class="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gray-200"
+              >
+                <div class="aspect-[4/3] sm:aspect-[16/10] overflow-hidden">
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={city.name}
+                      loading="lazy"
+                      width="520"
+                      height="292"
+                      class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div class="w-full h-full bg-gradient-to-br from-primary-200 to-primary-50" />
+                  )}
                 </div>
-              )}
-	              <div>
-	                <p class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</p>
-	                <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} properties</p>
-	              </div>
-	            </a>
-	          ))}
-	        </div>
-      </div>
-      {indexCityTotal > featuredDesktopLimit && (
-        <div class="md:hidden flex justify-center mt-6">
-          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
-            View All Cities
-          </a>
+                <div class="absolute inset-0 bg-gradient-to-t from-primary-900/90 via-primary-900/40 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-5">
+                  <h3 class="text-xl font-bold text-white mb-1">{city.name}</h3>
+                  <p class="text-sm text-gray-200">{city.state}</p>
+                  <p class="text-xs text-accent-400 mt-2 font-medium">
+                    {count} {count === 1 ? 'Property' : 'Properties'} Available
+                  </p>
+                </div>
+              </a>
+            );
+          })}
         </div>
-      )}
 
-      <div id="desktop-city-list" class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {featuredCities.map((city) => (
+        <div class="flex justify-center mt-10">
           <a
-            href={`/${city.slug}`}
-            class="group flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all"
+            href="/cities"
+            class="group inline-flex items-center gap-2 px-7 py-3 bg-primary-700 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 text-sm hover:bg-primary-800 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
-            {city.city_image || city.hero_image ? (
-              <img
-                src={city.city_image || city.hero_image}
-                alt={city.name}
-                loading="lazy"
-                width="40"
-                height="40"
-                class="w-10 h-10 rounded-full object-cover border border-gray-200"
-              />
-            ) : (
-              <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
-                <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>{city.initials}</span>
-              </div>
-            )}
-            <div>
-              <p class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</p>
-              <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} properties</p>
-            </div>
-          </a>
-        ))}
-      </div>
-
-      {indexCityTotal > featuredDesktopLimit && (
-        <div class="hidden md:flex justify-center mt-8">
-          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
             View All Cities
+            <svg
+              class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </a>
         </div>
-      )}
-    </div>
-  </section>
+	    </div>
+	  </section>
 
   <!-- Residential / Commercial Tabs -->
   <section class="py-16">
@@ -325,11 +309,7 @@ const listingFaqs = [
 	      </div>
 	    </div>
 	  </section>
-
-		  <FAQSection title="Listing FAQs" faqs={listingFaqs} />
-
-  <!-- Collections -->
-  <section class="py-16 bg-gray-50">
+ <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-10">
         <h2 class="text-3xl font-bold text-gray-900 mb-3">Curated Collections</h2>
@@ -342,6 +322,10 @@ const listingFaqs = [
       </div>
     </div>
   </section>
+			  <FAQSection title="FAQs" faqs={homepageFaqs} viewAllHref="/faq" viewAllText="View all FAQs" />
+
+  <!-- Collections -->
+ 
 
 	  <!-- Buying Guide (SEO) -->
 	  <section class="py-16 bg-gray-50">

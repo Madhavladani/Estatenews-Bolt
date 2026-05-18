@@ -104,6 +104,19 @@ export interface News {
   faqs?: { question: string; answer: string }[];
 }
 
+export interface Faq {
+  id: string;
+  city_id: string | null;
+  question: string;
+  answer: string;
+  is_homepage: boolean;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  city?: City;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -131,6 +144,11 @@ export interface Database {
         Row: News;
         Insert: Omit<News, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<News, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      faqs: {
+        Row: Faq;
+        Insert: Omit<Faq, 'id' | 'created_at' | 'updated_at' | 'city'>;
+        Update: Partial<Omit<Faq, 'id' | 'created_at' | 'updated_at' | 'city'>>;
       };
       collection_projects: {
         Row: {
