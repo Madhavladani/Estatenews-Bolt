@@ -115,9 +115,17 @@ const authorSlug = article.author_name
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* ── Two-column layout: article + sticky TOC sidebar */}
       <div
-        class="lg:grid lg:grid-cols-[1fr_220px] xl:grid-cols-[1fr_260px] lg:gap-10 xl:gap-14 items-start"
+        class="lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start"
       >
         {/* ── Main article column */}
+        {
+          toc.length > 1 && (
+            <div class="hidden lg:block self-start">
+              <ArticleTOC toc={toc} />
+            </div>
+          )
+        }
+
         <div class="min-w-0">
           {/* ── Article header */}
           <header class="mb-8">
@@ -209,7 +217,11 @@ const authorSlug = article.author_name
           </header>
 
           {/* ── Mobile TOC (above hero image) */}
-          {toc.length > 1 && <ArticleTOC toc={toc} />}
+          {toc.length > 1 && (
+            <div class="lg:hidden">
+              <ArticleTOC toc={toc} />
+            </div>
+          )}
 
           {/* ── Hero image */}
           {
@@ -267,14 +279,6 @@ const authorSlug = article.author_name
           />
         </div>
 
-        {/* ── Desktop sticky TOC sidebar */}
-        {
-          toc.length > 1 && (
-            <div class="hidden lg:block">
-              <ArticleTOC toc={toc} />
-            </div>
-          )
-        }
       </div>
     </div>
   </article>
