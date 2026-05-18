@@ -26,60 +26,59 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-lg">
     <form id="city-form" class="space-y-4">
-      <input type="hidden" id="city-id" />
+      <input type="hidden" id="city-id" value={cityToEdit?.id ?? ''} />
       <div>
         <label for="city-name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-        <input type="text" id="city-name" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <input type="text" id="city-name" required value={cityToEdit?.name ?? ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
       </div>
       <div>
         <label for="city-slug" class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
-        <input type="text" id="city-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <input type="text" id="city-slug" required value={cityToEdit?.slug ?? ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
       </div>
       <div>
         <label for="city-state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
         <select id="city-state" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
-          <option value="Gujarat">Gujarat</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Rajasthan">Rajasthan</option>
-          <option value="Delhi">Delhi</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Goa">Goa</option>
-          <option value="Madhya Pradesh">Madhya Pradesh</option>
-          <option value="Uttar Pradesh">Uttar Pradesh</option>
-          <option value="Andhra Pradesh">Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="West Bengal">West Bengal</option>
-          <option value="Punjab">Punjab</option>
-          <option value="Haryana">Haryana</option>
-          <option value="Bihar">Bihar</option>
-          <option value="Odisha">Odisha</option>
-          <option value="Kerala">Kerala</option>
-          <option value="Assam">Assam</option>
-          <option value="Jharkhand">Jharkhand</option>
-          <option value="Chhattisgarh">Chhattisgarh</option>
-          <option value="Uttarakhand">Uttarakhand</option>
-          <option value="Himachal Pradesh">Himachal Pradesh</option>
-          <option value="Tripura">Tripura</option>
-          <option value="Meghalaya">Meghalaya</option>
-          <option value="Manipur">Manipur</option>
-          <option value="Nagaland">Nagaland</option>
-          <option value="Goa">Goa</option>
-          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-          <option value="Mizoram">Mizoram</option>
-          <option value="Sikkim">Sikkim</option>
-          <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-          <option value="Chandigarh">Chandigarh</option>
-          <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-          <option value="Lakshadweep">Lakshadweep</option>
-          <option value="Puducherry">Puducherry</option>
-          <option value="Ladakh">Ladakh</option>
-          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+          <option value="Gujarat" selected={(cityToEdit?.state ?? 'Gujarat') === 'Gujarat'}>Gujarat</option>
+          <option value="Maharashtra" selected={cityToEdit?.state === 'Maharashtra'}>Maharashtra</option>
+          <option value="Rajasthan" selected={cityToEdit?.state === 'Rajasthan'}>Rajasthan</option>
+          <option value="Delhi" selected={cityToEdit?.state === 'Delhi'}>Delhi</option>
+          <option value="Karnataka" selected={cityToEdit?.state === 'Karnataka'}>Karnataka</option>
+          <option value="Goa" selected={cityToEdit?.state === 'Goa'}>Goa</option>
+          <option value="Madhya Pradesh" selected={cityToEdit?.state === 'Madhya Pradesh'}>Madhya Pradesh</option>
+          <option value="Uttar Pradesh" selected={cityToEdit?.state === 'Uttar Pradesh'}>Uttar Pradesh</option>
+          <option value="Andhra Pradesh" selected={cityToEdit?.state === 'Andhra Pradesh'}>Andhra Pradesh</option>
+          <option value="Telangana" selected={cityToEdit?.state === 'Telangana'}>Telangana</option>
+          <option value="Tamil Nadu" selected={cityToEdit?.state === 'Tamil Nadu'}>Tamil Nadu</option>
+          <option value="West Bengal" selected={cityToEdit?.state === 'West Bengal'}>West Bengal</option>
+          <option value="Punjab" selected={cityToEdit?.state === 'Punjab'}>Punjab</option>
+          <option value="Haryana" selected={cityToEdit?.state === 'Haryana'}>Haryana</option>
+          <option value="Bihar" selected={cityToEdit?.state === 'Bihar'}>Bihar</option>
+          <option value="Odisha" selected={cityToEdit?.state === 'Odisha'}>Odisha</option>
+          <option value="Kerala" selected={cityToEdit?.state === 'Kerala'}>Kerala</option>
+          <option value="Assam" selected={cityToEdit?.state === 'Assam'}>Assam</option>
+          <option value="Jharkhand" selected={cityToEdit?.state === 'Jharkhand'}>Jharkhand</option>
+          <option value="Chhattisgarh" selected={cityToEdit?.state === 'Chhattisgarh'}>Chhattisgarh</option>
+          <option value="Uttarakhand" selected={cityToEdit?.state === 'Uttarakhand'}>Uttarakhand</option>
+          <option value="Himachal Pradesh" selected={cityToEdit?.state === 'Himachal Pradesh'}>Himachal Pradesh</option>
+          <option value="Tripura" selected={cityToEdit?.state === 'Tripura'}>Tripura</option>
+          <option value="Meghalaya" selected={cityToEdit?.state === 'Meghalaya'}>Meghalaya</option>
+          <option value="Manipur" selected={cityToEdit?.state === 'Manipur'}>Manipur</option>
+          <option value="Nagaland" selected={cityToEdit?.state === 'Nagaland'}>Nagaland</option>
+          <option value="Arunachal Pradesh" selected={cityToEdit?.state === 'Arunachal Pradesh'}>Arunachal Pradesh</option>
+          <option value="Mizoram" selected={cityToEdit?.state === 'Mizoram'}>Mizoram</option>
+          <option value="Sikkim" selected={cityToEdit?.state === 'Sikkim'}>Sikkim</option>
+          <option value="Andaman and Nicobar Islands" selected={cityToEdit?.state === 'Andaman and Nicobar Islands'}>Andaman and Nicobar Islands</option>
+          <option value="Chandigarh" selected={cityToEdit?.state === 'Chandigarh'}>Chandigarh</option>
+          <option value="Dadra and Nagar Haveli and Daman and Diu" selected={cityToEdit?.state === 'Dadra and Nagar Haveli and Daman and Diu'}>Dadra and Nagar Haveli and Daman and Diu</option>
+          <option value="Lakshadweep" selected={cityToEdit?.state === 'Lakshadweep'}>Lakshadweep</option>
+          <option value="Puducherry" selected={cityToEdit?.state === 'Puducherry'}>Puducherry</option>
+          <option value="Ladakh" selected={cityToEdit?.state === 'Ladakh'}>Ladakh</option>
+          <option value="Jammu and Kashmir" selected={cityToEdit?.state === 'Jammu and Kashmir'}>Jammu and Kashmir</option>
         </select>
       </div>
       <div>
         <label for="city-hero" class="block text-sm font-medium text-gray-700 mb-1">Hero Image URL</label>
-        <input type="text" id="city-hero" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <input type="text" id="city-hero" value={cityToEdit?.hero_image ?? ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
         <div class="mt-2 flex items-center gap-3">
           <input type="file" id="city-hero-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
         </div>
@@ -87,16 +86,29 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
         <img id="city-hero-preview" alt="City hero preview" class="hidden mt-3 w-full h-44 object-cover rounded-lg border border-gray-200" />
       </div>
       <div>
+        <label for="city-image" class="block text-sm font-medium text-gray-700 mb-1">City Image URL (Card/Home)</label>
+        <input type="text" id="city-image" value={cityToEdit?.city_image ?? ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <div class="mt-2 flex items-center gap-3">
+          <input type="file" id="city-image-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+        </div>
+        <p id="city-image-upload-status" class="mt-2 text-xs text-gray-500"></p>
+        <img id="city-image-preview" alt="City image preview" class="hidden mt-3 w-full h-44 object-cover rounded-lg border border-gray-200" />
+      </div>
+      <div class="flex items-center gap-3">
+        <input id="city-index" type="checkbox" checked={!!cityToEdit?.index_city} class="h-4 w-4 rounded border-gray-300 text-primary-700 focus:ring-primary-500" />
+        <label for="city-index" class="text-sm text-gray-700">Show on home page (max 12)</label>
+      </div>
+      <div>
         <label for="city-overview" class="block text-sm font-medium text-gray-700 mb-1">Overview</label>
-        <textarea id="city-overview" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+        <textarea id="city-overview" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">{cityToEdit?.overview ?? ''}</textarea>
       </div>
       <div>
         <label for="city-meta-title" class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-        <input type="text" id="city-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        <input type="text" id="city-meta-title" value={cityToEdit?.meta_title ?? ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
       </div>
       <div>
         <label for="city-meta-desc" class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-        <textarea id="city-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+        <textarea id="city-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">{cityToEdit?.meta_description ?? ''}</textarea>
       </div>
       <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
         <a href="/admin/cities" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
@@ -107,13 +119,19 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
 </AdminLayout>
 
 <script define:vars={{ city: cityToEdit }}>
-  const form = document.getElementById('city-form');
-  const nameInput = document.getElementById('city-name');
-  const slugInput = document.getElementById('city-slug');
-  const heroInput = document.getElementById('city-hero');
-  const heroPreview = document.getElementById('city-hero-preview');
-  const heroFileInput = document.getElementById('city-hero-file');
-  const uploadStatus = document.getElementById('city-upload-status');
+  const form = document.getElementById('city-form') as HTMLFormElement;
+  const nameInput = document.getElementById('city-name') as HTMLInputElement;
+  const slugInput = document.getElementById('city-slug') as HTMLInputElement;
+  const heroInput = document.getElementById('city-hero') as HTMLInputElement;
+  const heroPreview = document.getElementById('city-hero-preview') as HTMLImageElement;
+  const heroFileInput = document.getElementById('city-hero-file') as HTMLInputElement;
+  const uploadStatus = document.getElementById('city-upload-status') as HTMLElement;
+
+  const cityImageInput = document.getElementById('city-image') as HTMLInputElement;
+  const cityImagePreview = document.getElementById('city-image-preview') as HTMLImageElement;
+  const cityImageFileInput = document.getElementById('city-image-file') as HTMLInputElement;
+  const cityImageUploadStatus = document.getElementById('city-image-upload-status') as HTMLElement;
+  const indexCheckbox = document.getElementById('city-index') as HTMLInputElement;
 
   function updateCityPreview(url) {
     if (!url) {
@@ -125,19 +143,18 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     heroPreview.classList.remove('hidden');
   }
 
-  if (city) {
-    document.getElementById('city-id').value = city.id;
-    document.getElementById('city-name').value = city.name;
-    document.getElementById('city-slug').value = city.slug;
-    document.getElementById('city-state').value = city.state;
-    document.getElementById('city-hero').value = city.hero_image || '';
-    document.getElementById('city-overview').value = city.overview || '';
-    document.getElementById('city-meta-title').value = city.meta_title || '';
-    document.getElementById('city-meta-desc').value = city.meta_description || '';
-  } else {
-    document.getElementById('city-state').value = 'Gujarat';
+  function updateCityImagePreview(url) {
+    if (!url) {
+      cityImagePreview.classList.add('hidden');
+      cityImagePreview.removeAttribute('src');
+      return;
+    }
+    cityImagePreview.src = url;
+    cityImagePreview.classList.remove('hidden');
   }
-  updateCityPreview(heroInput.value);
+
+	  updateCityPreview(heroInput.value);
+	  updateCityImagePreview(cityImageInput.value);
 
   // Auto-generate slug from name
   nameInput.addEventListener('input', (e) => {
@@ -145,6 +162,7 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     slugInput.value = slug;
   });
   heroInput.addEventListener('input', (e) => updateCityPreview(e.target.value));
+  cityImageInput.addEventListener('input', (e) => updateCityImagePreview(e.target.value));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -161,6 +179,8 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
         slug: document.getElementById('city-slug').value,
         state: document.getElementById('city-state').value,
         hero_image: document.getElementById('city-hero').value,
+        city_image: cityImageInput.value,
+        index_city: indexCheckbox.checked,
         overview: document.getElementById('city-overview').value,
         meta_title: document.getElementById('city-meta-title').value,
         meta_description: document.getElementById('city-meta-desc').value,
@@ -235,6 +255,57 @@ const pageTitle = cityToEdit ? 'Edit City' : 'Add City';
     } catch (error) {
       console.error(error);
       uploadStatus.textContent = 'Upload failed.';
+    }
+  });
+
+  cityImageFileInput?.addEventListener('change', async () => {
+    const file = cityImageFileInput.files?.[0];
+    const id = document.getElementById('city-id').value;
+
+    if (!file) {
+      cityImageUploadStatus.textContent = '';
+      return;
+    }
+    const localPreview = URL.createObjectURL(file);
+    updateCityImagePreview(localPreview);
+    cityImageUploadStatus.textContent = 'Uploading image...';
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'cities');
+
+      const res = await fetch('/admin/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        cityImageUploadStatus.textContent = data.error || 'Upload failed.';
+        return;
+      }
+
+      cityImageInput.value = data.url;
+      updateCityImagePreview(data.url);
+
+      if (id) {
+        const saveRes = await fetch(`/admin/api/cities?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ city_image: data.url }),
+        });
+        if (!saveRes.ok) {
+          cityImageUploadStatus.textContent = 'Image uploaded, but database update failed.';
+          return;
+        }
+      }
+      cityImageUploadStatus.textContent = id
+        ? 'Image uploaded and URL updated in database.'
+        : 'Image uploaded. Click Save City to store full record.';
+    } catch (error) {
+      console.error(error);
+      cityImageUploadStatus.textContent = 'Upload failed.';
     }
   });
 </script>

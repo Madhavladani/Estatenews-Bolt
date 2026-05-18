@@ -28,23 +28,25 @@ const latestResidential = residentialProjects.slice(0, 6);
 const latestCommercial = commercialProjects.slice(0, 6);
 const trendingProjects = allProjects.slice(0, 4);
 
-const projectCounts: Record<string, number> = {};
-for (const p of allProjects) {
-  const slug = p.city?.slug;
-  if (!slug) continue;
-  projectCounts[slug] = (projectCounts[slug] || 0) + 1;
-}
+	const projectCounts: Record<string, number> = {};
+	for (const p of allProjects) {
+	  const slug = p.city?.slug;
+	  if (!slug) continue;
+	  projectCounts[slug] = (projectCounts[slug] || 0) + 1;
+	}
 
-const featuredDesktopLimit = 12;
-const featuredCities = cities.map((city) => {
-  const initials = city.name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
-  return { ...city, initials };
-});
+	const featuredDesktopLimit = 12;
+	const indexCities = cities.filter((c) => c.index_city);
+	const indexCityTotal = indexCities.length;
+	const featuredCities = indexCities.slice(0, featuredDesktopLimit).map((city) => {
+	  const initials = city.name
+	    .split(' ')
+	    .filter(Boolean)
+	    .slice(0, 2)
+	    .map((part) => part[0]?.toUpperCase() ?? '')
+	    .join('');
+	  return { ...city, initials };
+	});
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://propdiscover.com' },
@@ -124,14 +126,61 @@ const listingFaqs = [
 
       <div class="md:hidden overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div class="grid grid-rows-2 grid-flow-col auto-cols-max gap-3 min-w-max">
-          {featuredCities.map((city, idx) => (
+          {featuredCities.map((city) => (
             <a
               href={`/${city.slug}`}
-              class:list={[
-                'group inline-flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all whitespace-nowrap',
-                idx >= featuredDesktopLimit && 'mobile-extra-city hidden',
-              ]}
+              class="group inline-flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all whitespace-nowrap"
             >
+              {city.city_image || city.hero_image ? (
+                <img
+                  src={city.city_image || city.hero_image}
+                  alt={city.name}
+                  loading="lazy"
+                  width="40"
+                  height="40"
+                  class="w-10 h-10 rounded-full object-cover border border-gray-200"
+                />
+              ) : (
+                <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
+                  <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span>{city.initials}</span>
+                </div>
+              )}
+	              <div>
+	                <p class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</p>
+	                <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} properties</p>
+	              </div>
+	            </a>
+	          ))}
+	        </div>
+      </div>
+      {indexCityTotal > featuredDesktopLimit && (
+        <div class="md:hidden flex justify-center mt-6">
+          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+            View All Cities
+          </a>
+        </div>
+      )}
+
+      <div id="desktop-city-list" class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {featuredCities.map((city) => (
+          <a
+            href={`/${city.slug}`}
+            class="group flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all"
+          >
+            {city.city_image || city.hero_image ? (
+              <img
+                src={city.city_image || city.hero_image}
+                alt={city.name}
+                loading="lazy"
+                width="40"
+                height="40"
+                class="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
               <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
                 <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -139,61 +188,20 @@ const listingFaqs = [
                 </svg>
                 <span>{city.initials}</span>
               </div>
-	              <div>
-	                <p class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</p>
-	                <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} projects</p>
-	              </div>
-	            </a>
-	          ))}
-	        </div>
-      </div>
-      {featuredCities.length > featuredDesktopLimit && (
-        <div class="md:hidden flex justify-center mt-6">
-          <button
-            id="show-all-cities-btn-mobile"
-            type="button"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm"
-            data-expanded="false"
-          >
-            View All Cities
-          </button>
-        </div>
-      )}
-
-      <div id="desktop-city-list" class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {featuredCities.map((city, idx) => (
-          <a
-            href={`/${city.slug}`}
-            class:list={[
-              'group flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all',
-              idx >= featuredDesktopLimit && 'desktop-extra-city hidden',
-            ]}
-          >
-            <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
-              <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-              <span>{city.initials}</span>
-            </div>
+            )}
             <div>
               <p class="text-sm font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</p>
-              <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} projects</p>
+              <p class="text-xs text-gray-500">{projectCounts[city.slug] || 0} properties</p>
             </div>
           </a>
         ))}
       </div>
 
-      {featuredCities.length > featuredDesktopLimit && (
+      {indexCityTotal > featuredDesktopLimit && (
         <div class="hidden md:flex justify-center mt-8">
-          <button
-            id="show-all-cities-btn"
-            type="button"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm"
-            data-expanded="false"
-          >
+          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
             View All Cities
-          </button>
+          </a>
         </div>
       )}
     </div>
@@ -442,24 +450,7 @@ const listingFaqs = [
     }
   });
 
-  const showAllBtn = document.getElementById('show-all-cities-btn');
-  const hiddenDesktopCities = document.querySelectorAll('.desktop-extra-city');
-  showAllBtn?.addEventListener('click', () => {
-    const isExpanded = showAllBtn.getAttribute('data-expanded') === 'true';
-    hiddenDesktopCities.forEach((city) => city.classList.toggle('hidden', isExpanded));
-    showAllBtn.setAttribute('data-expanded', String(!isExpanded));
-    showAllBtn.textContent = isExpanded ? 'View All Cities' : 'Show Less Cities';
-  });
-
-  const showAllBtnMobile = document.getElementById('show-all-cities-btn-mobile');
-  const hiddenMobileCities = document.querySelectorAll('.mobile-extra-city');
-  showAllBtnMobile?.addEventListener('click', () => {
-    const isExpanded = showAllBtnMobile.getAttribute('data-expanded') === 'true';
-    hiddenMobileCities.forEach((city) => city.classList.toggle('hidden', isExpanded));
-    showAllBtnMobile.setAttribute('data-expanded', String(!isExpanded));
-    showAllBtnMobile.textContent = isExpanded ? 'View All Cities' : 'Show Less Cities';
-  });
-</script>
+	</script>
 <script type="application/json" id="city-data-json">
   {JSON.stringify(cities.map((city) => ({ name: city.name, slug: city.slug })))}
 </script>

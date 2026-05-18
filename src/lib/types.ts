@@ -4,6 +4,8 @@ export interface City {
   slug: string;
   state: string;
   hero_image: string;
+  city_image: string;
+  index_city: boolean;
   overview: string;
   meta_title: string;
   meta_description: string;
