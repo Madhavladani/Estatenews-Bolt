@@ -21,7 +21,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const body = await request.json();
   const projectIds: string[] = body.project_ids;
   delete body.project_ids;
-  const { data, error } = await client.from('collections').insert(body).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('collections').insert(payload).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
 
@@ -43,7 +44,8 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   const body = await request.json();
   const projectIds: string[] = body.project_ids;
   delete body.project_ids;
-  const { data, error } = await client.from('collections').update(body).eq('id', id).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('collections').update(payload).eq('id', id).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
 

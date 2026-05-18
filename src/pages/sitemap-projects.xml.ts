@@ -8,13 +8,13 @@ export async function GET() {
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('city_id,project_type,slug,published_at,created_at');
+    .select('city_id,project_type,slug,last_modify,published_at,created_at');
 
   const entries = (projects || [])
     .filter((project) => cityById.has(project.city_id))
     .map((project) => ({
       loc: fullUrl(`/${cityById.get(project.city_id)}/${project.project_type}/${project.slug}`),
-      lastmod: formatLastmod(project.published_at || project.created_at),
+      lastmod: formatLastmod(project.last_modify || project.published_at || project.created_at),
     }));
 
   return new Response(buildUrlset(entries), {

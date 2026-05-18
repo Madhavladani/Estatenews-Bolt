@@ -6,6 +6,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const body = await request.json();
   const projects = Array.isArray(body) ? body : [body];
+  const now = new Date().toISOString();
 
   const processedProjects = projects.map(project => {
     const p = { ...project };
@@ -14,6 +15,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (typeof p.highlights === 'string') p.highlights = p.highlights.split(',').map((s: string) => s.trim()).filter(Boolean);
     if (typeof p.gallery_images === 'string') p.gallery_images = p.gallery_images.split('\n').map((s: string) => s.trim()).filter(Boolean);
     if (typeof p.floor_plans === 'string') { try { p.floor_plans = JSON.parse(p.floor_plans); } catch { p.floor_plans = []; } }
+    p.last_modify = now;
     return p;
   });
 
@@ -35,6 +37,7 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   if (typeof body.highlights === 'string') body.highlights = body.highlights.split(',').map((s: string) => s.trim()).filter(Boolean);
   if (typeof body.gallery_images === 'string') body.gallery_images = body.gallery_images.split('\n').map((s: string) => s.trim()).filter(Boolean);
   if (typeof body.floor_plans === 'string') { try { body.floor_plans = JSON.parse(body.floor_plans); } catch { body.floor_plans = []; } }
+  body.last_modify = new Date().toISOString();
 
   const { data, error } = await client.from('projects').update(body).eq('id', id).select().single();
 

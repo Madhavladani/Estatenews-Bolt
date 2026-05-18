@@ -10,6 +10,7 @@ export interface City {
   meta_title: string;
   meta_description: string;
   created_at: string;
+  last_modify: string;
 }
 
 export interface Project {
@@ -41,6 +42,7 @@ export interface Project {
   meta_description: string;
   published_at: string;
   created_at: string;
+  last_modify: string;
   city?: City;
   locality?: Locality;
 }
@@ -61,6 +63,7 @@ export interface Collection {
   meta_title: string;
   meta_description: string;
   created_at: string;
+  last_modify: string;
   city?: City;
   projects?: Project[];
 }
@@ -76,6 +79,7 @@ export interface Locality {
   faqs?: { question: string; answer: string }[] | any;
   infrastructure?: any;
   created_at: string;
+  last_modify: string;
   city?: City;
 }
 
@@ -93,6 +97,7 @@ export interface News {
   published_at: string;
   updated_at: string;
   created_at: string;
+  last_modify: string;
   meta_title: string;
   meta_description: string;
   meta_keywords: string;
@@ -122,28 +127,28 @@ export interface Database {
     Tables: {
       cities: {
         Row: City;
-        Insert: Omit<City, 'id' | 'created_at'>;
-        Update: Partial<Omit<City, 'id' | 'created_at'>>;
+        Insert: Omit<City, 'id' | 'created_at' | 'last_modify'>;
+        Update: Partial<Omit<City, 'id' | 'created_at' | 'last_modify'>>;
       };
       localities: {
         Row: Locality;
-        Insert: Omit<Locality, 'id' | 'created_at'>;
-        Update: Partial<Omit<Locality, 'id' | 'created_at'>>;
+        Insert: Omit<Locality, 'id' | 'created_at' | 'last_modify'>;
+        Update: Partial<Omit<Locality, 'id' | 'created_at' | 'last_modify'>>;
       };
       projects: {
         Row: Project;
-        Insert: Omit<Project, 'id' | 'created_at'>;
-        Update: Partial<Omit<Project, 'id' | 'created_at'>>;
+        Insert: Omit<Project, 'id' | 'created_at' | 'last_modify'>;
+        Update: Partial<Omit<Project, 'id' | 'created_at' | 'last_modify'>>;
       };
       collections: {
         Row: Collection;
-        Insert: Omit<Collection, 'id' | 'created_at'>;
-        Update: Partial<Omit<Collection, 'id' | 'created_at'>>;
+        Insert: Omit<Collection, 'id' | 'created_at' | 'last_modify'>;
+        Update: Partial<Omit<Collection, 'id' | 'created_at' | 'last_modify'>>;
       };
       news: {
         Row: News;
-        Insert: Omit<News, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<News, 'id' | 'created_at' | 'updated_at'>>;
+        Insert: Omit<News, 'id' | 'created_at' | 'updated_at' | 'last_modify'>;
+        Update: Partial<Omit<News, 'id' | 'created_at' | 'updated_at' | 'last_modify'>>;
       };
       faqs: {
         Row: Faq;

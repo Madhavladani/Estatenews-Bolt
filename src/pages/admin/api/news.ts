@@ -7,7 +7,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const body = await request.json();
   if (typeof body.tags === 'string') body.tags = body.tags.split(',').map((s: string) => s.trim()).filter(Boolean);
 
-  const { data, error } = await client.from('news').insert(body).select().single();
+  const now = new Date().toISOString();
+  const payload = { ...body, last_modify: now, updated_at: now };
+  const { data, error } = await client.from('news').insert(payload).select().single();
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
 };
@@ -22,7 +24,9 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   const body = await request.json();
   if (typeof body.tags === 'string') body.tags = body.tags.split(',').map((s: string) => s.trim()).filter(Boolean);
 
-  body.updated_at = new Date().toISOString();
+  const now = new Date().toISOString();
+  body.updated_at = now;
+  body.last_modify = now;
 
   const { data, error } = await client.from('news').update(body).eq('id', id).select().single();
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });

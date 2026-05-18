@@ -25,7 +25,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const body = await request.json();
   const limitError = await enforceIndexCityLimit(client, body?.index_city);
   if (limitError) return new Response(JSON.stringify({ error: limitError }), { status: 400 });
-  const { data, error } = await client.from('cities').insert(body).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('cities').insert(payload).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
@@ -41,7 +42,8 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   const body = await request.json();
   const limitError = await enforceIndexCityLimit(client, body?.index_city, id);
   if (limitError) return new Response(JSON.stringify({ error: limitError }), { status: 400 });
-  const { data, error } = await client.from('cities').update(body).eq('id', id).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('cities').update(payload).eq('id', id).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });

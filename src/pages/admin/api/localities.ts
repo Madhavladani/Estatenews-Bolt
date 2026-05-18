@@ -27,7 +27,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!client) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 
   const body = pickDefined(await request.json());
-  const { data, error } = await client.from('localities').insert(body).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('localities').insert(payload).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
@@ -41,7 +42,8 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400 });
 
   const body = pickDefined(await request.json());
-  const { data, error } = await client.from('localities').update(body).eq('id', id).select().single();
+  const payload = { ...body, last_modify: new Date().toISOString() };
+  const { data, error } = await client.from('localities').update(payload).eq('id', id).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });

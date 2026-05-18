@@ -3,20 +3,20 @@ import { supabase } from '../lib/supabase';
 import { buildUrlset, formatLastmod, fullUrl } from '../lib/sitemap';
 
 export async function GET() {
-  const { data: cities } = await supabase.from('cities').select('slug,created_at');
+  const { data: cities } = await supabase.from('cities').select('slug,last_modify,created_at');
 
   const entries = (cities || []).flatMap((city) => [
     {
       loc: fullUrl(`/${city.slug}`),
-      lastmod: formatLastmod(city.created_at),
+      lastmod: formatLastmod(city.last_modify || city.created_at),
     },
     {
       loc: fullUrl(`/${city.slug}/residential`),
-      lastmod: formatLastmod(city.created_at),
+      lastmod: formatLastmod(city.last_modify || city.created_at),
     },
     {
       loc: fullUrl(`/${city.slug}/commercial`),
-      lastmod: formatLastmod(city.created_at),
+      lastmod: formatLastmod(city.last_modify || city.created_at),
     },
   ]);
 

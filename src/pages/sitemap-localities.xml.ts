@@ -3,16 +3,16 @@ import { supabase } from '../lib/supabase';
 import { buildUrlset, formatLastmod, fullUrl } from '../lib/sitemap';
 
 export async function GET() {
-  const { data: cities } = await supabase.from('cities').select('id,slug,created_at');
-  const cityById = new Map((cities || []).map((c) => [c.id, { slug: c.slug, created_at: c.created_at }]));
+  const { data: cities } = await supabase.from('cities').select('id,slug,last_modify,created_at');
+  const cityById = new Map((cities || []).map((c) => [c.id, { slug: c.slug, last_modify: c.last_modify, created_at: c.created_at }]));
 
-  const { data: localities } = await supabase.from('localities').select('city_id,slug,created_at');
+  const { data: localities } = await supabase.from('localities').select('city_id,slug,last_modify,created_at');
 
   const entries = (localities || [])
     .filter((l) => cityById.has(l.city_id))
     .flatMap((l) => {
       const city = cityById.get(l.city_id)!;
-      const lastmod = formatLastmod(l.created_at || city.created_at);
+      const lastmod = formatLastmod(l.last_modify || l.created_at || city.last_modify || city.created_at);
       return [
         { loc: fullUrl(`/${city.slug}/${l.slug}`), lastmod },
         { loc: fullUrl(`/${city.slug}/residential/${l.slug}`), lastmod },

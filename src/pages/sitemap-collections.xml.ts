@@ -5,13 +5,21 @@ import { buildUrlset, formatLastmod, fullUrl } from '../lib/sitemap';
 export async function GET() {
   const { data: collections } = await supabase
     .from('collections')
-    .select('slug,created_at');
+    .select('slug,last_modify,created_at');
 
   const entries = [
-    { loc: fullUrl('/collections') },
+    {
+      loc: fullUrl('/collections'),
+      lastmod: formatLastmod((collections || []).reduce<string | null>((max, c) => {
+        const v = (c.last_modify || c.created_at) ?? null;
+        if (!v) return max;
+        if (!max) return v;
+        return new Date(v).getTime() > new Date(max).getTime() ? v : max;
+      }, null)),
+    },
     ...(collections || []).map((collection) => ({
       loc: fullUrl(`/collections/${collection.slug}`),
-      lastmod: formatLastmod(collection.created_at),
+      lastmod: formatLastmod(collection.last_modify || collection.created_at),
     })),
   ];
 
