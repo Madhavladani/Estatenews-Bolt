@@ -11,63 +11,222 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 ]);
 
 // Build-time fetch only; page is prerendered.
-const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
-const cities: City[] = citiesRes || [];
+const [citiesRes, projectsRes] = await Promise.all([
+  supabase.from('cities').select('*').order('name'),
+  supabase.from('projects').select('id, city:cities(slug)'),
+]);
+
+const cities: City[] = (citiesRes.data || []) as City[];
+const allProjects = (projectsRes.data || []) as { id: string; city?: { slug?: string | null } | null }[];
+
+const projectCounts: Record<string, number> = {};
+for (const p of allProjects) {
+  const slug = p.city?.slug;
+  if (!slug) continue;
+  projectCounts[slug] = (projectCounts[slug] || 0) + 1;
+}
 
 // Extract unique states for filtering
 const states = [...new Set(cities.map(city => city.state))].sort();
+
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Cities',
+  itemListElement: cities.slice(0, 200).map((city, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: city.name,
+    url: `https://propdiscover.com/${city.slug}`,
+  })),
+};
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'All Cities',
+  url: 'https://propdiscover.com/cities',
+  description: 'Browse cities and explore city-wise real estate projects and curated collections.',
+};
 ---
 
 <BaseLayout
-  title="All Cities - Real Estate Projects in Gujarat | PropDiscover"
-  description="Browse real estate opportunities across Gujarat cities. Compare city-wise markets for residential and commercial property investment."
-  jsonLd={breadcrumbSchema}
+  title={`Real Estate Cities in India - Browse ${cities.length} Top Localities | PropDiscover`}
+  description={`Discover top residential and commercial real estate markets across ${cities.length} Indian cities. Compare projects, prices, and investment trends with PropDiscover's expert data.`}
+  canonical="https://propdiscover.com/cities"
+  keywords="real estate cities India, property markets India, top cities for real estate, residential projects by city, commercial property cities, PropDiscover cities directory"
+  jsonLd={[breadcrumbSchema, itemListSchema, webPageSchema]}
+  breadcrumbs={[{ name: 'Cities', url: '/cities' }]}
 >
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">All Cities</h1>
-        <p class="text-gray-600 max-w-3xl mx-auto">
-          Explore city-level real estate markets across Gujarat. Open any city to see the latest residential and commercial property options.
+  <!-- Upgraded Hero Section -->
+  <section class="relative overflow-hidden bg-primary-800 pt-32 pb-24 border-b border-white/5">
+    <!-- Abstract Background Pattern -->
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_#3b82f6_0%,_transparent_60%)]"></div>
+      <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M54.627 0l.83.83L.83 55.457l-.83-.83L54.627 0zm-53.797 0l.83.83L54.627 55.457l-.83.83L.83 0z\" fill=\"%23ffffff\" fill-opacity=\"0.05\" fill-rule=\"evenodd\"/%3E%3C/svg%3E');"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+          Browse Residential & Commercial <span class="text-accent-400">Property Markets Across India</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 font-medium leading-relaxed mb-12">
+          Compare new projects & registered projects, analyze hyper-local pricing trends, and identify high-yield investment hotspots with data-driven clarity.
         </p>
+
+        <!-- Stats Grid -->
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation / Filter Section -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Utility Info Panel & Filter Container -->
+      <div class="flex flex-col lg:flex-row gap-8 items-stretch justify-between mb-12 pb-8 border-b border-slate-100">
+        
+        <!-- Info Cards (Left) -->
+        <div class="flex-1 bg-slate-50 border border-slate-100 rounded-2xl p-6 relative overflow-hidden group">
+          <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-700">
+            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+          </div>
+          <h2 class="text-sm font-bold tracking-wider text-slate-400 uppercase">Market Intelligence</h2>
+          <p class="mt-2 text-slate-600 font-medium">
+            PropDiscover tracks 509,000+ unsold inventory units to help you identify markets with the highest absorption rates.
+          </p>
+          <div class="mt-4 flex gap-3">
+             <span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase">Real-time Data</span>
+             <span class="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase">Verified by RERA</span>
+          </div>
+        </div>
+
+        <!-- Styled Filter Bar (Right) -->
+        <div class="flex flex-col sm:flex-row items-end justify-end gap-4 lg:w-2/5">
+          <div class="w-full sm:w-auto relative">
+            <label for="state-filter" class="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-1">
+              Regional Jurisdiction
+            </label>
+            <div class="relative group">
+              <select 
+                id="state-filter" 
+                class="w-full sm:w-72 appearance-none pl-5 pr-12 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-bold text-slate-900 hover:bg-slate-100 focus:bg-white focus:border-blue-500 focus:ring-0 outline-none transition-all cursor-pointer"
+              >
+                <option value="all">All Indian States</option>
+                {states.map(state => (
+                  <option value={state}>{state}</option>
+                ))}
+              </select>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-hover:text-blue-500 transition-colors">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6">
+            <span 
+              id="city-count" 
+              class="inline-flex items-center rounded-2xl bg-accent-500 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-accent-500/30 ring-1 ring-white/20 whitespace-nowrap"
+            >
+              Showing {cities.length} markets
+            </span>
+          </div>
+        </div>
       </div>
 
-      <!-- State Filter -->
-      <div class="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <label for="state-filter" class="text-sm font-medium text-gray-700">Filter by State:</label>
-        <select id="state-filter" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow min-w-[200px]">
-          <option value="all">All States</option>
-          {states.map(state => (
-            <option value={state}>{state}</option>
-          ))}
-        </select>
-        <span id="city-count" class="text-sm text-gray-500">Showing {cities.length} cities</span>
+  <!-- Interactive Control & Display Section -->
+ 
+      <!-- Main Directory Section Header -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Active Real Estate Hubs</h2>
+        <p class="mt-1 text-sm text-slate-500">Select any market hub below to explore specific tracking zones, builders, and active phases.</p>
       </div>
 
-      <div id="cities-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Enhanced Cards Grid -->
+      <div id="cities-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {cities.map((city) => {
+          const count = projectCounts[city.slug] || 0;
+          const imageUrl = city.city_image || city.hero_image || '';
+          const hasImage = Boolean(imageUrl);
           const initials = city.name
             .split(' ')
             .filter(Boolean)
             .slice(0, 2)
             .map((part) => part[0]?.toUpperCase() ?? '')
             .join('');
+            
           return (
-            <a href={`/${city.slug}`} data-state={city.state} class="city-card group bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-primary-200 transition-all">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="relative flex items-center justify-center w-11 h-11 rounded-full bg-primary-50 text-primary-700 font-semibold text-xs">
-                  <svg class="absolute -top-1 -left-1 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <span>{initials}</span>
-                </div>
-                <div>
-                  <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{city.name}</h2>
-                  <p class="text-sm text-gray-500">{city.state}</p>
-                </div>
-              </div>
-              <p class="text-sm text-gray-600">{city.overview}</p>
+            <a
+              href={`/${city.slug}`}
+              data-state={city.state}
+              data-name={city.name}
+              data-has-image={hasImage ? '1' : '0'}
+              class="city-card group relative flex flex-col justify-between rounded-2xl border border-slate-150 bg-white shadow-sm hover:shadow-xl hover:border-primary-200 hover:-translate-y-1 transition-all duration-300 overflow-hidden min-h-[220px]"
+            >
+              {hasImage ? (
+                <>
+                  <!-- Visual State Cover Card -->
+                  <div class="absolute inset-0 bg-slate-900">
+                    <img
+                      src={imageUrl}
+                      alt={`Real estate projects in ${city.name}, ${city.state}`}
+                      loading="lazy"
+                      width="640"
+                      height="400"
+                      class="w-full h-full object-cover object-center opacity-80 group-hover:scale-105 group-hover:opacity-60 transition-all duration-500"
+                    />
+                  </div>
+                  
+                  <!-- Gradient Protective Varnish -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent"></div>
+                  
+                  <!-- High Visibility Meta Context -->
+                  <div class="relative mt-auto p-6 w-full z-10">
+                    <p class="text-xs font-bold uppercase tracking-widest text-accent-400 mb-1">{city.state}</p>
+                    <h3 class="text-xl font-bold text-white tracking-tight leading-tight mb-3">{city.name}</h3>
+                    
+                    <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                      <span class="inline-flex items-center rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md ring-1 ring-inset ring-white/20">
+                        {count} {count === 1 ? 'Project Managed' : 'Projects Active'}
+                      </span>
+                      <span class="text-xs font-semibold text-accent-400 group-hover:text-accent-300 flex items-center gap-1 transition-colors">
+                        Explore City <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <!-- Text-Centric Fallback Card -->
+                  <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="min-w-0">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">{city.state}</p>
+                        <h3 class="text-xl font-bold text-slate-900 tracking-tight group-hover:text-primary-600 transition-colors truncate">
+                          {city.name}
+                        </h3>
+                      </div>
+                      
+                      <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-slate-50 text-slate-700 font-bold text-sm tracking-wider shrink-0 border border-slate-200/60 group-hover:bg-accent-50 group-hover:text-accent-700 group-hover:border-accent-100 transition-colors">
+                        {initials || 'C'}
+                      </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span class="text-sm font-bold text-slate-700">
+                        {count} {count === 1 ? 'Project' : 'Projects'}
+                      </span>
+                      <span class="text-xs font-semibold text-slate-400 group-hover:text-accent-600 flex items-center gap-1 transition-colors">
+                        Explore City <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </a>
           );
         })}
@@ -75,29 +234,44 @@ const states = [...new Set(cities.map(city => city.state))].sort();
     </div>
   </section>
 
+  <!-- Client State Control Logic Script -->
   <script>
     const stateFilter = document.getElementById('state-filter') as HTMLSelectElement;
     const citiesGrid = document.getElementById('cities-grid');
-    const cityCards = document.querySelectorAll('.city-card') as NodeListOf<HTMLElement>;
     const cityCount = document.getElementById('city-count');
 
-    stateFilter?.addEventListener('change', (e) => {
-      const selectedState = (e.target as HTMLSelectElement).value;
-      let visibleCount = 0;
+    function applyFilterAndSort() {
+      if (!citiesGrid) return;
+      const selectedState = stateFilter?.value || 'all';
+      const cards = Array.from(citiesGrid.querySelectorAll('.city-card')) as HTMLElement[];
 
-      cityCards.forEach(card => {
+      const visible = cards.filter((card) => {
         const cityState = card.getAttribute('data-state');
-        if (selectedState === 'all' || cityState === selectedState) {
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
+        return selectedState === 'all' || cityState === selectedState;
       });
 
+      visible.sort((a, b) => {
+        const aHas = a.getAttribute('data-has-image') === '1' ? 1 : 0;
+        const bHas = b.getAttribute('data-has-image') === '1' ? 1 : 0;
+        if (aHas !== bHas) return bHas - aHas; // images first
+        const aName = (a.getAttribute('data-name') || '').toLowerCase();
+        const bName = (b.getAttribute('data-name') || '').toLowerCase();
+        return aName.localeCompare(bName);
+      });
+
+      for (const card of cards) card.style.display = 'none';
+      for (const card of visible) {
+        card.style.display = 'flex'; // Enforce flex rendering match
+        citiesGrid.appendChild(card);
+      }
+
+      const visibleCount = visible.length;
       if (cityCount) {
         cityCount.textContent = `Showing ${visibleCount} city${visibleCount !== 1 ? 's' : ''}`;
       }
-    });
+    }
+
+    applyFilterAndSort();
+    stateFilter?.addEventListener('change', applyFilterAndSort);
   </script>
 </BaseLayout>
