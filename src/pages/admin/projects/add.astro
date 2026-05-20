@@ -1,17 +1,26 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
-import type { City, Project } from '../../../lib/types';
+import type { City, Project, Collection } from '../../../lib/types';
 
 const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
 const cities: City[] = citiesRes || [];
 
+const { data: collectionsRes } = await supabase.from('collections').select('*').order('title');
+const allCollections = (collectionsRes || []) as Collection[];
+
 // Check for id to prepopulate (edit mode)
 const projectId = Astro.url.searchParams.get('id');
 let projectToEdit: Project | null = null;
+let currentCollectionIds: string[] = [];
+
 if (projectId) {
-  const { data } = await supabase.from('projects').select('*').eq('id', projectId).single();
-  projectToEdit = data;
+  const [pRes, pcRes] = await Promise.all([
+    supabase.from('projects').select('*').eq('id', projectId).single(),
+    supabase.from('collection_projects').select('collection_id').eq('project_id', projectId)
+  ]);
+  projectToEdit = pRes.data as Project | null;
+  currentCollectionIds = (pcRes.data as any[] || []).map((r: any) => r.collection_id as string);
 }
 
 const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
@@ -200,6 +209,65 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
           <textarea id="p-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+        </div>
+      </div>
+
+      <!-- Collections Section -->
+      <div id="collections-section" class="pt-6 border-t border-gray-100">
+        <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 shadow-sm transition-all duration-300" id="main-collections-accordion">
+          <div class="px-5 py-4 cursor-pointer flex items-center justify-between bg-white hover:bg-gray-50 transition-colors group" id="main-coll-header">
+            <div>
+              <h3 class="text-sm font-bold text-gray-900 group-hover:text-primary-700 transition-colors">Select Project Collections</h3>
+              <p id="no-collections-msg" class="text-[11px] text-gray-500 mt-0.5">Please select a city to see available collections.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="selected-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 hidden">0</span>
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-all duration-300 transform" id="main-coll-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="p-5 space-y-3 hidden bg-gray-50/50 border-t border-gray-100" id="main-coll-content">
+            <div id="collections-container" class="space-y-3">
+              {allCollections.map((coll, index) => {
+                const colors = [
+                  { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
+                  { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
+                  { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
+                  { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700' },
+                  { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
+                  { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
+                  { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700' }
+                ];
+                const color = colors[index % colors.length];
+                return (
+                  <div 
+                    class={`collection-item hidden border rounded-xl overflow-hidden transition-all duration-200 ${color.bg} ${color.border} hover:shadow-md h-auto`} 
+                    data-city-id={coll.city_id || ''}
+                  >
+                    <div class="flex items-start gap-4 px-4 py-4">
+                      <div class="pt-1">
+                        <input 
+                          type="checkbox" 
+                          class="coll-checkbox w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-colors cursor-pointer" 
+                          value={coll.id} 
+                          checked={currentCollectionIds.includes(coll.id)}
+                        />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class={`text-[13px] font-bold ${color.text} truncate`}>{coll.title}</span>
+                          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-white/50 border border-black/5 opacity-70">{coll.collection_type || 'General'}</span>
+                        </div>
+                        <p class="text-[11px] text-gray-600 leading-normal line-clamp-2">{coll.intro_content || 'No description available for this collection.'}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
       
@@ -456,6 +524,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         longitude: parseFloat(document.getElementById('p-lng').value) || 0,
         meta_title: document.getElementById('p-meta-title').value,
         meta_description: document.getElementById('p-meta-desc').value,
+        collection_ids: Array.from(document.querySelectorAll('.coll-checkbox:checked')).map(cb => cb.value),
       };
 
       const res = await fetch(id ? `/admin/api/projects?id=${id}` : '/admin/api/projects', {
@@ -642,4 +711,69 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
       brochureStatus.textContent = 'Brochure upload failed.';
     }
   });
+
+  // Main Accordion Logic
+  const mainHeader = document.getElementById('main-coll-header');
+  const mainContent = document.getElementById('main-coll-content');
+  const mainChevron = document.getElementById('main-coll-chevron');
+  const selectedCount = document.getElementById('selected-count');
+
+  function updateSelectedCount() {
+    const checked = document.querySelectorAll('.coll-checkbox:checked').length;
+    if (checked > 0) {
+      selectedCount.textContent = checked;
+      selectedCount.classList.remove('hidden');
+    } else {
+      selectedCount.classList.add('hidden');
+    }
+  }
+
+  mainHeader?.addEventListener('click', () => {
+    const isOpen = !mainContent.classList.contains('hidden');
+    if (isOpen) {
+      mainContent.classList.add('hidden');
+      mainChevron.classList.remove('rotate-180');
+    } else {
+      mainContent.classList.remove('hidden');
+      mainChevron.classList.add('rotate-180');
+    }
+  });
+
+  document.querySelectorAll('.coll-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateSelectedCount);
+  });
+
+  function filterCollections(cityId) {
+    const items = document.querySelectorAll('.collection-item');
+    const msg = document.getElementById('no-collections-msg');
+    let found = 0;
+
+    items.forEach(item => {
+      const itemCityId = item.dataset.cityId;
+      if (!cityId || itemCityId === cityId || itemCityId === '') {
+        item.classList.remove('hidden');
+        found++;
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+
+    if (found > 0) {
+      msg.className = 'text-[11px] text-green-600 font-medium mt-0.5';
+      msg.textContent = `${found} collections available for this city.`;
+    } else {
+      msg.className = 'text-[11px] text-gray-500 mt-0.5';
+      msg.textContent = cityId ? 'No collections found for this city.' : 'Please select a city to see available collections.';
+    }
+    
+    updateSelectedCount();
+  }
+
+  citySelect?.addEventListener('change', () => {
+    loadLocalities(citySelect.value, null, '');
+    filterCollections(citySelect.value);
+  });
+
+  // Initial setup
+  filterCollections(citySelect?.value || '');
 </script>

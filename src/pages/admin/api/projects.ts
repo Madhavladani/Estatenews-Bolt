@@ -10,6 +10,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const processedProjects = projects.map(project => {
     const p = { ...project };
+    delete p.collection_ids;
     // Parse array fields
     if (typeof p.amenities === 'string') p.amenities = p.amenities.split(',').map((s: string) => s.trim()).filter(Boolean);
     if (typeof p.highlights === 'string') p.highlights = p.highlights.split(',').map((s: string) => s.trim()).filter(Boolean);
@@ -22,6 +23,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { data, error } = await client.from('projects').insert(Array.isArray(body) ? processedProjects : processedProjects[0]).select();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+
+  // Handle collection associations
+  if (!Array.isArray(body) && body.collection_ids && data?.[0]) {
+    const collectionIds = body.collection_ids;
+    if (collectionIds.length > 0) {
+      await client.from('collection_projects').insert(
+        collectionIds.map((cid: string) => ({ collection_id: cid, project_id: data[0].id }))
+      );
+    }
+  }
+
   return new Response(JSON.stringify(Array.isArray(body) ? data : data[0]), { headers: { 'Content-Type': 'application/json' } });
 };
 
@@ -33,6 +45,9 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400 });
 
   const body = await request.json();
+  const collectionIds = body.collection_ids;
+  delete body.collection_ids;
+
   if (typeof body.amenities === 'string') body.amenities = body.amenities.split(',').map((s: string) => s.trim()).filter(Boolean);
   if (typeof body.highlights === 'string') body.highlights = body.highlights.split(',').map((s: string) => s.trim()).filter(Boolean);
   if (typeof body.gallery_images === 'string') body.gallery_images = body.gallery_images.split('\n').map((s: string) => s.trim()).filter(Boolean);
@@ -42,8 +57,20 @@ export const PUT: APIRoute = async ({ request, url, locals }) => {
   const { data, error } = await client.from('projects').update(body).eq('id', id).select().single();
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+
+  // Update collection associations
+  if (collectionIds !== undefined) {
+    await client.from('collection_projects').delete().eq('project_id', id);
+    if (collectionIds.length > 0) {
+      await client.from('collection_projects').insert(
+        collectionIds.map((cid: string) => ({ collection_id: cid, project_id: id }))
+      );
+    }
+  }
+
   return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
 };
+
 
 export const DELETE: APIRoute = async ({ url, locals }) => {
   const client = locals.supabase;
