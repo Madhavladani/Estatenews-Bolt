@@ -229,7 +229,7 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
     document.getElementById('n-tags').value = (articleToEdit.tags || []).join(', ');
     document.getElementById('n-published-at').value = toLocalDatetimeValue(articleToEdit.published_at);
     document.getElementById('n-meta-title').value = articleToEdit.meta_title || '';
-    document.getElementById('n-meta-description').value = articleToEdit.meta_description || '';
+    document.getElementById('n-meta-desc').value = articleToEdit.meta_description || '';
     document.getElementById('n-meta-keywords').value = articleToEdit.meta_keywords || '';
     document.getElementById('n-canonical').value = articleToEdit.canonical_path || '';
     document.getElementById('n-og-image').value = articleToEdit.og_image || '';
@@ -369,7 +369,7 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
         tags: document.getElementById('n-tags').value,
         published_at: publishedAtIso,
         meta_title: document.getElementById('n-meta-title').value,
-        meta_description: document.getElementById('n-meta-description').value,
+        meta_description: document.getElementById('n-meta-desc').value,
         meta_keywords: document.getElementById('n-meta-keywords').value,
         canonical_path: document.getElementById('n-canonical').value,
         og_image: document.getElementById('n-og-image').value,
