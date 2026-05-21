@@ -1,0 +1,136 @@
+---
+export const prerender = true;
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CollectionCard from '../../../components/CollectionCard.astro';
+import { supabase } from '../../../lib/supabase';
+import { buildBreadcrumbSchema } from '../../../lib/seo';
+import type { GetStaticPaths } from 'astro';
+import type { City, Collection } from '../../../lib/types';
+
+type Props = {
+  city: City;
+  collections: (Collection & { city?: any })[];
+  allCities: { slug: string; name: string }[];
+};
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { data: citiesData } = await supabase.from('cities').select('*').order('name', { ascending: true });
+  const cities = citiesData || [];
+
+  const allCities = cities
+    .filter((c) => c.slug && c.name)
+    .map((c) => ({ slug: String(c.slug).trim().toLowerCase(), name: c.name as string }));
+
+  const paths: { params: { city: string }; props: Props }[] = [];
+
+  for (const city of cities) {
+    const citySlug = String(city.slug || '').trim().toLowerCase();
+    if (!citySlug) continue;
+
+    const { data: collectionsData } = await supabase
+      .from('collections')
+      .select('*, city:cities(*)')
+      .eq('city_id', city.id)
+      .order('created_at', { ascending: false });
+
+    paths.push({
+      params: { city: citySlug },
+      props: {
+        city,
+        collections: (collectionsData || []) as any,
+        allCities,
+      },
+    });
+  }
+
+  return paths;
+};
+
+const { city, collections, allCities } = Astro.props as Props;
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://propdiscover.com' },
+  { name: 'Collections', url: 'https://propdiscover.com/collections' },
+  { name: city.name, url: `https://propdiscover.com/collections/city/${city.slug}` },
+]);
+---
+
+<BaseLayout
+  title={`Collections in ${city.name} | PropDiscover`}
+  description={`Browse curated real estate collections in ${city.name}, ${city.state}: luxury, affordable, new launch and investment-focused project shortlists.`}
+  canonical={`https://propdiscover.com/collections/city/${String(city.slug).trim().toLowerCase()}`}
+  jsonLd={breadcrumbSchema}
+  breadcrumbs={[
+    { name: 'Collections', url: '/collections' },
+    { name: city.name, url: `/collections/city/${String(city.slug).trim().toLowerCase()}` },
+  ]}
+>
+  <section class="relative overflow-hidden bg-gradient-to-b from-primary-900 via-primary-800 to-primary-700 text-white">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute -top-24 -right-24 w-72 h-72 bg-white/20 blur-3xl rounded-full"></div>
+      <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-accent-400/30 blur-3xl rounded-full"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div class="max-w-3xl">
+        <h1 class="text-3xl md:text-5xl font-bold tracking-tight">Collections in {city.name}</h1>
+        <p class="mt-4 text-base md:text-lg text-white/85">
+          Curated shortlists across <strong>luxury</strong>, <strong>affordable</strong>, <strong>new launch</strong> and <strong>investment</strong> themes in {city.name}.
+        </p>
+
+        <div class="mt-7 bg-white/10 backdrop-blur rounded-2xl p-4 md:p-5 border border-white/15">
+          <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div class="flex-1">
+              <label for="city-select" class="block text-sm font-medium text-white/90">
+                Switch city
+              </label>
+              <select
+                id="city-select"
+                class="mt-2 w-full rounded-xl bg-white text-gray-900 px-3 py-3 text-sm shadow-sm border border-white/30 focus:outline-none focus:ring-2 focus:ring-accent-400"
+              >
+                <option value="/collections">All cities (All collections)</option>
+                {allCities.map((c) => (
+                  <option value={`/collections/city/${c.slug}`} selected={c.slug === String(city.slug).trim().toLowerCase()}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="text-xs text-white/70 sm:pb-1">
+              Showing {collections.length} collections in {city.name}.
+            </div>
+          </div>
+        </div>
+
+        <script is:inline>
+          document.addEventListener('change', (e) => {
+            const t = e.target;
+            if (t && t.id === 'city-select' && t.value) window.location.href = String(t.value);
+          });
+        </script>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10 md:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {collections.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          {collections.map((col) => (
+            <CollectionCard collection={col} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <h2 class="text-2xl font-bold text-gray-900">No collections yet</h2>
+          <p class="mt-3 text-gray-600">We’ll publish curated collections for {city.name} soon.</p>
+          <div class="mt-6">
+            <a href="/collections" class="inline-flex items-center rounded-xl bg-primary-700 hover:bg-primary-800 text-white px-5 py-3 text-sm font-semibold transition">
+              View all collections
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
