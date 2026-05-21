@@ -30,38 +30,6 @@ const user = Astro.locals.user as User | undefined;
         </a>
         <a href="/admin/projects" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'projects' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
----
-import BaseLayout from './BaseLayout.astro';
-import type { User } from '@supabase/supabase-js';
-
-interface Props {
-  title: string;
-  activeTab: string;
-}
-
-const { title, activeTab } = Astro.props;
-const user = Astro.locals.user as User | undefined;
----
-
-<BaseLayout title={`${title} | PropDiscover Admin`} description="PropDiscover Admin Panel" showHeader={false} showFooter={false}>
-  <div class="flex min-h-[calc(100vh-64px)]">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-primary-900 text-white flex-shrink-0 hidden lg:block">
-      <div class="p-6">
-        <h2 class="text-lg font-bold mb-1">Admin Panel</h2>
-        <p class="text-xs text-gray-400 truncate">{user?.email}</p>
-      </div>
-      <nav class="space-y-1 px-3">
-        <a href="/admin" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          Dashboard
-        </a>
-        <a href="/admin/cities" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'cities' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-          Cities
-        </a>
-        <a href="/admin/projects" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'projects' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           Projects
         </a>
         <a href="/admin/localities" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'localities' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>

@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeaturedBlogCard from '../../components/FeaturedBlogCard.astro';
 import BlogCard from '../../components/BlogCard.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema } from '../../lib/seo';
@@ -50,22 +51,22 @@ const breadcrumbSchema = buildBreadcrumbSchema([
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       {/* ── Page header */}
-      <header class="mb-10">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Real Estate Blog</h1>
+      <header class="mb-12">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">Real Estate Blog</h1>
         <p class="text-gray-500 mt-2 text-lg">Latest updates, launches, and market insights across Gujarat.</p>
 
         {/* ── Tag filter chips */}
         {allTags.length > 0 && (
-          <div class="flex flex-wrap gap-2 mt-5" id="tag-filters">
+          <div class="flex flex-wrap gap-2 mt-6" id="tag-filters">
             <button
-              class="tag-filter-btn active text-xs font-semibold px-4 py-1.5 rounded-full border transition-colors bg-blue-600 text-white border-blue-600"
+              class="tag-filter-btn active text-xs font-semibold px-4 py-2 rounded-full border transition-colors bg-blue-600 text-white border-blue-600 shadow-sm"
               data-tag="all"
             >
               All
             </button>
             {allTags.map((tag) => (
               <button
-                class="tag-filter-btn text-xs font-semibold px-4 py-1.5 rounded-full border border-gray-200 text-gray-600 bg-white hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-colors"
+                class="tag-filter-btn text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 text-gray-600 bg-white hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-colors shadow-sm"
                 data-tag={tag}
               >
                 {tag}
@@ -75,20 +76,28 @@ const breadcrumbSchema = buildBreadcrumbSchema([
         )}
       </header>
 
+      {/* ── Featured Article (Design Break) */}
+      {articles.length > 0 && (
+        <div class="blog-item mb-12" data-tags={(articles[0].tags || []).join(',')}>
+          <FeaturedBlogCard article={articles[0]} />
+        </div>
+      )}
+
       {/* ── Article grid */}
-      {articles.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="blog-grid">
-          {articles.map((article) => (
+      {articles.length > 1 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="blog-grid">
+          {articles.slice(1).map((article) => (
             <div class="blog-item h-full" data-tags={(article.tags || []).join(',')}>
               <BlogCard article={article} />
             </div>
           ))}
         </div>
-      ) : (
+      ) : articles.length === 0 ? (
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-500">
           No blogs published yet.
         </div>
-      )}
+      ) : null}
+
 
       {/* ── No results message (hidden by default) */}
       <p id="no-results" class="hidden text-center text-gray-400 py-16">No articles found for this topic.</p>

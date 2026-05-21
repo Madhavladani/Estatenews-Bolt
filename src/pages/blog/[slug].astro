@@ -115,7 +115,9 @@ const authorSlug = article.author_name
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* ── Two-column layout: article + sticky TOC sidebar */}
       <div
-        class="lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start"
+        class:list={[
+          toc.length > 1 ? "lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start" : "max-w-4xl mx-auto"
+        ]}
       >
         {/* ── Main article column */}
         {
