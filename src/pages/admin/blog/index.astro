@@ -1,7 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
-import type { News } from '../../../lib/types';
+import type { Blog } from '../../../lib/types';
 
 const url = new URL(Astro.request.url);
 const search = url.searchParams.get('q') || '';
@@ -24,17 +24,17 @@ if (published === 'no') query = query.eq('is_published', false);
 query = query.order(sortBy, { ascending: order === 'asc' }).range(from, to);
 
 const res = await query;
-const articles: News[] = res.data || [];
+const articles: Blog[] = res.data || [];
 const totalCount = res.count || 0;
 const totalPages = Math.ceil(totalCount / limit);
 ---
 
-<AdminLayout title="News" activeTab="news">
+<AdminLayout title="Blog" activeTab="blog">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">News</h1>
-    <a href="/admin/news/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+    <h1 class="text-2xl font-bold text-gray-900">Blog</h1>
+    <a href="/admin/blog/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Add News
+      Add Blog
     </a>
   </div>
 
@@ -43,7 +43,7 @@ const totalPages = Math.ceil(totalCount / limit);
       <input
         type="text"
         id="search-input"
-        placeholder="Search news..."
+        placeholder="Search blog..."
         value={search}
         class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500"
       />
@@ -84,20 +84,20 @@ const totalPages = Math.ceil(totalCount / limit);
               {a.published_at ? new Date(a.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' }) : '-'}
             </td>
             <td class="px-4 py-3 text-right">
-              <a href={`/admin/news/add?id=${a.id}`} class="px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
+              <a href={`/admin/blog/add?id=${a.id}`} class="px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
               <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={a.id} data-name={a.title}>Delete</button>
             </td>
           </tr>
         ))}
       </tbody>
     </table>
-    {articles.length === 0 && <div class="text-center py-12 text-gray-500 text-sm">No news found.</div>}
+    {articles.length === 0 && <div class="text-center py-12 text-gray-500 text-sm">No blogs found.</div>}
   </div>
 
   {totalPages > 1 && (
     <div class="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
       <div class="text-sm text-gray-500">
-        Showing <span class="font-medium text-gray-900">{from + 1}-{Math.min(to + 1, totalCount)}</span> of <span class="font-medium text-gray-900">{totalCount}</span> news items
+        Showing <span class="font-medium text-gray-900">{from + 1}-{Math.min(to + 1, totalCount)}</span> of <span class="font-medium text-gray-900">{totalCount}</span> blog items
       </div>
       <div class="flex items-center gap-2">
         {page > 1 && (
@@ -145,7 +145,7 @@ const totalPages = Math.ceil(totalCount / limit);
   document.querySelectorAll('.delete-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
-      const res = await fetch(`/admin/api/news?id=${(btn as HTMLElement).dataset.id}`, { method: 'DELETE' });
+      const res = await fetch(`/admin/api/blog?id=${(btn as HTMLElement).dataset.id}`, { method: 'DELETE' });
       if (res.ok) window.location.reload();
       else alert('Failed to delete');
     });

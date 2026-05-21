@@ -1,25 +1,25 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
-import type { City, News } from '../../../lib/types';
+import type { City, Blog } from '../../../lib/types';
 
 const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
 const cities: City[] = citiesRes || [];
 
-const newsId = Astro.url.searchParams.get('id');
-let articleToEdit: News | null = null;
-if (newsId) {
-  const { data } = await supabase.from('news').select('*').eq('id', newsId).single();
+const blogId = Astro.url.searchParams.get('id');
+let articleToEdit: Blog | null = null;
+if (blogId) {
+  const { data } = await supabase.from('news').select('*').eq('id', blogId).single();
   articleToEdit = data;
 }
 
-const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
+const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
 ---
 
-<AdminLayout title={pageTitle} activeTab="news">
+<AdminLayout title={pageTitle} activeTab="blog">
   <div class="mb-6">
     <div class="flex items-center gap-4">
-      <a href="/admin/news" class="text-gray-500 hover:text-gray-700 transition-colors">
+      <a href="/admin/blog" class="text-gray-500 hover:text-gray-700 transition-colors">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
       </a>
       <h1 class="text-2xl font-bold text-gray-900">{pageTitle}</h1>
@@ -72,7 +72,7 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
               <img id="n-featured-preview" class="max-h-48 rounded-lg border border-gray-200" />
             </div>
           </div>
-          <p class="mt-1 text-xs text-gray-500">Used on cards + article header. High resolution images are auto-compressed.</p>
+          <p class="mt-1 text-xs text-gray-500">Used on cards + blog header. High resolution images are auto-compressed.</p>
         </div>
         <div class="flex items-end">
           <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -136,7 +136,7 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Canonical Path (optional)</label>
-            <input type="text" id="n-canonical" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="/news/my-slug" />
+            <input type="text" id="n-canonical" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="/blog/my-slug" />
           </div>
         </div>
 
@@ -159,7 +159,7 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-2">
-        <a href="/admin/news" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50">Cancel</a>
+        <a href="/admin/blog" class="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50">Cancel</a>
         <button type="submit" class="px-5 py-2 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg text-sm transition-colors">
           Save
         </button>
@@ -229,7 +229,7 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
     document.getElementById('n-tags').value = (articleToEdit.tags || []).join(', ');
     document.getElementById('n-published-at').value = toLocalDatetimeValue(articleToEdit.published_at);
     document.getElementById('n-meta-title').value = articleToEdit.meta_title || '';
-    document.getElementById('n-meta-desc').value = articleToEdit.meta_description || '';
+    document.getElementById('n-meta-description').value = articleToEdit.meta_description || '';
     document.getElementById('n-meta-keywords').value = articleToEdit.meta_keywords || '';
     document.getElementById('n-canonical').value = articleToEdit.canonical_path || '';
     document.getElementById('n-og-image').value = articleToEdit.og_image || '';
@@ -369,7 +369,7 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
         tags: document.getElementById('n-tags').value,
         published_at: publishedAtIso,
         meta_title: document.getElementById('n-meta-title').value,
-        meta_description: document.getElementById('n-meta-desc').value,
+        meta_description: document.getElementById('n-meta-description').value,
         meta_keywords: document.getElementById('n-meta-keywords').value,
         canonical_path: document.getElementById('n-canonical').value,
         og_image: document.getElementById('n-og-image').value,
@@ -380,14 +380,14 @@ const pageTitle = articleToEdit ? 'Edit News' : 'Add News';
         })).filter(f => f.question && f.answer),
       };
 
-      const res = await fetch(id ? `/admin/api/news?id=${id}` : '/admin/api/news', {
+      const res = await fetch(id ? `/admin/api/blog?id=${id}` : '/admin/api/blog', {
         method: id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
       if (res.ok) {
-        window.location.href = '/admin/news';
+        window.location.href = '/admin/blog';
       } else {
         const d = await res.json();
         alert(d.error || 'Failed to save');

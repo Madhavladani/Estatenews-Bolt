@@ -1,8 +1,8 @@
 ---
-import type { News } from '../lib/types';
+import type { Blog } from '../lib/types';
 
 interface Props {
-  articles: News[];
+  articles: Blog[];
   currentSlug: string;
   currentTags?: string[];
 }
@@ -31,7 +31,7 @@ function formatDate(dateStr: string): string {
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       {related.map((article) => (
         <a
-          href={`/news/${article.slug}`}
+          href={`/blog/${article.slug}`}
           class="group flex flex-col bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden"
         >
           {article.featured_image && (

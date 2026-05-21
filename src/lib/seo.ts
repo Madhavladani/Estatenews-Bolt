@@ -1,4 +1,4 @@
-import type { City, Project, Collection, News } from './types';
+import type { City, Project, Collection, Blog } from './types';
 
 const SITE_URL = 'https://propdiscover.com';
 const SITE_NAME = 'PropDiscover';
@@ -116,8 +116,8 @@ export function buildCollectionSchema(collection: Collection) {
   };
 }
 
-export function buildNewsArticleSchema(article: News) {
-  const url = `${SITE_URL}${article.canonical_path || `/news/${article.slug}`}`;
+export function buildBlogArticleSchema(article: Blog) {
+  const url = `${SITE_URL}${article.canonical_path || `/blog/${article.slug}`}`;
   const image = article.og_image || article.featured_image || `${SITE_URL}/og-default.jpg`;
   const keywords = article.meta_keywords
     ? article.meta_keywords
@@ -137,14 +137,14 @@ export function buildNewsArticleSchema(article: News) {
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
     author: article.author_name
-      ? [{ '@type': 'Person', name: article.author_name, url: `${SITE_URL}/news` }]
+      ? [{ '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }]
       : undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': url,
     },
     keywords: keywords,
-    articleSection: 'Real Estate News',
+    articleSection: 'Real Estate Blog',
     speakable: {
       '@type': 'SpeakableSpecification',
       cssSelector: ['h1', '.prose p'],

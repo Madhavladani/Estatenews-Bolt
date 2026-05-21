@@ -1,10 +1,10 @@
 ---
 export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import NewsCard from '../../components/NewsCard.astro';
+import BlogCard from '../../components/BlogCard.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema } from '../../lib/seo';
-import type { News } from '../../lib/types';
+import type { Blog } from '../../lib/types';
 
 const { data } = await supabase
   .from('news')
@@ -13,45 +13,45 @@ const { data } = await supabase
   .order('published_at', { ascending: false })
   .limit(60);
 
-const articles: News[] = data || [];
+const articles: Blog[] = data || [];
 
 // Collect all unique tags for filter chips
 const allTags = [...new Set(articles.flatMap((a) => a.tags || []))].slice(0, 12);
 
-// ItemList schema for the news index
+// ItemList schema for the blog index
 const itemListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'Latest Real Estate News — PropDiscover',
-  url: 'https://propdiscover.com/news',
+  name: 'Latest Real Estate Blog — PropDiscover',
+  url: 'https://propdiscover.com/blog',
   numberOfItems: articles.length,
   itemListElement: articles.slice(0, 10).map((article, i) => ({
     '@type': 'ListItem',
     position: i + 1,
-    url: `https://propdiscover.com/news/${article.slug}`,
+    url: `https://propdiscover.com/blog/${article.slug}`,
     name: article.title,
   })),
 };
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://propdiscover.com' },
-  { name: 'News', url: 'https://propdiscover.com/news' },
+  { name: 'Blog', url: 'https://propdiscover.com/blog' },
 ]);
 ---
 
 <BaseLayout
-  title="Latest Real Estate News in Gujarat | PropDiscover"
-  description="Read the latest real estate news, updates, and insights across Gujarat. Market trends, new launches, policy changes, and investment tips."
-  keywords="real estate news Gujarat, property news India, new launch news, real estate market updates, PropDiscover"
+  title="Latest Real Estate Blog in Gujarat | PropDiscover"
+  description="Read the latest real estate blog, updates, and insights across Gujarat. Market trends, new launches, policy changes, and investment tips."
+  keywords="real estate blog Gujarat, property blog India, new launch news, real estate market updates, PropDiscover"
   jsonLd={[breadcrumbSchema, itemListSchema]}
-  breadcrumbs={[{ name: 'News', url: '/news' }]}
+  breadcrumbs={[{ name: 'Blog', url: '/blog' }]}
 >
   <section class="py-14 bg-gray-50 min-h-[60vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       {/* ── Page header */}
       <header class="mb-10">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Real Estate News</h1>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Real Estate Blog</h1>
         <p class="text-gray-500 mt-2 text-lg">Latest updates, launches, and market insights across Gujarat.</p>
 
         {/* ── Tag filter chips */}
@@ -77,16 +77,16 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 
       {/* ── Article grid */}
       {articles.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="news-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="blog-grid">
           {articles.map((article) => (
-            <div class="news-item h-full" data-tags={(article.tags || []).join(',')}>
-              <NewsCard article={article} />
+            <div class="blog-item h-full" data-tags={(article.tags || []).join(',')}>
+              <BlogCard article={article} />
             </div>
           ))}
         </div>
       ) : (
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-500">
-          No news published yet.
+          No blogs published yet.
         </div>
       )}
 
@@ -98,7 +98,7 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 
 <script>
   const filterBtns = document.querySelectorAll<HTMLButtonElement>('.tag-filter-btn');
-  const items = document.querySelectorAll<HTMLElement>('.news-item');
+  const items = document.querySelectorAll<HTMLElement>('.blog-item');
   const noResults = document.getElementById('no-results');
 
   filterBtns.forEach((btn) => {

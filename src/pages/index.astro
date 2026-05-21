@@ -4,10 +4,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import CollectionCard from '../components/CollectionCard.astro';
 import FAQSection from '../components/FAQSection.astro';
-import NewsCard from '../components/NewsCard.astro';
+import BlogCard from '../components/BlogCard.astro';
 import { supabase } from '../lib/supabase';
 import { buildBreadcrumbSchema } from '../lib/seo';
-import type { City, Project, Collection, News } from '../lib/types';
+import type { City, Project, Collection, Blog } from '../lib/types';
 
 const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Promise.all([
   // Build-time fetch only; page is prerendered.
@@ -28,7 +28,7 @@ const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Pro
 const cities: City[] = citiesRes.data || [];
 const allProjects: (Project & { city?: City })[] = projectsRes.data || [];
 const collections: (Collection & { city?: City })[] = collectionsRes.data || [];
-const latestNews: News[] = newsRes.data || [];
+const latestBlog: Blog[] = newsRes.data || [];
 const homeFaqs = (homeFaqsRes.data || []) as { question: string; answer: string }[];
 
 const residentialProjects = allProjects.filter((p) => p.project_type === 'residential');
@@ -250,35 +250,35 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 	    </div>
 	  </section>
 
-    <!-- Latest News -->
+    <!-- Latest Blog -->
     <section class="py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-end justify-between gap-4 mb-10">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">Latest Real Estate News</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Latest Real Estate Blog</h2>
             <p class="text-gray-600">Fresh updates, launches, and market insights.</p>
           </div>
-          <a href="/news" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
-            View all news
+          <a href="/blog" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+            View all blog posts
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>
         </div>
 
-        {latestNews.length > 0 ? (
+        {latestBlog.length > 0 ? (
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latestNews.map((article) => (
-              <NewsCard article={article} />
+            {latestBlog.map((article) => (
+              <BlogCard article={article} />
             ))}
           </div>
         ) : (
           <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-500">
-            News will appear here once published.
+            Blog posts will appear here once published.
           </div>
         )}
 
         <div class="sm:hidden text-center mt-8">
-          <a href="/news" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
-            View all news
+          <a href="/blog" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+            View all blog posts
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>
         </div>

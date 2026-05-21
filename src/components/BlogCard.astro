@@ -1,12 +1,12 @@
 ---
-import type { News } from '../lib/types';
+import type { Blog } from '../lib/types';
 
 interface Props {
-  article: News;
+  article: Blog;
 }
 
 const { article } = Astro.props;
-const href = `/news/${article.slug}`;
+const href = `/blog/${article.slug}`;
 
 // Reading time estimate from excerpt word count (fallback for listing page)
 const text = (article.excerpt || article.meta_description || '').replace(/<[^>]*>/g, '').trim();

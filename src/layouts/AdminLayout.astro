@@ -30,6 +30,38 @@ const user = Astro.locals.user as User | undefined;
         </a>
         <a href="/admin/projects" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'projects' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+---
+import BaseLayout from './BaseLayout.astro';
+import type { User } from '@supabase/supabase-js';
+
+interface Props {
+  title: string;
+  activeTab: string;
+}
+
+const { title, activeTab } = Astro.props;
+const user = Astro.locals.user as User | undefined;
+---
+
+<BaseLayout title={`${title} | PropDiscover Admin`} description="PropDiscover Admin Panel" showHeader={false} showFooter={false}>
+  <div class="flex min-h-[calc(100vh-64px)]">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-primary-900 text-white flex-shrink-0 hidden lg:block">
+      <div class="p-6">
+        <h2 class="text-lg font-bold mb-1">Admin Panel</h2>
+        <p class="text-xs text-gray-400 truncate">{user?.email}</p>
+      </div>
+      <nav class="space-y-1 px-3">
+        <a href="/admin" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+        <a href="/admin/cities" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'cities' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Cities
+        </a>
+        <a href="/admin/projects" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'projects' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
           Projects
         </a>
         <a href="/admin/localities" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'localities' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
@@ -40,9 +72,9 @@ const user = Astro.locals.user as User | undefined;
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
           Collections
         </a>
-        <a href="/admin/news" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'news' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
+        <a href="/admin/blog" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'blog' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h2"/></svg>
-          News
+          Blog
         </a>
         <a href="/admin/faqs" class={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'faqs' ? 'bg-primary-700 text-white' : 'text-gray-300 hover:bg-primary-800 hover:text-white'}`}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8M8 14h6M10 3h4a2 2 0 012 2v2h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V5a2 2 0 012-2z"/></svg>
@@ -82,9 +114,9 @@ const user = Astro.locals.user as User | undefined;
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
           Collections
         </a>
-        <a href="/admin/news" class="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white px-2 py-1">
+        <a href="/admin/blog" class="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white px-2 py-1">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 4v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 13h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9h2"/></svg>
-          News
+          Blog
         </a>
         <a href="/admin/faqs" class="flex flex-col items-center gap-1 text-xs text-gray-300 hover:text-white px-2 py-1">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8M8 14h6M10 3h4a2 2 0 012 2v2h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V5a2 2 0 012-2z"/></svg>

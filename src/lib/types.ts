@@ -83,7 +83,7 @@ export interface Locality {
   city?: City;
 }
 
-export interface News {
+export interface Blog {
   id: string;
   title: string;
   slug: string;
@@ -146,9 +146,9 @@ export interface Database {
         Update: Partial<Omit<Collection, 'id' | 'created_at' | 'last_modify'>>;
       };
       news: {
-        Row: News;
-        Insert: Omit<News, 'id' | 'created_at' | 'updated_at' | 'last_modify'>;
-        Update: Partial<Omit<News, 'id' | 'created_at' | 'updated_at' | 'last_modify'>>;
+        Row: Blog;
+        Insert: Omit<Blog, 'id' | 'created_at' | 'updated_at' | 'last_modify'>;
+        Update: Partial<Omit<Blog, 'id' | 'created_at' | 'updated_at' | 'last_modify'>>;
       };
       faqs: {
         Row: Faq;

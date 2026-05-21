@@ -8,13 +8,13 @@ import ArticleFAQ from "../../components/ArticleFAQ.astro";
 import { supabase } from "../../lib/supabase";
 import {
   buildBreadcrumbSchema,
-  buildNewsArticleSchema,
+  buildBlogArticleSchema,
   buildFAQSchema,
   calculateReadingTime,
   extractFAQs,
   extractTOC,
 } from "../../lib/seo";
-import type { News } from "../../lib/types";
+import type { Blog } from "../../lib/types";
 
 export async function getStaticPaths() {
   const { data } = await supabase
@@ -23,7 +23,7 @@ export async function getStaticPaths() {
     .eq("is_published", true)
     .order("published_at", { ascending: false });
 
-  const articles = (data || []) as News[];
+  const articles = (data || []) as Blog[];
 
   return articles.map((article) => ({
     params: { slug: article.slug },
@@ -32,11 +32,11 @@ export async function getStaticPaths() {
 }
 
 const { article, allArticles } = Astro.props as {
-  article: News;
-  allArticles: News[];
+  article: Blog;
+  allArticles: Blog[];
 };
 
-const canonicalPath = article.canonical_path || `/news/${article.slug}`;
+const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
 const canonicalUrl = `https://propdiscover.com${canonicalPath}`;
 const ogImage = article.og_image || article.featured_image || undefined;
 const heroImage = article.featured_image || undefined;
@@ -56,10 +56,10 @@ const keywords = article.meta_keywords
 // ── Schema
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: "Home", url: "https://propdiscover.com" },
-  { name: "News", url: "https://propdiscover.com/news" },
+  { name: "Blog", url: "https://propdiscover.com/blog" },
   { name: article.title, url: canonicalUrl },
 ]);
-const articleSchema = buildNewsArticleSchema(article);
+const articleSchema = buildBlogArticleSchema(article);
 const faqSchema = faqs.length > 0 ? buildFAQSchema(faqs) : null;
 const schemas = [
   breadcrumbSchema,
@@ -85,14 +85,14 @@ const authorSlug = article.author_name
   title={article.meta_title || `${article.title} | PropDiscover`}
   description={article.meta_description ||
     article.excerpt ||
-    "Latest real estate news and updates."}
+    "Latest real estate blog and updates."}
   canonical={canonicalUrl}
   ogImage={ogImage}
   noindex={article.noindex}
   jsonLd={schemas}
   breadcrumbs={[
-    { name: "News", url: "/news" },
-    { name: article.title, url: `/news/${article.slug}` },
+    { name: "Blog", url: "/blog" },
+    { name: article.title, url: `/blog/${article.slug}` },
   ]}
   keywords={keywords}
   heroImagePreload={heroImage}
@@ -110,7 +110,7 @@ const authorSlug = article.author_name
   <article
     class="py-10 lg:py-14"
     itemscope
-    itemtype="https://schema.org/NewsArticle"
+    itemtype="https://schema.org/BlogPosting"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* ── Two-column layout: article + sticky TOC sidebar */}

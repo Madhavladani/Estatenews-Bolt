@@ -5,7 +5,7 @@ const paths = [
   '/sitemap-cities.xml',
   '/sitemap-projects.xml',
   '/sitemap-collections.xml',
-  '/sitemap-news.xml',
+  '/sitemap-blog.xml',
   '/sitemap-localities.xml',
   '/sitemap-guides.xml',
 ];
