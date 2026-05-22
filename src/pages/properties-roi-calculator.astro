@@ -1,62 +1,1109 @@
 ---
+// pages/roi-calculator.astro
 export const prerender = true;
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Properties ROI Calculator | PropDiscover"
-  description="Calculate expected return on investment for your property with PropDiscover's simple ROI calculator."
+  title="Property ROI Calculator | PropDiscover"
+  description="Calculate expected return on investment for your property instantly. Free rental yield & annual ROI estimator with maintenance and appreciation."
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Properties ROI Calculator</h1>
-      <p class="text-gray-600 mb-8">Estimate annual ROI and monthly rental yield for your property investment.</p>
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="text-sm text-gray-700">Property Purchase Price (INR)
-            <input id="purchasePrice" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 7500000" />
-          </label>
-          <label class="text-sm text-gray-700">Monthly Rental Income (INR)
-            <input id="monthlyRent" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 25000" />
-          </label>
-          <label class="text-sm text-gray-700">Annual Maintenance Cost (INR)
-            <input id="annualMaintenance" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 60000" />
-          </label>
-          <label class="text-sm text-gray-700">Annual Property Appreciation (%)
-            <input id="appreciation" type="number" step="0.1" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 5" />
-          </label>
-        </div>
-        <button id="roiCalcBtn" class="mt-6 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-semibold">Calculate ROI</button>
-        <div id="roiResult" class="mt-6 hidden rounded-xl bg-primary-50 border border-primary-100 p-5">
-          <p class="text-sm text-gray-600">Net Annual Income</p>
-          <p id="netAnnualIncomeText" class="text-xl font-bold text-primary-800"></p>
-          <p class="mt-3 text-sm text-gray-600">Total Annual Return (Income + Appreciation)</p>
-          <p id="totalAnnualReturnText" class="text-xl font-bold text-primary-800"></p>
-          <p class="mt-3 text-sm text-gray-600">Estimated Annual ROI</p>
-          <p id="annualRoiText" class="text-2xl font-bold text-green-700"></p>
+  <!-- Structured Data: FAQ & WebApplication -->
+  <script type="application/ld+json" slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PropDiscover Property ROI Calculator",
+      "url": "https://www.propdiscover.com/roi-calculator",
+      "description": "Calculate expected return on investment for your property with PropDiscover's simple ROI calculator.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" }
+    }
+  </script>
+  <script type="application/ld+json" slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is ROI in real estate?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ROI (Return on Investment) measures the profitability of a property. It is calculated as (Annual Return / Total Investment) × 100. Annual return includes rental income after expenses plus appreciation in property value."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is rental yield different from ROI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Rental yield only considers rental income relative to property price (annual rent / purchase price). ROI is broader and includes both rental income and capital appreciation, minus all expenses like maintenance and taxes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What maintenance costs should I include?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Include property tax, insurance, repairs, society maintenance charges, and any property management fees. A common estimate is 1-2% of the property value annually."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is property appreciation guaranteed?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No, property appreciation depends on market conditions, location, infrastructure development, and economic factors. Past performance does not guarantee future returns. Always use conservative estimates."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is a good ROI for residential property in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Typically, a rental yield of 2-4% is common in metro cities. Including moderate appreciation (3-5%), a total ROI of 5-8% can be considered reasonable. However, it varies widely by city and location."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I improve my property's ROI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "To boost ROI, you can: increase rental income through renovations, reduce vacancy periods, negotiate lower maintenance costs, or invest in areas with higher appreciation potential. Pre-paying any loan also reduces interest outgo."
+          }
+        }
+      ]
+    }
+  </script>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="page-header">
+    <span class="header-badge">📈 Smart Investment Tool</span>
+    <h1>Property ROI Calculator<span class="accent-dot">.</span></h1>
+    <p>
+      Estimate net annual income, total return, and ROI – including rental yield
+      and property appreciation.
+    </p>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-container">
+    <!-- Calculator Card -->
+    <div class="calculator-card" aria-label="ROI Calculator Form">
+      <!-- Quick Select: Purchase Price -->
+      <div class="quick-select-section">
+        <p class="quick-select-label">Quick Property Price</p>
+        <div class="chip-row" id="quickPriceChips">
+          <button class="chip" data-price="5000000">₹50 Lakh</button>
+          <button class="chip active" data-price="7500000">₹75 Lakh</button>
+          <button class="chip" data-price="10000000">₹1 Crore</button>
+          <button class="chip" data-price="15000000">₹1.5 Cr</button>
+          <button class="chip" data-price="20000000">₹2 Crore</button>
+          <button class="chip" data-price="30000000">₹3 Crore</button>
+          <button class="chip" data-price="50000000">₹5 Crore</button>
         </div>
       </div>
+
+      <!-- Input Grid -->
+      <div class="input-grid">
+        <!-- Property Purchase Price -->
+        <div class="input-group">
+          <label for="purchasePrice">
+            <span class="label-icon"></span> Purchase Price (INR)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input
+              type="number"
+              id="purchasePrice"
+              value="7500000"
+              min="100000"
+              max="100000000"
+              step="50000"
+              placeholder="e.g. 7500000"
+            />
+          </div>
+          <input
+            type="range"
+            id="purchasePriceSlider"
+            class="range-slider"
+            min="100000"
+            max="50000000"
+            step="50000"
+            value="7500000"
+            aria-label="Purchase price slider"
+          />
+        </div>
+
+        <!-- Monthly Rental Income -->
+        <div class="input-group">
+          <label for="monthlyRent">
+            <span class="label-icon"></span> Monthly Rent (INR)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input
+              type="number"
+              id="monthlyRent"
+              value="30000"
+              min="0"
+              max="1000000"
+              step="500"
+              placeholder="e.g. 30000"
+            />
+          </div>
+          <input
+            type="range"
+            id="monthlyRentSlider"
+            class="range-slider"
+            min="0"
+            max="200000"
+            step="500"
+            value="30000"
+            aria-label="Monthly rent slider"
+          />
+        </div>
+
+        <!-- Annual Maintenance -->
+        <div class="input-group">
+          <label for="annualMaintenance">
+            <span class="label-icon"></span> Annual Maintenance (INR)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input
+              type="number"
+              id="annualMaintenance"
+              value="60000"
+              min="0"
+              max="1000000"
+              step="1000"
+              placeholder="e.g. 60000"
+            />
+          </div>
+          <input
+            type="range"
+            id="annualMaintenanceSlider"
+            class="range-slider"
+            min="0"
+            max="500000"
+            step="1000"
+            value="60000"
+            aria-label="Annual maintenance slider"
+          />
+        </div>
+
+        <!-- Annual Appreciation % -->
+        <div class="input-group">
+          <label for="appreciation">
+            <span class="label-icon"></span> Appreciation Rate (%)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">%</span>
+            <input
+              type="number"
+              id="appreciation"
+              value="5"
+              min="0"
+              max="30"
+              step="0.1"
+              placeholder="e.g. 5"
+            />
+          </div>
+          <input
+            type="range"
+            id="appreciationSlider"
+            class="range-slider"
+            min="0"
+            max="20"
+            step="0.1"
+            value="5"
+            aria-label="Appreciation rate slider"
+          />
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="calc-btn-wrapper">
+        <button id="roiCalcBtn" class="btn-calculate">
+          <span class="btn-icon"></span> Calculate ROI
+        </button>
+        <button id="roiResetBtn" class="btn-reset" title="Reset to defaults">
+          ↺ Reset
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="roiResult" class="results-container">
+        <p class="result-header">💎 Your Investment Breakdown</p>
+        <div class="result-inner-grid roi-results-grid">
+          <div class="result-item">
+            <p class="result-label">Net Annual Income</p>
+            <p id="netAnnualIncomeText" class="result-value">—</p>
+          </div>
+          <div class="result-item emi-highlight">
+            <p class="result-label">Total Annual Return</p>
+            <p id="totalAnnualReturnText" class="result-value">—</p>
+          </div>
+          <div class="result-item roi-highlight">
+            <p class="result-label">Annual ROI</p>
+            <p id="annualRoiText" class="result-value">—</p>
+          </div>
+        </div>
+        <!-- Visual Breakdown Bar -->
+        <div class="breakdown-bar-section">
+          <p class="breakdown-bar-label">
+            📊 Income vs Appreciation Contribution
+          </p>
+          <div class="breakdown-bar-outer">
+            <div
+              id="incomeBar"
+              class="breakdown-bar-principal"
+              style="width:50%;"
+            >
+            </div>
+            <div
+              id="appreciationBar"
+              class="breakdown-bar-interest"
+              style="width:50%;"
+            >
+            </div>
+          </div>
+          <div class="breakdown-legend">
+            <span
+              ><span class="legend-dot principal-dot"></span> Net Income: <strong
+                id="legendIncome">—</strong
+              ></span
+            >
+            <span
+              ><span class="legend-dot interest-dot"></span> Appreciation: <strong
+                id="legendAppreciation">—</strong
+              ></span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Banner -->
+      <div class="info-banner">
+        <span class="info-icon">💡</span>
+        <span
+          ><strong>Pro Tip:</strong> A rental yield above 3% is considered healthy
+          in most Indian metros. Combine it with a conservative appreciation estimate
+          for realistic ROI expectations.</span
+        >
+      </div>
     </div>
-  </section>
+
+    <!-- ==================== FAQ SECTION ==================== -->
+    <section class="faq-section" aria-labelledby="faq-heading">
+      <h2 id="faq-heading">Property ROI – Common Questions</h2>
+      <p class="faq-subtitle">
+        Understand how to evaluate your real estate investment.
+      </p>
+      <div class="faq-grid">
+        <details class="faq-item">
+          <summary>
+            What is ROI in real estate?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              ROI (Return on Investment) measures the profitability of a
+              property. It is calculated as <strong
+                >(Annual Return / Total Investment) × 100</strong
+              >. Annual return includes rental income after expenses plus
+              appreciation in property value.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            How is rental yield different from ROI?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              Rental yield only considers rental income relative to property
+              price (annual rent / purchase price). ROI is broader and includes
+              both rental income and capital appreciation, minus all expenses
+              like maintenance and taxes.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            What maintenance costs should I include?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              Include property tax, insurance, repairs, society maintenance
+              charges, and any property management fees. A common estimate is <strong
+                >1-2% of the property value annually</strong
+              >.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Is property appreciation guaranteed?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              No, property appreciation depends on market conditions, location,
+              infrastructure development, and economic factors. Past performance
+              does not guarantee future returns. Always use conservative
+              estimates.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            What is a good ROI for residential property?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              Typically, a rental yield of <strong>2-4%</strong> is common in metro
+              cities. Including moderate appreciation (3-5%), a total ROI of <strong
+                >5-8%</strong
+              > can be considered reasonable. It varies widely by city and location.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            How can I improve my property's ROI?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              To boost ROI, you can: increase rental income through renovations,
+              reduce vacancy periods, negotiate lower maintenance costs, or
+              invest in areas with higher appreciation potential. Pre-paying any
+              loan also reduces interest outgo.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Footer Note -->
+    <p class="footer-note">
+      Powered by <strong>PropDiscover</strong> — India's trusted real estate platform.
+      &nbsp;|&nbsp;
+      <a href="/">Back to Home</a>
+    </p>
+  </main>
 </BaseLayout>
 
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --primary-light: #2a5180;
+    --primary-lighter: #e8eff7;
+    --primary-lightest: #f4f7fb;
+    --accent: #f97316;
+    --accent-hover: #ea5c0a;
+    --accent-light: #fff4eb;
+    --accent-glow: rgba(249, 115, 22, 0.25);
+    --header: #0a1929;
+    --header-light: #112240;
+    --text-dark: #1a1a2e;
+    --text-medium: #4a5568;
+    --text-light: #718096;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family:
+      "Inter",
+      "Segoe UI",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    background: var(--gray-50);
+    color: var(--text-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header */
+  .page-header {
+    background: linear-gradient(
+      160deg,
+      var(--header) 0%,
+      #0d2137 40%,
+      #122d4a 100%
+    );
+    padding: 3rem 1.5rem 3.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: -30%;
+    width: 160%;
+    height: 200%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(249, 115, 22, 0.06) 0%,
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+  .page-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.7;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(249, 115, 22, 0.15);
+    color: #fca35d;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+  }
+  .page-header h1 {
+    color: #fff;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+  }
+  .accent-dot {
+    color: var(--accent);
+  }
+  .page-header p {
+    color: #b0c4d8;
+    font-size: 1.1rem;
+    max-width: 550px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Main container */
+  .main-container {
+    max-width: 960px;
+    margin: -1.5rem auto 0;
+    padding: 0 1.25rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Calculator Card */
+  .calculator-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem 2rem 2.25rem;
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+  }
+  .calculator-card:hover {
+    box-shadow: var(--shadow-xl);
+  }
+
+  .quick-select-section {
+    margin-bottom: 1.75rem;
+  }
+  .quick-select-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 0.6rem;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    padding: 0.5rem 1.05rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--gray-300);
+    background: var(--white);
+    color: var(--text-medium);
+    transition: var(--transition);
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.06);
+  }
+  .chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 10px var(--accent-glow);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .input-grid {
+      grid-template-columns: 1fr;
+    }
+    .calculator-card {
+      padding: 1.5rem 1.25rem;
+    }
+    .page-header {
+      padding: 2rem 1rem 2.5rem;
+    }
+    .page-header h1 {
+      font-size: 1.6rem;
+    }
+    .result-inner-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .faq-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .input-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .label-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+  .input-wrapper {
+    position: relative;
+  }
+  .prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .input-wrapper input[type="number"] {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    background: var(--gray-50);
+    transition: var(--transition);
+    font-family: inherit;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .input-wrapper input[type="number"]::-webkit-outer-spin-button,
+  .input-wrapper input[type="number"]::-webkit-inner-spin-button {
+    opacity: 1;
+    height: 32px;
+  }
+  .input-wrapper input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(30, 58, 95, 0.06);
+  }
+  .range-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--gray-200);
+    outline: none;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+  .range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+  }
+  .range-slider::-webkit-slider-thumb:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  .calc-btn-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .btn-calculate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2.2rem;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.02em;
+    box-shadow: 0 6px 24px var(--accent-glow);
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+  }
+  .btn-calculate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+  .btn-calculate:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(249, 115, 22, 0.35);
+  }
+  .btn-reset {
+    padding: 0.85rem 1.5rem;
+    background: transparent;
+    color: var(--text-medium);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+  .btn-reset:hover {
+    border-color: var(--gray-400);
+    color: var(--text-dark);
+    background: var(--gray-50);
+  }
+
+  /* Results */
+  .results-container {
+    margin-top: 2rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      145deg,
+      #162d47 0%,
+      var(--primary) 40%,
+      #1a3552 100%
+    );
+    padding: 2rem 1.75rem;
+    color: #fff;
+    display: none;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .results-container.visible {
+    display: block;
+    animation: fadeSlideIn 0.45s ease-out;
+  }
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .results-container::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -25%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(
+      circle,
+      rgba(249, 115, 22, 0.1) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+  .result-inner-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 1;
+  }
+  .result-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: var(--transition);
+  }
+  .result-item:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .result-label {
+    font-size: 0.78rem;
+    color: #b0c8dd;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .result-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    word-break: break-all;
+  }
+  .result-item.emi-highlight {
+    background: rgba(249, 115, 22, 0.13);
+    border-color: rgba(249, 115, 22, 0.3);
+    position: relative;
+  }
+  .result-item.emi-highlight .result-value {
+    color: #ffb87a;
+    font-size: 1.75rem;
+  }
+  .result-item.emi-highlight::after {
+    content: "★";
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+  .result-item.roi-highlight {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .result-item.roi-highlight .result-value {
+    color: #7dd3fc;
+    font-weight: 900;
+    font-size: 1.8rem;
+  }
+
+  .breakdown-bar-section {
+    margin-top: 1.25rem;
+    position: relative;
+    z-index: 1;
+  }
+  .breakdown-bar-outer {
+    height: 14px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    display: flex;
+  }
+  .breakdown-bar-principal {
+    height: 100%;
+    background: #5b9bd5;
+    border-radius: 7px 0 0 7px;
+    transition: width 0.5s ease-out;
+    min-width: 2px;
+  }
+  .breakdown-bar-interest {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 7px 7px 0;
+    transition: width 0.5s ease-out;
+    min-width: 2px;
+  }
+  .breakdown-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: #c0d4e8;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .principal-dot {
+    background: #5b9bd5;
+  }
+  .interest-dot {
+    background: var(--accent);
+  }
+
+  .info-banner {
+    margin-top: 1.5rem;
+    background: var(--primary-lightest);
+    border: 1px solid var(--primary-lighter);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* FAQ */
+  .faq-section {
+    margin-top: 2.5rem;
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    padding: 2rem 2rem 1.5rem;
+    border: 1px solid var(--gray-200);
+  }
+  .faq-section h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--header);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+  }
+  .faq-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+  }
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .faq-item {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: var(--transition);
+    background: var(--white);
+  }
+  .faq-item summary {
+    padding: 1rem 1.2rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transition: var(--transition);
+    user-select: none;
+  }
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-arrow {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 0.7rem;
+    color: var(--text-light);
+  }
+  .faq-item[open] summary {
+    color: var(--primary);
+    background: var(--primary-lightest);
+  }
+  .faq-item[open] .faq-arrow {
+    background: var(--primary);
+    color: #fff;
+    transform: rotate(180deg);
+  }
+  .faq-answer {
+    padding: 0 1.2rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    line-height: 1.65;
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+  .footer-note a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .footer-note a:hover {
+    color: var(--accent);
+  }
+
+  @keyframes subtlePulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+    }
+  }
+  .pulse-once {
+    animation: subtlePulse 1.2s ease-out 1;
+  }
+</style>
+
 <script>
-  const formatINR = (value: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
+  // ROI Calculator Logic
+  const formatINR = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
 
-  const roiButton = document.getElementById('roiCalcBtn');
-  const roiResult = document.getElementById('roiResult');
-  const netAnnualIncomeText = document.getElementById('netAnnualIncomeText');
-  const totalAnnualReturnText = document.getElementById('totalAnnualReturnText');
-  const annualRoiText = document.getElementById('annualRoiText');
+  const purchasePriceInput = document.getElementById("purchasePrice");
+  const monthlyRentInput = document.getElementById("monthlyRent");
+  const annualMaintenanceInput = document.getElementById("annualMaintenance");
+  const appreciationInput = document.getElementById("appreciation");
+  const purchasePriceSlider = document.getElementById("purchasePriceSlider");
+  const monthlyRentSlider = document.getElementById("monthlyRentSlider");
+  const annualMaintenanceSlider = document.getElementById(
+    "annualMaintenanceSlider",
+  );
+  const appreciationSlider = document.getElementById("appreciationSlider");
+  const roiButton = document.getElementById("roiCalcBtn");
+  const roiResetBtn = document.getElementById("roiResetBtn");
+  const roiResult = document.getElementById("roiResult");
+  const netAnnualIncomeText = document.getElementById("netAnnualIncomeText");
+  const totalAnnualReturnText = document.getElementById(
+    "totalAnnualReturnText",
+  );
+  const annualRoiText = document.getElementById("annualRoiText");
+  const incomeBar = document.getElementById("incomeBar");
+  const appreciationBar = document.getElementById("appreciationBar");
+  const legendIncome = document.getElementById("legendIncome");
+  const legendAppreciation = document.getElementById("legendAppreciation");
+  const quickPriceChips = document.getElementById("quickPriceChips");
 
-  roiButton?.addEventListener('click', () => {
-    const purchasePrice = Number((document.getElementById('purchasePrice') as HTMLInputElement)?.value || 0);
-    const monthlyRent = Number((document.getElementById('monthlyRent') as HTMLInputElement)?.value || 0);
-    const annualMaintenance = Number((document.getElementById('annualMaintenance') as HTMLInputElement)?.value || 0);
-    const appreciation = Number((document.getElementById('appreciation') as HTMLInputElement)?.value || 0);
+  const syncNumberToSlider = (num, slider, isFloat) => {
+    const val = parseFloat(num.value);
+    if (
+      !isNaN(val) &&
+      val >= parseFloat(slider.min) &&
+      val <= parseFloat(slider.max)
+    ) {
+      slider.value = isFloat ? val.toFixed(1) : val;
+    }
+  };
+  const syncSliderToNumber = (slider, num, isFloat) => {
+    num.value = isFloat ? parseFloat(slider.value).toFixed(2) : slider.value;
+  };
 
-    if (purchasePrice <= 0) return;
+  const highlightPriceChip = (price) => {
+    quickPriceChips.querySelectorAll(".chip").forEach((chip) => {
+      chip.classList.toggle(
+        "active",
+        parseInt(chip.dataset.price, 10) === price,
+      );
+    });
+  };
+
+  const calculateROI = () => {
+    const purchasePrice = parseFloat(purchasePriceInput.value) || 0;
+    const monthlyRent = parseFloat(monthlyRentInput.value) || 0;
+    const annualMaintenance = parseFloat(annualMaintenanceInput.value) || 0;
+    const appreciation = parseFloat(appreciationInput.value) || 0;
+
+    if (purchasePrice <= 0) {
+      roiResult.classList.remove("visible");
+      return;
+    }
 
     const annualRent = monthlyRent * 12;
     const netAnnualIncome = annualRent - annualMaintenance;
@@ -64,11 +1111,114 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const totalAnnualReturn = netAnnualIncome + appreciationGain;
     const annualRoi = (totalAnnualReturn / purchasePrice) * 100;
 
-    if (netAnnualIncomeText && totalAnnualReturnText && annualRoiText && roiResult) {
-      netAnnualIncomeText.textContent = formatINR(netAnnualIncome);
-      totalAnnualReturnText.textContent = formatINR(totalAnnualReturn);
-      annualRoiText.textContent = `${annualRoi.toFixed(2)}%`;
-      roiResult.classList.remove('hidden');
+    netAnnualIncomeText.textContent = formatINR(netAnnualIncome);
+    totalAnnualReturnText.textContent = formatINR(totalAnnualReturn);
+    annualRoiText.textContent = annualRoi.toFixed(2) + "%";
+
+    // Visual breakdown: net income vs appreciation gain proportions
+    const totalForBar = Math.abs(netAnnualIncome) + Math.abs(appreciationGain);
+    if (totalForBar > 0) {
+      const incomePct = (netAnnualIncome / totalForBar) * 100;
+      const appPct = (appreciationGain / totalForBar) * 100;
+      incomeBar.style.width = incomePct + "%";
+      appreciationBar.style.width = appPct + "%";
+      legendIncome.textContent = Math.round(incomePct) + "%";
+      legendAppreciation.textContent = Math.round(appPct) + "%";
+    } else {
+      incomeBar.style.width = "50%";
+      appreciationBar.style.width = "50%";
+      legendIncome.textContent = "0%";
+      legendAppreciation.textContent = "0%";
+    }
+
+    roiResult.classList.add("visible");
+    roiResult.classList.remove("pulse-once");
+    void roiResult.offsetWidth;
+    roiResult.classList.add("pulse-once");
+  };
+
+  const debounce = (fn, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  };
+  const debouncedCalculate = debounce(calculateROI, 300);
+
+  // Input events
+  purchasePriceInput.addEventListener("input", () => {
+    syncNumberToSlider(purchasePriceInput, purchasePriceSlider, false);
+    highlightPriceChip(parseInt(purchasePriceInput.value, 10));
+    debouncedCalculate();
+  });
+  monthlyRentInput.addEventListener("input", () => {
+    syncNumberToSlider(monthlyRentInput, monthlyRentSlider, false);
+    debouncedCalculate();
+  });
+  annualMaintenanceInput.addEventListener("input", () => {
+    syncNumberToSlider(annualMaintenanceInput, annualMaintenanceSlider, false);
+    debouncedCalculate();
+  });
+  appreciationInput.addEventListener("input", () => {
+    syncNumberToSlider(appreciationInput, appreciationSlider, true);
+    debouncedCalculate();
+  });
+
+  purchasePriceSlider.addEventListener("input", () => {
+    syncSliderToNumber(purchasePriceSlider, purchasePriceInput, false);
+    highlightPriceChip(parseInt(purchasePriceInput.value, 10));
+    debouncedCalculate();
+  });
+  monthlyRentSlider.addEventListener("input", () => {
+    syncSliderToNumber(monthlyRentSlider, monthlyRentInput, false);
+    debouncedCalculate();
+  });
+  annualMaintenanceSlider.addEventListener("input", () => {
+    syncSliderToNumber(annualMaintenanceSlider, annualMaintenanceInput, false);
+    debouncedCalculate();
+  });
+  appreciationSlider.addEventListener("input", () => {
+    syncSliderToNumber(appreciationSlider, appreciationInput, true);
+    debouncedCalculate();
+  });
+
+  roiButton.addEventListener("click", () => {
+    syncNumberToSlider(purchasePriceInput, purchasePriceSlider, false);
+    syncNumberToSlider(monthlyRentInput, monthlyRentSlider, false);
+    syncNumberToSlider(annualMaintenanceInput, annualMaintenanceSlider, false);
+    syncNumberToSlider(appreciationInput, appreciationSlider, true);
+    highlightPriceChip(parseInt(purchasePriceInput.value, 10));
+    calculateROI();
+    if (window.innerWidth < 768 && roiResult.classList.contains("visible")) {
+      roiResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   });
+
+  roiResetBtn.addEventListener("click", () => {
+    purchasePriceInput.value = 7500000;
+    monthlyRentInput.value = 30000;
+    annualMaintenanceInput.value = 60000;
+    appreciationInput.value = 5;
+    purchasePriceSlider.value = 7500000;
+    monthlyRentSlider.value = 30000;
+    annualMaintenanceSlider.value = 60000;
+    appreciationSlider.value = 5;
+    highlightPriceChip(7500000);
+    calculateROI();
+  });
+
+  quickPriceChips.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    const price = parseInt(chip.dataset.price, 10);
+    purchasePriceInput.value = price;
+    purchasePriceSlider.value = price;
+    highlightPriceChip(price);
+    calculateROI();
+  });
+
+  // Initial calculation
+  calculateROI();
+  highlightPriceChip(7500000);
 </script>

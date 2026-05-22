@@ -1,11 +1,14 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const breadcrumbs = [
-  { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'Property documents checklist', url: '/buying-guide/property-documents-checklist' },
+  { name: "Home", url: "/" },
+  { name: "Buying Guide", url: "/buying-guide" },
+  {
+    name: "Property documents checklist",
+    url: "/buying-guide/property-documents-checklist",
+  },
 ];
 ---
 
@@ -13,88 +16,761 @@ const breadcrumbs = [
   title="Property Documents Checklist (Before You Buy) | PropDiscover"
   description="A practical checklist of property documents to verify before buying: title, approvals, encumbrance, taxes, agreements, and handover papers."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: b.name,
+        item: `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "Property Documents Checklist: Verify Before You Buy",
+      description:
+        "A practical checklist of property documents to verify before buying: title, approvals, encumbrance, taxes, agreements, and handover papers.",
+      url: "https://propdiscover.com/buying-guide/property-documents-checklist",
+      author: {
+        "@type": "Organization",
+        name: "PropDiscover",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PropDiscover",
+        url: "https://propdiscover.com",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id":
+          "https://propdiscover.com/buying-guide/property-documents-checklist",
+      },
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Property documents checklist</h1>
-      <p class="text-gray-600 mb-8">
-        Always consult a qualified lawyer for a full title search. This list helps you ask the right questions and collect the right papers early.
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div
+      class="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"
+    >
+    </div>
+
+    <div
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10"
+    >
+      <!-- Accent badge -->
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5"
+        style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);"
+      >
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        Due Diligence
+      </div>
+
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight"
+      >
+        Property Documents Checklist
+        <span
+          class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80"
+          style="color: #f97316;">Verify before you buy</span
+        >
+      </h1>
+      <p
+        class="text-base md:text-lg max-w-2xl leading-relaxed"
+        style="color: rgba(255,255,255,0.75);"
+      >
+        Always consult a qualified lawyer for a full title search. This
+        checklist helps you ask the right questions and collect the right papers
+        early.
       </p>
 
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">A) Ownership & title</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Sale deed / conveyance deed (current owner’s proof).</li>
-            <li>Chain of title documents (previous transfers, if applicable).</li>
-            <li>Encumbrance certificate / lien status (as applicable).</li>
-            <li>Mutation / khata / property card entries (where applicable).</li>
-          </ul>
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path></svg
+          >
+          5 key categories
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">B) Approvals & compliance</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Approved layout/building plans and commencement permission.</li>
-            <li>Occupancy/Completion certificate (for ready/near-ready projects, where applicable).</li>
-            <li>RERA registration details (for applicable projects/phases).</li>
-          </ul>
-          <p class="mt-3">
-            Read: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/rera-guide">RERA guide</a>.
-          </p>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+          >
+          Legal must-haves
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">C) Financial & payment proofs</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Demand schedule and payment receipts.</li>
-            <li>NOC from lender (if resale and loan closed) / loan statement (if any).</li>
-            <li>Society NOC (where applicable) and maintenance dues clearance.</li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">D) Tax & utility</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Latest paid property tax receipts.</li>
-            <li>Electricity/water bills and meter transfer process details.</li>
-          </ul>
-          <p class="mt-3">
-            Read: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-tax-guide">Property tax guide</a>.
-          </p>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">E) Agreement & handover</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Agreement to sell / builder-buyer agreement (key clauses, penalties, possession date).</li>
-            <li>Final sale deed + stamp duty & registration proof.</li>
-            <li>Handover letter, keys, and inventory/fixture list (if applicable).</li>
-          </ul>
-          <p class="mt-3">
-            Read: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty & registration guide</a>.
-          </p>
-        </div>
-
-        <div class="pt-2">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/home-loan-guide">Home loan guide</a></li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+            ></path></svg
+          >
+          Keep records safe
         </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== MAIN CONTENT ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- A) Ownership & title -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                A) Ownership & title
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Sale deed / conveyance deed (current owner’s proof).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Chain of title documents (previous transfers, if
+                    applicable).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Encumbrance certificate / lien status (as applicable).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Mutation / khata / property card entries (where
+                    applicable).</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- B) Approvals & compliance -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                B) Approvals & compliance
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Approved layout/building plans and commencement permission.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Occupancy/Completion certificate (for ready/near-ready
+                    projects, where applicable).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >RERA registration details (for applicable projects/phases).</span
+                  >
+                </li>
+              </ul>
+              <a
+                href="/buying-guide/rera-guide"
+                class="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:gap-3"
+                style="background-color: rgba(30,58,95,0.06); color: #1e3a5f;"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+                RERA guide
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path></svg
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- C) Financial & payment proofs -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                C) Financial & payment proofs
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Demand schedule and payment receipts.</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >NOC from lender (if resale and loan closed) / loan
+                    statement (if any).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Society NOC (where applicable) and maintenance dues
+                    clearance.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D) Tax & utility -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                D) Tax & utility
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Latest paid property tax receipts.</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Electricity/water bills and meter transfer process details.</span
+                  >
+                </li>
+              </ul>
+              <a
+                href="/buying-guide/property-tax-guide"
+                class="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:gap-3"
+                style="background-color: rgba(30,58,95,0.06); color: #1e3a5f;"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+                Property tax guide
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path></svg
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- E) Agreement & handover -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                E) Agreement & handover
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Agreement to sell / builder-buyer agreement (key clauses,
+                    penalties, possession date).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Final sale deed + stamp duty & registration proof.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Handover letter, keys, and inventory/fixture list (if
+                    applicable).</span
+                  >
+                </li>
+              </ul>
+              <a
+                href="/buying-guide/stamp-duty-guide"
+                class="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:gap-3"
+                style="background-color: rgba(30,58,95,0.06); color: #1e3a5f;"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+                Stamp duty & registration guide
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path></svg
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== NEXT READS ========== -->
+      <div
+        class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Next reads</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >How to buy property</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/buying-guide/home-loan-guide"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Home loan guide</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div
+        class="mt-10 text-center rounded-2xl p-6 sm:p-8"
+        style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);"
+      >
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">
+          Got your documents ready?
+        </p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Use our complete buying guide to move forward with confidence.
+        </p>
+        <a
+          href="/buying-guide"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+          style="background-color: #f97316; color: #fff;"
+        >
+          Explore buying guide
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

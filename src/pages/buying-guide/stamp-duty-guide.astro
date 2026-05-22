@@ -1,11 +1,11 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const breadcrumbs = [
-  { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'Stamp duty guide', url: '/buying-guide/stamp-duty-guide' },
+  { name: "Home", url: "/" },
+  { name: "Buying Guide", url: "/buying-guide" },
+  { name: "Stamp duty guide", url: "/buying-guide/stamp-duty-guide" },
 ];
 ---
 
@@ -13,62 +13,538 @@ const breadcrumbs = [
   title="Stamp Duty & Registration Guide | PropDiscover"
   description="Stamp duty & registration guide: what charges to expect, how registration works, and practical tips for a smooth property registration process."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: b.name,
+        item: `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "Stamp Duty & Registration Guide: Charges, Process, and Tips",
+      description:
+        "Stamp duty & registration guide: what charges to expect, how registration works, and practical tips for a smooth property registration process.",
+      url: "https://propdiscover.com/buying-guide/stamp-duty-guide",
+      author: {
+        "@type": "Organization",
+        name: "PropDiscover",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PropDiscover",
+        url: "https://propdiscover.com",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": "https://propdiscover.com/buying-guide/stamp-duty-guide",
+      },
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Stamp duty & registration guide</h1>
-      <p class="text-gray-600 mb-8">
-        Stamp duty and registration are mandatory steps for transferring property ownership. Plan these costs early to avoid last-minute surprises.
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div
+      class="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"
+    >
+    </div>
+
+    <div
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10"
+    >
+      <!-- Accent badge -->
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5"
+        style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);"
+      >
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        Legal Transfer
+      </div>
+
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight"
+      >
+        Stamp Duty & Registration Guide
+        <span
+          class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80"
+          style="color: #f97316;">Plan costs, own with confidence</span
+        >
+      </h1>
+      <p
+        class="text-base md:text-lg max-w-2xl leading-relaxed"
+        style="color: rgba(255,255,255,0.75);"
+      >
+        Stamp duty and registration are mandatory for transferring property
+        ownership. Budget early and follow these steps to avoid last‑minute
+        surprises.
       </p>
 
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">What charges are usually involved</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Stamp duty (varies by state, property type, and buyer category).</li>
-            <li>Registration fee (usually a percentage or capped amount).</li>
-            <li>Misc. costs: advocate, documentation, and bank/legal charges (if financed).</li>
-          </ul>
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path></svg
+          >
+          Budget upfront
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Typical registration flow</h2>
-          <ol class="list-decimal pl-5 space-y-2">
-            <li>Finalize agreement / sale deed draft.</li>
-            <li>Pay stamp duty and book registration slot (where applicable).</li>
-            <li>Visit registrar office with witnesses and originals.</li>
-            <li>Submit biometric/verification and collect acknowledgement.</li>
-          </ol>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+            ></path></svg
+          >
+          Mandatory steps
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Practical tips</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Keep all payments traceable and preserve receipts.</li>
-            <li>Ensure names, carpet area, and property identifiers match across documents.</li>
-            <li>Confirm possession date and penalty clauses in the agreement.</li>
-          </ul>
-        </div>
-
-        <div class="pt-2">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-tax-guide">Property tax guide</a></li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            ></path></svg
+          >
+          Avoid penalties
         </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== MAIN CONTENT ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- 1) What charges are usually involved -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                What charges are usually involved
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Stamp duty (varies by state, property type, and buyer
+                    category).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Registration fee (usually a percentage or capped amount).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Misc. costs: advocate, documentation, and bank/legal
+                    charges (if financed).</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) Typical registration flow -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Typical registration flow
+              </h2>
+              <ol class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                    style="background-color: #1e3a5f;">1</span
+                  >
+                  <span>Finalize agreement / sale deed draft.</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                    style="background-color: #1e3a5f;">2</span
+                  >
+                  <span
+                    >Pay stamp duty and book registration slot (where
+                    applicable).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                    style="background-color: #1e3a5f;">3</span
+                  >
+                  <span
+                    >Visit registrar office with witnesses and originals.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                    style="background-color: #1e3a5f;">4</span
+                  >
+                  <span
+                    >Submit biometric/verification and collect acknowledgement.</span
+                  >
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) Practical tips -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Practical tips
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Keep all payments traceable and preserve receipts.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Ensure names, carpet area, and property identifiers match
+                    across documents.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Confirm possession date and penalty clauses in the
+                    agreement.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== QUICK NEXT READS ========== -->
+      <div
+        class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Next reads</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >How to buy property</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/buying-guide/property-tax-guide"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Property tax guide</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div
+        class="mt-10 text-center rounded-2xl p-6 sm:p-8"
+        style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);"
+      >
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">
+          Ready for a smooth registration?
+        </p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Explore the full buying guide to master every step of your property
+          journey.
+        </p>
+        <a
+          href="/buying-guide"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+          style="background-color: #f97316; color: #fff;"
+        >
+          Browse all guides
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

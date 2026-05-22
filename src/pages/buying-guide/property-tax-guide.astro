@@ -1,11 +1,11 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const breadcrumbs = [
-  { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'Property tax guide', url: '/buying-guide/property-tax-guide' },
+  { name: "Home", url: "/" },
+  { name: "Buying Guide", url: "/buying-guide" },
+  { name: "Property tax guide", url: "/buying-guide/property-tax-guide" },
 ];
 ---
 
@@ -13,57 +13,490 @@ const breadcrumbs = [
   title="Property Tax Guide (What, Why, How to Pay) | PropDiscover"
   description="Property tax guide for homeowners: what it is, who pays it, what affects it, documents to keep, and how to avoid penalties."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: b.name,
+        item: `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline:
+        "Property Tax Guide: What It Is, Who Pays, and How to Avoid Penalties",
+      description:
+        "Property tax guide for homeowners: what it is, who pays it, what affects it, documents to keep, and how to avoid penalties.",
+      url: "https://propdiscover.com/buying-guide/property-tax-guide",
+      author: {
+        "@type": "Organization",
+        name: "PropDiscover",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PropDiscover",
+        url: "https://propdiscover.com",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": "https://propdiscover.com/buying-guide/property-tax-guide",
+      },
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Property tax guide</h1>
-      <p class="text-gray-600 mb-8">
-        Property tax is typically paid to your local municipal body. Keeping payments current helps avoid penalties and makes resale smoother.
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div
+      class="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"
+    >
+    </div>
+
+    <div
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10"
+    >
+      <!-- Accent badge -->
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5"
+        style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);"
+      >
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        Ownership Essentials
+      </div>
+
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight"
+      >
+        Property Tax Guide
+        <span
+          class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80"
+          style="color: #f97316;">Stay compliant, avoid penalties</span
+        >
+      </h1>
+      <p
+        class="text-base md:text-lg max-w-2xl leading-relaxed"
+        style="color: rgba(255,255,255,0.75);"
+      >
+        Property tax is paid to your local municipal body. Keeping payments
+        current not only avoids fines but also makes future resale much
+        smoother.
       </p>
 
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Who pays property tax?</h2>
-          <p>Usually, the owner of the property is responsible. In some rental arrangements, tenants may pay it contractually, but ownership liability remains important.</p>
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path></svg
+          >
+          Avoid penalties
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">What affects the tax amount</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Location (zone/ward), property usage (residential/commercial).</li>
-            <li>Built-up area / carpet area and construction type.</li>
-            <li>Municipal valuation method and rebates/penalties.</li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path></svg
+          >
+          Records matter
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">What to keep for records</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Latest paid receipts and challans.</li>
-            <li>Mutation/khata details (where applicable).</li>
-            <li>Sale deed and basic property identifiers (door no./plot no.).</li>
-          </ul>
-        </div>
-
-        <div class="pt-2">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty & registration guide</a></li>
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+            ></path></svg
+          >
+          Municipal rules
         </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== MAIN CONTENT ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- 1) Who pays property tax? -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Who pays property tax?
+              </h2>
+              <p
+                class="text-sm sm:text-base leading-relaxed"
+                style="color: #334155;"
+              >
+                Usually, the owner of the property is responsible. In some
+                rental arrangements, tenants may pay it contractually, but
+                ownership liability remains important.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) What affects the tax amount -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                What affects the tax amount
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Location (zone/ward), property usage
+                    (residential/commercial).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Built-up area / carpet area and construction type.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Municipal valuation method and rebates/penalties.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) What to keep for records -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                What to keep for records
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Latest paid receipts and challans.</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Mutation/khata details (where applicable).</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Sale deed and basic property identifiers (door no./plot
+                    no.).</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== QUICK NEXT READS ========== -->
+      <div
+        class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Next reads</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/buying-guide/stamp-duty-guide"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Stamp duty & registration guide</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >How to buy property</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div
+        class="mt-10 text-center rounded-2xl p-6 sm:p-8"
+        style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);"
+      >
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">
+          Keep your property paperwork in order?
+        </p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Our buying guide helps you stay organized from purchase to tax
+          compliance.
+        </p>
+        <a
+          href="/buying-guide"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+          style="background-color: #f97316; color: #fff;"
+        >
+          Browse all guides
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,77 +1,1183 @@
 ---
+// pages/emi-calculator.astro
 export const prerender = true;
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
   title="Loan EMI Calculator | PropDiscover"
-  description="Calculate your monthly home loan EMI instantly with PropDiscover's EMI calculator."
+  description="Calculate your monthly home loan EMI instantly with PropDiscover's free EMI calculator. Get accurate monthly EMI, total interest payable, and amortization breakdown."
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Loan EMI Calculator</h1>
-      <p class="text-gray-600 mb-8">Estimate your monthly EMI, total interest, and total payment amount.</p>
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <label class="text-sm text-gray-700">Loan Amount (INR)
-            <input id="loanAmount" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 5000000" />
-          </label>
-          <label class="text-sm text-gray-700">Annual Interest Rate (%)
-            <input id="interestRate" type="number" step="0.01" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 8.5" />
-          </label>
-          <label class="text-sm text-gray-700">Loan Tenure (Years)
-            <input id="loanTenure" type="number" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" placeholder="e.g. 20" />
-          </label>
+  <!-- Structured Data: FAQ & WebApplication -->
+  <script type="application/ld+json" slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PropDiscover Loan EMI Calculator",
+      "url": "https://www.propdiscover.com/emi-calculator",
+      "description": "Calculate your monthly home loan EMI instantly with PropDiscover's free EMI calculator.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "INR" },
+      "browserRequirements": "Requires JavaScript"
+    }
+  </script>
+  <script type="application/ld+json" slot="head">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is an EMI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "EMI stands for Equated Monthly Installment. It is the fixed monthly payment you make to repay a loan over a specified tenure. Each EMI consists of both principal repayment and interest payment."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is EMI calculated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "EMI is calculated using the formula: EMI = P × r × (1+r)^n / ((1+r)^n - 1), where P is the principal loan amount, r is the monthly interest rate, and n is the number of months."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does reducing the loan tenure affect EMI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. A shorter tenure increases monthly EMIs but drastically reduces total interest paid. A longer tenure lowers EMIs but increases total interest."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between fixed and floating interest rates?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Fixed rates remain constant; floating rates change with market conditions. Most home loans in India use floating rates."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I prepay my home loan to reduce EMI?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, partial prepayment reduces your outstanding principal, which can lower future EMIs or shorten the tenure, saving you interest."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What factors affect home loan EMI the most?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The three main factors are loan amount, interest rate, and tenure. Your credit score also heavily influences the interest rate you qualify for."
+          }
+        }
+      ]
+    }
+  </script>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="page-header">
+    <span class="header-badge">💰 Free Financial Tool</span>
+    <h1>Loan EMI Calculator<span class="accent-dot">.</span></h1>
+    <p>
+      Estimate your monthly EMI, total interest payable, and total payment
+      amount — instantly & accurately.
+    </p>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-container">
+    <!-- Calculator Card -->
+    <div class="calculator-card" aria-label="EMI Calculator Form">
+      <!-- Quick Select: Loan Amount -->
+      <div class="quick-select-section">
+        <p class="quick-select-label">Quick Loan Amount</p>
+        <div class="chip-row" id="quickAmountChips">
+          <button class="chip" data-amount="1000000">₹10 Lakh</button>
+          <button class="chip" data-amount="2500000">₹25 Lakh</button>
+          <button class="chip active" data-amount="5000000">₹50 Lakh</button>
+          <button class="chip" data-amount="7500000">₹75 Lakh</button>
+          <button class="chip" data-amount="10000000">₹1 Crore</button>
+          <button class="chip" data-amount="15000000">₹1.5 Crore</button>
+          <button class="chip" data-amount="20000000">₹2 Crore</button>
         </div>
-        <button id="emiCalcBtn" class="mt-6 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-semibold">Calculate EMI</button>
-        <div id="emiResult" class="mt-6 hidden rounded-xl bg-primary-50 border border-primary-100 p-5 space-y-3">
-          <div>
-            <p class="text-sm text-gray-600">Monthly EMI</p>
-            <p id="monthlyEmiText" class="text-2xl font-bold text-primary-800"></p>
+      </div>
+
+      <!-- Input Grid -->
+      <div class="input-grid">
+        <!-- Loan Amount -->
+        <div class="input-group">
+          <label for="loanAmount">
+            <span class="label-icon"></span> Loan Amount (INR)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input
+              type="number"
+              id="loanAmount"
+              value="5000000"
+              min="50000"
+              max="50000000"
+              step="50000"
+              placeholder="e.g. 5000000"
+            />
           </div>
-          <div>
-            <p class="text-sm text-gray-600">Total Interest Payable</p>
-            <p id="totalInterestText" class="text-xl font-semibold text-gray-900"></p>
+          <input
+            type="range"
+            id="loanAmountSlider"
+            class="range-slider"
+            min="50000"
+            max="20000000"
+            step="50000"
+            value="5000000"
+            aria-label="Loan amount slider"
+          />
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="input-group">
+          <label for="interestRate">
+            <span class="label-icon"></span> Annual Interest Rate (%)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix">%</span>
+            <input
+              type="number"
+              id="interestRate"
+              value="8.50"
+              min="1"
+              max="25"
+              step="0.01"
+              placeholder="e.g. 8.5"
+            />
           </div>
-          <div>
-            <p class="text-sm text-gray-600">Total Amount Payable</p>
-            <p id="totalPayableText" class="text-xl font-semibold text-gray-900"></p>
+          <input
+            type="range"
+            id="interestRateSlider"
+            class="range-slider"
+            min="1"
+            max="20"
+            step="0.1"
+            value="8.5"
+            aria-label="Interest rate slider"
+          />
+        </div>
+
+        <!-- Loan Tenure -->
+        <div class="input-group">
+          <label for="loanTenure">
+            <span class="label-icon"></span> Loan Tenure (Years)
+          </label>
+          <div class="input-wrapper">
+            <span class="prefix"></span>
+            <input
+              type="number"
+              id="loanTenure"
+              value="20"
+              min="1"
+              max="40"
+              step="1"
+              placeholder="e.g. 20"
+            />
+          </div>
+          <input
+            type="range"
+            id="loanTenureSlider"
+            class="range-slider"
+            min="1"
+            max="35"
+            step="1"
+            value="20"
+            aria-label="Loan tenure slider"
+          />
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="calc-btn-wrapper">
+        <button id="emiCalcBtn" class="btn-calculate">
+          <span class="btn-icon">🧮</span> Calculate EMI
+        </button>
+        <button id="emiResetBtn" class="btn-reset" title="Reset to defaults">
+          ↺ Reset
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="emiResult" class="results-container">
+        <p class="result-header">📋 Your EMI Breakdown</p>
+        <div class="result-inner-grid">
+          <div class="result-item emi-highlight">
+            <p class="result-label">Monthly EMI</p>
+            <p id="monthlyEmiText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Interest Payable</p>
+            <p id="totalInterestText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Amount Payable</p>
+            <p id="totalPayableText" class="result-value">—</p>
+          </div>
+        </div>
+        <!-- Visual Breakdown Bar -->
+        <div class="breakdown-bar-section">
+          <p class="breakdown-bar-label">📊 Principal vs Interest Proportion</p>
+          <div class="breakdown-bar-outer">
+            <div
+              id="breakdownPrincipalBar"
+              class="breakdown-bar-principal"
+              style="width:50%;"
+            >
+            </div>
+            <div
+              id="breakdownInterestBar"
+              class="breakdown-bar-interest"
+              style="width:50%;"
+            >
+            </div>
+          </div>
+          <div class="breakdown-legend">
+            <span
+              ><span class="legend-dot principal-dot"></span> Principal: <strong
+                id="legendPrincipal">—</strong
+              ></span
+            >
+            <span
+              ><span class="legend-dot interest-dot"></span> Interest: <strong
+                id="legendInterest">—</strong
+              ></span
+            >
           </div>
         </div>
       </div>
+
+      <!-- Info Banner -->
+      <div class="info-banner">
+        <span class="info-icon">💡</span>
+        <span
+          ><strong>Tip:</strong> A lower interest rate or shorter tenure can save
+          you lakhs in interest. Use this calculator to compare different scenarios
+          before applying for a home loan.</span
+        >
+      </div>
     </div>
-  </section>
+
+    <!-- ==================== FAQ SECTION ==================== -->
+    <section class="faq-section" aria-labelledby="faq-heading">
+      <h2 id="faq-heading">Frequently Asked Questions</h2>
+      <p class="faq-subtitle">
+        Everything you need to know about EMI and home loans.
+      </p>
+      <div class="faq-grid">
+        <details class="faq-item">
+          <summary>
+            What is an EMI?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              EMI stands for <strong>Equated Monthly Installment</strong>. It is
+              the fixed monthly payment you make to repay a loan over a
+              specified tenure. Each EMI consists of both <em
+                >principal repayment</em
+              > and <em>interest payment</em>. In the early years, the interest
+              component is higher; over time, the principal portion increases.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            How is EMI calculated?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              EMI is calculated using the formula:<br /><strong
+                >EMI = P × r × (1+r)<sup>n</sup> / ((1+r)<sup>n</sup> − 1)</strong
+              ><br />Where <strong>P</strong> = Principal loan amount, <strong
+                >r</strong
+              > = Monthly interest rate (annual rate ÷ 12 ÷ 100), and <strong
+                >n</strong
+              > = Total number of months (tenure in years × 12).
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Does reducing the loan tenure affect EMI?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              Yes. A <strong>shorter tenure</strong> results in higher monthly EMIs
+              but <strong>significantly reduces</strong> the total interest paid.
+              A longer tenure lowers your monthly burden but increases total interest
+              outgo substantially.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Fixed vs Floating interest rates?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              <strong>Fixed rate:</strong> Stays constant throughout the loan tenure
+              — predictable EMIs.<br /><strong>Floating rate:</strong> Changes with
+              market conditions and RBI repo rate — EMIs may increase or decrease
+              over time. Most home loans in India use floating rates.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            Can prepayment reduce my EMI?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              Absolutely. <strong>Partial prepayments</strong> reduce your outstanding
+              principal. You can choose to either <strong
+                >lower your monthly EMI</strong
+              > or <strong>shorten the remaining tenure</strong>. Both options
+              save you significant interest over the long run.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>
+            What factors affect EMI the most?
+            <span class="faq-arrow">▾</span>
+          </summary>
+          <div class="faq-answer">
+            <p>
+              The three pillars are: <strong>Loan Amount</strong> (higher loan = higher
+              EMI), <strong>Interest Rate</strong> (higher rate = higher EMI), and
+              <strong>Tenure</strong> (longer = lower EMI but more total interest).
+              Your <strong>credit score</strong> (CIBIL) also heavily influences the
+              rate you qualify for.
+            </p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Footer Note -->
+    <p class="footer-note">
+      Powered by <strong>PropDiscover</strong> — India's trusted real estate platform.
+      &nbsp;|&nbsp;
+      <a href="/">Back to Home</a>
+    </p>
+  </main>
 </BaseLayout>
 
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --primary-light: #2a5180;
+    --primary-lighter: #e8eff7;
+    --primary-lightest: #f4f7fb;
+    --accent: #f97316;
+    --accent-hover: #ea5c0a;
+    --accent-light: #fff4eb;
+    --accent-glow: rgba(249, 115, 22, 0.25);
+    --header: #0a1929;
+    --header-light: #112240;
+    --text-dark: #1a1a2e;
+    --text-medium: #4a5568;
+    --text-light: #718096;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family:
+      "Inter",
+      "Segoe UI",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    background: var(--gray-50);
+    color: var(--text-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page-header {
+    background: linear-gradient(
+      160deg,
+      var(--header) 0%,
+      #0d2137 40%,
+      #122d4a 100%
+    );
+    padding: 3rem 1.5rem 3.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: -30%;
+    width: 160%;
+    height: 200%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(249, 115, 22, 0.06) 0%,
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+  .page-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.7;
+  }
+  .page-header .header-badge {
+    display: inline-block;
+    background: rgba(249, 115, 22, 0.15);
+    color: #fca35d;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(249, 115, 22, 0.25);
+  }
+  .page-header h1 {
+    color: #ffffff;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+  }
+  .page-header h1 .accent-dot {
+    color: var(--accent);
+  }
+  .page-header p {
+    color: #b0c4d8;
+    font-size: 1.1rem;
+    max-width: 550px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    font-weight: 400;
+  }
+
+  .main-container {
+    max-width: 960px;
+    margin: -1.5rem auto 0;
+    padding: 0 1.25rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .calculator-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem 2rem 2.25rem;
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+  }
+  .calculator-card:hover {
+    box-shadow: var(--shadow-xl);
+  }
+
+  .quick-select-section {
+    margin-bottom: 1.75rem;
+  }
+  .quick-select-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    margin-bottom: 0.6rem;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    padding: 0.5rem 1.05rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--gray-300);
+    background: var(--white);
+    color: var(--text-medium);
+    transition: var(--transition);
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.06);
+  }
+  .chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 10px var(--accent-glow);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .input-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .calculator-card {
+      padding: 1.5rem 1.25rem;
+    }
+    .page-header {
+      padding: 2rem 1rem 2.5rem;
+    }
+    .page-header h1 {
+      font-size: 1.6rem;
+    }
+    .result-inner-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .faq-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .input-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .input-group label .label-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+  .input-wrapper {
+    position: relative;
+  }
+  .input-wrapper .prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .input-wrapper input[type="number"] {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    background: var(--gray-50);
+    transition: var(--transition);
+    font-family: inherit;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .input-wrapper input[type="number"]::-webkit-outer-spin-button,
+  .input-wrapper input[type="number"]::-webkit-inner-spin-button {
+    opacity: 1;
+    height: 32px;
+  }
+  .input-wrapper input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(30, 58, 95, 0.06);
+  }
+  .input-group .range-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--gray-200);
+    outline: none;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+  .range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+  }
+  .range-slider::-webkit-slider-thumb:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .range-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .calc-btn-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .btn-calculate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2.2rem;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.02em;
+    box-shadow: 0 6px 24px var(--accent-glow);
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+  }
+  .btn-calculate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+  .btn-calculate:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(249, 115, 22, 0.35);
+  }
+  .btn-calculate:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+  .btn-reset {
+    padding: 0.85rem 1.5rem;
+    background: transparent;
+    color: var(--text-medium);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+  .btn-reset:hover {
+    border-color: var(--gray-400);
+    color: var(--text-dark);
+    background: var(--gray-50);
+  }
+
+  .results-container {
+    margin-top: 2rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      145deg,
+      #162d47 0%,
+      var(--primary) 40%,
+      #1a3552 100%
+    );
+    padding: 2rem 1.75rem;
+    color: #fff;
+    display: none;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .results-container.visible {
+    display: block;
+    animation: fadeSlideIn 0.45s ease-out;
+  }
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .results-container::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -25%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(
+      circle,
+      rgba(249, 115, 22, 0.1) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+  .result-inner-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 1;
+  }
+  .result-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: var(--transition);
+  }
+  .result-item:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .result-item .result-label {
+    font-size: 0.78rem;
+    color: #b0c8dd;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .result-item .result-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    word-break: break-all;
+  }
+  .result-item.emi-highlight {
+    background: rgba(249, 115, 22, 0.13);
+    border-color: rgba(249, 115, 22, 0.3);
+    position: relative;
+  }
+  .result-item.emi-highlight .result-value {
+    color: #ffb87a;
+    font-size: 1.75rem;
+  }
+  .result-item.emi-highlight::after {
+    content: "★";
+    position: absolute;
+    top: -10px;
+    right: -6px;
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+  .breakdown-bar-section {
+    margin-top: 1.25rem;
+    position: relative;
+    z-index: 1;
+  }
+  .breakdown-bar-outer {
+    height: 14px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    display: flex;
+  }
+  .breakdown-bar-principal {
+    height: 100%;
+    background: #5b9bd5;
+    border-radius: 7px 0 0 7px;
+    transition: width 0.5s ease-out;
+    min-width: 2px;
+  }
+  .breakdown-bar-interest {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 0 7px 7px 0;
+    transition: width 0.5s ease-out;
+    min-width: 2px;
+  }
+  .breakdown-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: #c0d4e8;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .principal-dot {
+    background: #5b9bd5;
+  }
+  .interest-dot {
+    background: var(--accent);
+  }
+
+  .info-banner {
+    margin-top: 1.5rem;
+    background: var(--primary-lightest);
+    border: 1px solid var(--primary-lighter);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .faq-section {
+    margin-top: 2.5rem;
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    padding: 2rem 2rem 1.5rem;
+    border: 1px solid var(--gray-200);
+  }
+  .faq-section h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--header);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+  }
+  .faq-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+  }
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .faq-item {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: var(--transition);
+    background: var(--white);
+  }
+  .faq-item summary {
+    padding: 1rem 1.2rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transition: var(--transition);
+    user-select: none;
+  }
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-item summary .faq-arrow {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 0.7rem;
+    color: var(--text-light);
+  }
+  .faq-item[open] summary {
+    color: var(--primary);
+    background: var(--primary-lightest);
+  }
+  .faq-item[open] summary .faq-arrow {
+    background: var(--primary);
+    color: #fff;
+    transform: rotate(180deg);
+  }
+  .faq-item .faq-answer {
+    padding: 0 1.2rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+    line-height: 1.65;
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+  .footer-note a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .footer-note a:hover {
+    color: var(--accent);
+  }
+
+  @keyframes subtlePulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+    }
+  }
+  .pulse-once {
+    animation: subtlePulse 1.2s ease-out 1;
+  }
+</style>
+
 <script>
-  const formatINR = (value: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
+  // EMI Calculator Logic
+  const formatINR = (value) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
 
-  const emiButton = document.getElementById('emiCalcBtn');
-  const emiResult = document.getElementById('emiResult');
-  const monthlyEmiText = document.getElementById('monthlyEmiText');
-  const totalInterestText = document.getElementById('totalInterestText');
-  const totalPayableText = document.getElementById('totalPayableText');
+  const loanAmountInput = document.getElementById("loanAmount");
+  const interestRateInput = document.getElementById("interestRate");
+  const loanTenureInput = document.getElementById("loanTenure");
+  const loanAmountSlider = document.getElementById("loanAmountSlider");
+  const interestRateSlider = document.getElementById("interestRateSlider");
+  const loanTenureSlider = document.getElementById("loanTenureSlider");
+  const emiButton = document.getElementById("emiCalcBtn");
+  const emiResetBtn = document.getElementById("emiResetBtn");
+  const emiResult = document.getElementById("emiResult");
+  const monthlyEmiText = document.getElementById("monthlyEmiText");
+  const totalInterestText = document.getElementById("totalInterestText");
+  const totalPayableText = document.getElementById("totalPayableText");
+  const breakdownPrincipalBar = document.getElementById(
+    "breakdownPrincipalBar",
+  );
+  const breakdownInterestBar = document.getElementById("breakdownInterestBar");
+  const legendPrincipal = document.getElementById("legendPrincipal");
+  const legendInterest = document.getElementById("legendInterest");
+  const quickAmountChips = document.getElementById("quickAmountChips");
 
-  emiButton?.addEventListener('click', () => {
-    const principal = Number((document.getElementById('loanAmount') as HTMLInputElement)?.value || 0);
-    const annualRate = Number((document.getElementById('interestRate') as HTMLInputElement)?.value || 0);
-    const tenureYears = Number((document.getElementById('loanTenure') as HTMLInputElement)?.value || 0);
+  const syncNumberToSlider = (num, slider, isFloat) => {
+    const val = parseFloat(num.value);
+    if (
+      !isNaN(val) &&
+      val >= parseFloat(slider.min) &&
+      val <= parseFloat(slider.max)
+    ) {
+      slider.value = isFloat ? val.toFixed(1) : val;
+    }
+  };
 
-    if (principal <= 0 || annualRate <= 0 || tenureYears <= 0) return;
+  const syncSliderToNumber = (slider, num, isFloat) => {
+    num.value = isFloat ? parseFloat(slider.value).toFixed(2) : slider.value;
+  };
+
+  const highlightChip = (amount) => {
+    quickAmountChips.querySelectorAll(".chip").forEach((chip) => {
+      chip.classList.toggle(
+        "active",
+        parseInt(chip.dataset.amount, 10) === amount,
+      );
+    });
+  };
+
+  const calculateEMI = () => {
+    const principal = parseFloat(loanAmountInput.value) || 0;
+    const annualRate = parseFloat(interestRateInput.value) || 0;
+    const tenureYears = parseFloat(loanTenureInput.value) || 0;
+
+    if (principal <= 0 || annualRate <= 0 || tenureYears <= 0) {
+      emiResult.classList.remove("visible");
+      return;
+    }
 
     const monthlyRate = annualRate / 12 / 100;
-    const months = tenureYears * 12;
-    const factor = Math.pow(1 + monthlyRate, months);
-    const emi = (principal * monthlyRate * factor) / (factor - 1);
+    const months = Math.round(tenureYears * 12);
+    let emi;
+    if (monthlyRate === 0) {
+      emi = principal / months;
+    } else {
+      const factor = Math.pow(1 + monthlyRate, months);
+      emi = (principal * monthlyRate * factor) / (factor - 1);
+    }
+
     const totalPayable = emi * months;
     const totalInterest = totalPayable - principal;
+    const principalPct = (principal / totalPayable) * 100;
+    const interestPct = (totalInterest / totalPayable) * 100;
 
-    if (monthlyEmiText && totalInterestText && totalPayableText && emiResult) {
-      monthlyEmiText.textContent = formatINR(emi);
-      totalInterestText.textContent = formatINR(totalInterest);
-      totalPayableText.textContent = formatINR(totalPayable);
-      emiResult.classList.remove('hidden');
+    monthlyEmiText.textContent = formatINR(emi);
+    totalInterestText.textContent = formatINR(totalInterest);
+    totalPayableText.textContent = formatINR(totalPayable);
+    breakdownPrincipalBar.style.width = principalPct + "%";
+    breakdownInterestBar.style.width = interestPct + "%";
+    legendPrincipal.textContent = Math.round(principalPct) + "%";
+    legendInterest.textContent = Math.round(interestPct) + "%";
+
+    emiResult.classList.add("visible");
+    emiResult.classList.remove("pulse-once");
+    void emiResult.offsetWidth;
+    emiResult.classList.add("pulse-once");
+  };
+
+  const debounce = (fn, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  };
+  const debouncedCalculate = debounce(calculateEMI, 300);
+
+  loanAmountInput.addEventListener("input", () => {
+    syncNumberToSlider(loanAmountInput, loanAmountSlider, false);
+    highlightChip(parseInt(loanAmountInput.value, 10));
+    debouncedCalculate();
+  });
+  interestRateInput.addEventListener("input", () => {
+    syncNumberToSlider(interestRateInput, interestRateSlider, true);
+    debouncedCalculate();
+  });
+  loanTenureInput.addEventListener("input", () => {
+    syncNumberToSlider(loanTenureInput, loanTenureSlider, false);
+    debouncedCalculate();
+  });
+
+  loanAmountSlider.addEventListener("input", () => {
+    syncSliderToNumber(loanAmountSlider, loanAmountInput, false);
+    highlightChip(parseInt(loanAmountInput.value, 10));
+    debouncedCalculate();
+  });
+  interestRateSlider.addEventListener("input", () => {
+    syncSliderToNumber(interestRateSlider, interestRateInput, true);
+    debouncedCalculate();
+  });
+  loanTenureSlider.addEventListener("input", () => {
+    syncSliderToNumber(loanTenureSlider, loanTenureInput, false);
+    debouncedCalculate();
+  });
+
+  emiButton.addEventListener("click", () => {
+    syncNumberToSlider(loanAmountInput, loanAmountSlider, false);
+    syncNumberToSlider(interestRateInput, interestRateSlider, true);
+    syncNumberToSlider(loanTenureInput, loanTenureSlider, false);
+    highlightChip(parseInt(loanAmountInput.value, 10));
+    calculateEMI();
+    if (window.innerWidth < 768 && emiResult.classList.contains("visible")) {
+      emiResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   });
+
+  emiResetBtn.addEventListener("click", () => {
+    loanAmountInput.value = 5000000;
+    interestRateInput.value = 8.5;
+    loanTenureInput.value = 20;
+    loanAmountSlider.value = 5000000;
+    interestRateSlider.value = 8.5;
+    loanTenureSlider.value = 20;
+    highlightChip(5000000);
+    calculateEMI();
+  });
+
+  quickAmountChips.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    const amount = parseInt(chip.dataset.amount, 10);
+    loanAmountInput.value = amount;
+    loanAmountSlider.value = amount;
+    highlightChip(amount);
+    calculateEMI();
+  });
+
+  // Initial calculation
+  calculateEMI();
+  highlightChip(5000000);
 </script>

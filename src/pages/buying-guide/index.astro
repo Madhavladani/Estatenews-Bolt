@@ -6,57 +6,238 @@ const breadcrumbs = [
   { name: 'Home', url: '/' },
   { name: 'Buying Guide', url: '/buying-guide' },
 ];
+
+const guides = [
+  {
+    title: 'How to buy property',
+    description: 'A step-by-step purchase process with a checklist you can follow.',
+    url: '/buying-guide/how-to-buy-property',
+    icon: 'M9 5l7 7-7 7',
+  },
+  {
+    title: 'Home loan guide',
+    description: 'Eligibility, documents, down payment planning, and rate basics.',
+    url: '/buying-guide/home-loan-guide',
+    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+  },
+  {
+    title: 'RERA guide',
+    description: 'What to verify on the RERA portal and what red flags to avoid.',
+    url: '/buying-guide/rera-guide',
+    icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+  },
+  {
+    title: 'Stamp duty guide',
+    description: 'Stamp duty, registration charges, and how the payment usually works.',
+    url: '/buying-guide/stamp-duty-guide',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+  },
+  {
+    title: 'Property tax guide',
+    description: 'How property tax is calculated, who pays it, and payment reminders.',
+    url: '/buying-guide/property-tax-guide',
+    icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
+  },
+  {
+    title: 'Property documents checklist',
+    description: 'Documents to collect and verify before you pay any booking amount.',
+    url: '/buying-guide/property-documents-checklist',
+    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+  },
+];
+
+const faqs = [
+  {
+    question: "What is the first step before buying property?",
+    answer: "Fix your budget – including down payment, stamp duty, registration, and a buffer for interiors and emergencies. Then shortlist locations and projects that fit your financial comfort.",
+  },
+  {
+    question: "How can I verify a property's legal status?",
+    answer: "Check the title deeds, encumbrance certificate, approved building plans, occupancy/completion certificate, and RERA registration (for applicable projects). Use our property documents checklist for a complete list.",
+  },
+  {
+    question: "What is stamp duty and how is it calculated?",
+    answer: "Stamp duty is a state-level tax paid on property transactions. It's usually a percentage of the agreement value or circle rate (whichever is higher) and varies by state, property type, and buyer category.",
+  },
+  {
+    question: "Do I need a home loan pre-approval before searching?",
+    answer: "While not mandatory, a pre-approval gives you a clear budget and shows sellers you're a serious buyer. It also helps you avoid falling in love with a property you can't finance.",
+  },
+  {
+    question: "What documents should I check before paying a booking amount?",
+    answer: "At minimum, verify the title/ownership chain, encumbrance certificate, approved plans, and RERA details. Never pay without seeing these documents and consulting a lawyer.",
+  },
+];
 ---
 
 <BaseLayout
   title="Buying Guide | PropDiscover"
   description="Helpful property buying guides: how to buy property, home loans, RERA checks, stamp duty & registration, property tax, and document checklists."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "name": b.name,
+        "item": `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Buying Guide",
+      "description": "Helpful property buying guides: how to buy property, home loans, RERA checks, stamp duty & registration, property tax, and document checklists.",
+      "url": "https://propdiscover.com/buying-guide",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "PropDiscover",
+        "url": "https://propdiscover.com",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(f => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answer,
+        },
+      })),
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Buying Guide</h1>
-        <p class="text-gray-600 mt-2">Clear, practical guides for homebuyers and investors.</p>
+
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"></div>
+    <div class="absolute inset-0 opacity-[0.04] pointer-events-none" style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"></div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10">
+      <!-- Accent badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5" style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        Knowledge Base
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <a href="/buying-guide/how-to-buy-property" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">How to buy property</h2>
-          <p class="text-sm text-gray-600 mt-2">A step-by-step purchase process with a checklist you can follow.</p>
-        </a>
-        <a href="/buying-guide/home-loan-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Home loan guide</h2>
-          <p class="text-sm text-gray-600 mt-2">Eligibility, documents, down payment planning, and rate basics.</p>
-        </a>
-        <a href="/buying-guide/rera-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">RERA guide</h2>
-          <p class="text-sm text-gray-600 mt-2">What to verify on the RERA portal and what red flags to avoid.</p>
-        </a>
-        <a href="/buying-guide/stamp-duty-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Stamp duty guide</h2>
-          <p class="text-sm text-gray-600 mt-2">Stamp duty, registration charges, and how the payment usually works.</p>
-        </a>
-        <a href="/buying-guide/property-tax-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property tax guide</h2>
-          <p class="text-sm text-gray-600 mt-2">How property tax is calculated, who pays it, and payment reminders.</p>
-        </a>
-        <a href="/buying-guide/property-documents-checklist" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
-          <h2 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property documents checklist</h2>
-          <p class="text-sm text-gray-600 mt-2">Documents to collect and verify before you pay any booking amount.</p>
-        </a>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight">
+        Buying Guide
+        <span class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80" style="color: #f97316;">Practical resources for smart buyers</span>
+      </h1>
+      <p class="text-base md:text-lg max-w-2xl leading-relaxed" style="color: rgba(255,255,255,0.75);">
+        Clear, actionable guides to help you navigate every stage of buying property—from planning and legal checks to registration and beyond.
+      </p>
+
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div class="flex items-center gap-2 text-sm font-medium" style="color: rgba(255,255,255,0.6);">
+          <svg class="w-4 h-4" style="color: #f97316;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          {guides.length} essential guides
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium" style="color: rgba(255,255,255,0.6);">
+          <svg class="w-4 h-4" style="color: #f97316;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Updated regularly
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium" style="color: rgba(255,255,255,0.6);">
+          <svg class="w-4 h-4" style="color: #f97316;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Expert-verified
+        </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== GUIDES GRID ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {guides.map((guide) => (
+          <a
+            href={guide.url}
+            class="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full"
+          >
+            <!-- Subtle top accent line -->
+            <div class="absolute top-0 left-0 right-0 h-1 transition-all duration-300 group-hover:h-1.5" style="background-color: #f97316;"></div>
+
+            <!-- Icon -->
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-105" style="background-color: rgba(30,58,95,0.08);">
+              <svg class="w-5 h-5" style="color: #1e3a5f;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d={guide.icon} />
+              </svg>
+            </div>
+
+            <!-- Title -->
+            <h2 class="text-lg font-bold mb-2 transition-colors duration-200 group-hover:text-[#f97316]" style="color: #0a1929;">
+              {guide.title}
+            </h2>
+
+            <!-- Description -->
+            <p class="text-sm leading-relaxed flex-1" style="color: #475569;">
+              {guide.description}
+            </p>
+
+            <!-- Arrow -->
+            <div class="flex items-center mt-4 text-sm font-semibold transition-all duration-200 group-hover:gap-1.5" style="color: #1e3a5f;">
+              <span>Read guide</span>
+              <svg class="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- ========== FAQ SECTION ========== -->
+      <div class="mt-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: rgba(249,115,22,0.1);">
+            <svg class="w-5 h-5" style="color: #f97316;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Frequently Asked Questions</h2>
+        </div>
+        <div class="space-y-4">
+          {faqs.map((faq, i) => (
+            <div class="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+              <h3 class="text-sm sm:text-base font-semibold mb-2" style="color: #0a1929;">
+                {i + 1}. {faq.question}
+              </h3>
+              <p class="text-sm sm:text-base leading-relaxed" style="color: #475569;">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div class="mt-12 text-center rounded-2xl p-6 sm:p-8" style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);">
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">Not sure where to start?</p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Try our step‑by‑step purchase checklist or estimate your finances with our free tools.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+            style="background-color: #f97316; color: #fff;"
+          >
+            Start step‑by‑step guide
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </a>
+          <a
+            href="/loan-emi-calculator"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg border"
+            style="border-color: rgba(255,255,255,0.3); color: #fff;"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            EMI Calculator
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

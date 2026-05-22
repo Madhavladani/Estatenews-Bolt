@@ -1,11 +1,11 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const breadcrumbs = [
-  { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'Home loan guide', url: '/buying-guide/home-loan-guide' },
+  { name: "Home", url: "/" },
+  { name: "Buying Guide", url: "/buying-guide" },
+  { name: "Home loan guide", url: "/buying-guide/home-loan-guide" },
 ];
 ---
 
@@ -13,80 +13,796 @@ const breadcrumbs = [
   title="Home Loan Guide (Eligibility, EMI, Documents) | PropDiscover"
   description="Home loan guide for property buyers: eligibility, required documents, fixed vs floating rates, pre-approval, down payment, and common mistakes."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: b.name,
+        item: `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline:
+        "Home Loan Guide: Eligibility, EMI, Documents & Smart Comparisons",
+      description:
+        "Home loan guide for property buyers: eligibility, required documents, fixed vs floating rates, pre-approval, down payment, and common mistakes.",
+      url: "https://propdiscover.com/buying-guide/home-loan-guide",
+      author: {
+        "@type": "Organization",
+        name: "PropDiscover",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PropDiscover",
+        url: "https://propdiscover.com",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": "https://propdiscover.com/buying-guide/home-loan-guide",
+      },
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Home loan guide</h1>
-      <p class="text-gray-600 mb-8">
-        Use this guide to understand eligibility, documents, and how to compare lenders beyond just the interest rate.
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div
+      class="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"
+    >
+    </div>
+
+    <div
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10"
+    >
+      <!-- Accent badge -->
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5"
+        style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);"
+      >
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        Financing Your Home
+      </div>
+
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight"
+      >
+        Home Loan Guide
+        <span
+          class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80"
+          style="color: #f97316;">Eligibility, EMI & documents</span
+        >
+      </h1>
+      <p
+        class="text-base md:text-lg max-w-2xl leading-relaxed"
+        style="color: rgba(255,255,255,0.75);"
+      >
+        Compare lenders beyond just the interest rate. Understand eligibility,
+        required documents, and how to structure your loan smartly.
       </p>
 
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Before you apply</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Check your credit score and clear small dues if possible.</li>
-            <li>Plan your down payment and keep extra funds for registration & interiors.</li>
-            <li>Prefer a pre-approval / sanction to negotiate confidently.</li>
-          </ul>
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+          >
+          Pre-approval tips
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Eligibility factors (what lenders look at)</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Income stability, existing EMIs, and employer/business profile.</li>
-            <li>Age and remaining earning years (loan tenure fit).</li>
-            <li>Property type, builder profile, and legal/technical clearance.</li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path></svg
+          >
+          Compare total cost
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Fixed vs floating interest</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Fixed can help predict EMIs early on; floating can benefit when rates fall.</li>
-            <li>Compare the spread, reset frequency, and switching terms.</li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Documents you’ll usually need</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>KYC: PAN, Aadhaar, address proof, photos.</li>
-            <li>Income: salary slips / ITRs, bank statements, Form 16 (as applicable).</li>
-            <li>Property: allotment/booking, agreement draft, approvals, and builder papers.</li>
-          </ul>
-          <p class="mt-3">
-            For deeper due diligence: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-documents-checklist">Property documents checklist</a>.
-          </p>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Compare lenders using the total cost</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Processing fee, legal/technical charges, and insurance add-ons.</li>
-            <li>Part-prepayment rules, foreclosure charges, and conversion fees.</li>
-          </ul>
-        </div>
-
-        <div class="pt-2">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Useful tools</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li><a class="text-primary-700 hover:text-primary-800" href="/loan-emi-calculator">Loan EMI calculator</a></li>
-            <li><a class="text-primary-700 hover:text-primary-800" href="/properties-roi-calculator">Property ROI calculator</a></li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path></svg
+          >
+          Document checklist
         </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== MAIN CONTENT ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- 1) Before you apply -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Before you apply
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Check your credit score and clear small dues if possible.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Plan your down payment and keep extra funds for
+                    registration & interiors.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Prefer a pre-approval / sanction to negotiate confidently.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) Eligibility factors -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Eligibility factors (what lenders look at)
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Income stability, existing EMIs, and employer/business
+                    profile.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Age and remaining earning years (loan tenure fit).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Property type, builder profile, and legal/technical
+                    clearance.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) Fixed vs floating -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Fixed vs floating interest
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Fixed can help predict EMIs early on; floating can benefit
+                    when rates fall.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Compare the spread, reset frequency, and switching terms.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) Documents you'll need -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Documents you’ll usually need
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    ><strong class="font-semibold" style="color: #0a1929;"
+                      >KYC:</strong
+                    > PAN, Aadhaar, address proof, photos.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    ><strong class="font-semibold" style="color: #0a1929;"
+                      >Income:</strong
+                    > salary slips / ITRs, bank statements, Form 16 (as applicable).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    ><strong class="font-semibold" style="color: #0a1929;"
+                      >Property:</strong
+                    > allotment/booking, agreement draft, approvals, and builder papers.</span
+                  >
+                </li>
+              </ul>
+              <a
+                href="/buying-guide/property-documents-checklist"
+                class="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:gap-3"
+                style="background-color: rgba(30,58,95,0.06); color: #1e3a5f;"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+                Property documents checklist
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path></svg
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) Compare lenders -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Compare lenders using the total cost
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Processing fee, legal/technical charges, and insurance
+                    add-ons.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Part-prepayment rules, foreclosure charges, and conversion
+                    fees.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== USEFUL TOOLS CARD ========== -->
+      <div
+        class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">
+            Useful tools
+          </h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/loan-emi-calculator"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Loan EMI calculator</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/properties-roi-calculator"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Property ROI calculator</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== NEXT READS ========== -->
+      <div
+        class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Next reads</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >How to buy property</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/buying-guide/property-documents-checklist"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Property documents checklist</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div
+        class="mt-10 text-center rounded-2xl p-6 sm:p-8"
+        style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);"
+      >
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">
+          Ready to finance your dream home?
+        </p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Get the full picture – explore our complete buying guide for a
+          stress-free purchase.
+        </p>
+        <a
+          href="/buying-guide"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+          style="background-color: #f97316; color: #fff;"
+        >
+          View buying guide
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

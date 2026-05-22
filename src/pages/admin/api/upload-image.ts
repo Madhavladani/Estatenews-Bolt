@@ -12,21 +12,22 @@ const endpoint = import.meta.env.R2_ENDPOINT || (accountId ? `https://${accountI
 
 const s3Client = accountId && accessKeyId && secretAccessKey
   ? new S3Client({
-      region: 'auto',
-      endpoint,
-      credentials: { accessKeyId, secretAccessKey },
-      forcePathStyle: true,
-    })
+    region: 'auto',
+    endpoint,
+    credentials: { accessKeyId, secretAccessKey },
+    forcePathStyle: true,
+  })
   : null;
 
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
-function extFromMimeType(mimeType: string): string {
+function mimeToExt(mimeType: string): string {
   if (mimeType === 'image/png') return 'png';
   if (mimeType === 'image/webp') return 'webp';
   if (mimeType === 'image/avif') return 'avif';
   return 'jpg';
 }
+
 
 export const POST: APIRoute = async ({ request, locals }) => {
   if (!locals.user || !locals.supabase) {
@@ -52,23 +53,25 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const inputBuffer = Buffer.from(await file.arrayBuffer());
 
   let outputBuffer: Buffer;
-  let outputType = 'image/webp';
+  const outputType = file.type; // preserve original format
+  const outputExt = mimeToExt(file.type);
   try {
-    // Resize and compress aggressively (~60-70% lower size for common inputs)
-    outputBuffer = await sharp(inputBuffer)
+    const pipeline = sharp(inputBuffer)
       .rotate()
-      .resize({ width: 1920, withoutEnlargement: true, fit: 'inside' })
-      .webp({ quality: 65 })
-      .toBuffer();
+      .resize({ width: 1920, withoutEnlargement: true, fit: 'inside' });
+
+    if (outputExt === 'webp') outputBuffer = await pipeline.webp({ quality: 60 }).toBuffer();
+    else if (outputExt === 'avif') outputBuffer = await pipeline.avif({ quality: 60 }).toBuffer();
+    else if (outputExt === 'png') outputBuffer = await pipeline.png({ compressionLevel: 9 }).toBuffer();
+    else outputBuffer = await pipeline.jpeg({ quality: 60 }).toBuffer();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid image data.' }), { status: 400 });
   }
 
   const baseName = (file.name || 'image').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'image';
-  const originalExt = extFromMimeType(file.type);
   const timestamp = Date.now();
   const randomPart = crypto.randomUUID().slice(0, 8);
-  const key = `${folder}/${baseName}-${timestamp}-${randomPart}.${originalExt}.webp`;
+  const key = `${folder}/${baseName}-${timestamp}-${randomPart}.${outputExt}`;
 
   await s3Client.send(new PutObjectCommand({
     Bucket: bucketName,

@@ -1,11 +1,11 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const breadcrumbs = [
-  { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'RERA guide', url: '/buying-guide/rera-guide' },
+  { name: "Home", url: "/" },
+  { name: "Buying Guide", url: "/buying-guide" },
+  { name: "RERA guide", url: "/buying-guide/rera-guide" },
 ];
 ---
 
@@ -13,61 +13,535 @@ const breadcrumbs = [
   title="RERA Guide: What to Check Before Buying | PropDiscover"
   description="RERA guide for property buyers: what RERA means, how to verify a project and promoter on the RERA portal, and red flags to avoid."
   breadcrumbs={breadcrumbs}
-  jsonLd={{
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbs.map((b, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "name": b.name,
-      "item": `https://propdiscover.com${b.url}`,
-    })),
-  }}
+  jsonLd={[
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: breadcrumbs.map((b, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: b.name,
+        item: `https://propdiscover.com${b.url}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "RERA Guide: What to Check Before Buying",
+      description:
+        "RERA guide for property buyers: what RERA means, how to verify a project and promoter on the RERA portal, and red flags to avoid.",
+      url: "https://propdiscover.com/buying-guide/rera-guide",
+      author: {
+        "@type": "Organization",
+        name: "PropDiscover",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PropDiscover",
+        url: "https://propdiscover.com",
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": "https://propdiscover.com/buying-guide/rera-guide",
+      },
+    },
+  ]}
 >
-  <section class="py-14 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">RERA guide</h1>
-      <p class="text-gray-600 mb-8">
-        RERA helps protect homebuyers by bringing transparency to project approvals, timelines, and disclosures.
+  <!-- ========== HERO HEADER ========== -->
+  <section class="relative overflow-hidden" style="background-color: #0a1929;">
+    <div
+      class="absolute inset-0 opacity-[0.06] pointer-events-none"
+      style="background: radial-gradient(ellipse at 30% 50%, #f97316 0%, transparent 70%);"
+    >
+    </div>
+    <div
+      class="absolute inset-0 opacity-[0.04] pointer-events-none"
+      style="background: radial-gradient(ellipse at 75% 30%, #ffffff 0%, transparent 60%);"
+    >
+    </div>
+
+    <div
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10"
+    >
+      <!-- Accent badge -->
+      <div
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase mb-5"
+        style="background-color: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3);"
+      >
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+        >
+        Buyer Protection
+      </div>
+
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 tracking-tight"
+      >
+        RERA Guide
+        <span
+          class="block text-xl sm:text-2xl md:text-3xl font-semibold mt-1 opacity-80"
+          style="color: #f97316;">Check before you buy</span
+        >
+      </h1>
+      <p
+        class="text-base md:text-lg max-w-2xl leading-relaxed"
+        style="color: rgba(255,255,255,0.75);"
+      >
+        RERA brings transparency to project approvals, timelines, and
+        disclosures. Use this guide to verify every detail and spot red flags
+        early.
       </p>
 
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 space-y-7 text-gray-700 leading-relaxed">
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">What to check on the RERA portal</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Project registration number and validity.</li>
-            <li>Promoter details, past projects, and litigation disclosures (if listed).</li>
-            <li>Approved plans, number of units, and promised amenities.</li>
-            <li>Quarterly progress updates / construction status (where available).</li>
-          </ul>
+      <!-- Quick stats -->
+      <div class="flex flex-wrap gap-4 mt-8">
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg
+          >
+          Verify in minutes
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Common red flags</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li>Missing registration details or mismatched project name/phase.</li>
-            <li>Unclear possession dates or vague payment milestones.</li>
-            <li>Verbal promises that are not reflected in brochures/agreements.</li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+            ></path></svg
+          >
+          Avoid common traps
         </div>
-
-        <div>
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Documents still matter</h2>
-          <p>
-            Even for RERA-registered projects, verify core documents and approvals before paying a large amount.
-            Use: <a class="text-primary-700 hover:text-primary-800" href="/buying-guide/property-documents-checklist">Property documents checklist</a>.
-          </p>
-        </div>
-
-        <div class="pt-2">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Next reads</h2>
-          <ul class="list-disc pl-5 space-y-2">
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/how-to-buy-property">How to buy property</a></li>
-            <li><a class="text-primary-700 hover:text-primary-800" href="/buying-guide/stamp-duty-guide">Stamp duty guide</a></li>
-          </ul>
+        <div
+          class="flex items-center gap-2 text-sm font-medium"
+          style="color: rgba(255,255,255,0.6);"
+        >
+          <svg
+            class="w-4 h-4"
+            style="color: #f97316;"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+          >
+          Backed by law
         </div>
       </div>
     </div>
   </section>
-</BaseLayout>
 
+  <!-- ========== MAIN CONTENT ========== -->
+  <section class="py-12 md:py-16" style="background-color: #f8fafc;">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <!-- 1) What to check on the RERA portal -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <!-- Icon -->
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                What to check on the RERA portal
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span>Project registration number and validity.</span>
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Promoter details, past projects, and litigation disclosures
+                    (if listed).</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Approved plans, number of units, and promised amenities.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Quarterly progress updates / construction status (where
+                    available).</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) Common red flags -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Common red flags
+              </h2>
+              <ul class="space-y-2.5">
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Missing registration details or mismatched project
+                    name/phase.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Unclear possession dates or vague payment milestones.</span
+                  >
+                </li>
+                <li
+                  class="flex items-start gap-3 text-sm sm:text-base leading-relaxed"
+                  style="color: #334155;"
+                >
+                  <span
+                    class="flex-shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full"
+                    style="background-color: #f97316;"></span>
+                  <span
+                    >Verbal promises that are not reflected in
+                    brochures/agreements.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) Documents still matter -->
+      <div
+        class="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5"
+          style="background-color: #f97316;"
+        >
+        </div>
+        <div class="p-5 sm:p-7 pl-6 sm:pl-9">
+          <div class="flex items-start gap-4">
+            <div
+              class="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shadow-sm"
+              style="background-color: #1e3a5f;"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path></svg
+              >
+            </div>
+            <div class="flex-1 min-w-0">
+              <h2
+                class="text-lg sm:text-xl font-bold mb-3"
+                style="color: #0a1929;"
+              >
+                Documents still matter
+              </h2>
+              <p
+                class="text-sm sm:text-base leading-relaxed mb-3"
+                style="color: #334155;"
+              >
+                Even for RERA-registered projects, verify core documents and
+                approvals before paying a large amount.
+              </p>
+              <a
+                href="/buying-guide/property-documents-checklist"
+                class="inline-flex items-center gap-2 mt-1 text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:gap-3"
+                style="background-color: rgba(30,58,95,0.06); color: #1e3a5f;"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  ></path></svg
+                >
+                Property documents checklist
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"></path></svg
+                >
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== QUICK NEXT READS ========== -->
+      <div
+        class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8"
+      >
+        <div class="flex items-center gap-3 mb-5">
+          <div
+            class="w-10 h-10 rounded-xl flex items-center justify-center"
+            style="background-color: rgba(249,115,22,0.1);"
+          >
+            <svg
+              class="w-5 h-5"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path></svg
+            >
+          </div>
+          <h2 class="text-xl font-bold" style="color: #0a1929;">Next reads</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <a
+            href="/buying-guide/how-to-buy-property"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >How to buy property</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+          <a
+            href="/buying-guide/stamp-duty-guide"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group"
+            style="background-color: #f8fafc;"
+          >
+            <div
+              class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: rgba(30,58,95,0.08);"
+            >
+              <svg
+                class="w-4 h-4"
+                style="color: #1e3a5f;"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;"
+              >Stamp duty guide</span
+            >
+            <svg
+              class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              style="color: #f97316;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 5l7 7-7 7"></path></svg
+            >
+          </a>
+        </div>
+      </div>
+
+      <!-- ========== BOTTOM CTA ========== -->
+      <div
+        class="mt-10 text-center rounded-2xl p-6 sm:p-8"
+        style="background: linear-gradient(135deg, #1e3a5f 0%, #0a1929 100%);"
+      >
+        <p class="text-white font-semibold text-base sm:text-lg mb-1">
+          Want a complete pre‑purchase checklist?
+        </p>
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">
+          Our buying guide walks you through every step, from budget to
+          registration.
+        </p>
+        <a
+          href="/buying-guide"
+          class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
+          style="background-color: #f97316; color: #fff;"
+        >
+          Explore full buying guide
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg
+          >
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
