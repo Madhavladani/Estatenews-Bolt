@@ -53,7 +53,7 @@ export function buildBreadcrumbSchema(items: { name: string; url: string }[]) {
 export function buildProjectSchema(project: Project, city: City) {
   return {
     '@context': 'https://schema.org',
-    '@type': 'Residence' === project.project_type ? 'Residence' : 'CommercialBuilding',
+    '@type': 'residential' === project.project_type ? 'Residence' : 'CommercialBuilding',
     name: project.title,
     description: project.short_description,
     image: project.featured_image,
@@ -136,8 +136,16 @@ export function buildBlogArticleSchema(article: Blog) {
     },
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
-    author: article.author_name
-      ? [{ '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }]
+    author: article.author
+      ? {
+          '@type': 'Person',
+          name: article.author.full_name,
+          url: `${SITE_URL}/author/${article.author.slug}`,
+          image: article.author.photo_url,
+          jobTitle: article.author.company_role,
+        }
+      : article.author_name
+      ? { '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }
       : undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',

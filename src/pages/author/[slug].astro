@@ -12,13 +12,15 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.params;
 
-const { data: author } = await supabase
+const { data: authorData } = await supabase
   .from('authors' as any)
   .select('*')
   .eq('slug', slug)
   .single();
 
-if (!author) {
+const author = (authorData as any) || ({} as any);
+
+if (!authorData) {
   return Astro.redirect('/404');
 }
 
@@ -31,11 +33,45 @@ const { data: blogs } = await supabase
   .order('published_at', { ascending: false });
 
 const typedBlogs = (blogs || []) as Blog[];
+
+// ── JSON-LD Schema
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: author.full_name,
+  jobTitle: author.company_role,
+  description: author.short_bio,
+  image: author.photo_url,
+  url: `https://propdiscover.com/author/${author.slug}`,
+  sameAs: [
+    author.linkedin_profile,
+    ...(author.social_links || []).map((l: any) => l.url)
+  ].filter(Boolean),
+  knowsAbout: author.expertise_areas || [],
+  worksFor: {
+    '@type': 'Organization',
+    name: 'PropDiscover'
+  }
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://propdiscover.com' },
+    { '@type': 'ListItem', position: 2, name: 'Authors', item: 'https://propdiscover.com/blog' },
+    { '@type': 'ListItem', position: 3, name: author.full_name, item: `https://propdiscover.com/author/${author.slug}` }
+  ]
+};
+
+const schemas = [personSchema, breadcrumbSchema];
 ---
 
 <BaseLayout
-  title={`${author.full_name} | Expert Author at PropDiscover`}
+  title={author.full_name ? `${author.full_name} | Expert Real Estate Author at PropDiscover` : 'Author Profile | PropDiscover'}
   description={author.short_bio || `Read articles and insights from ${author.full_name}, ${author.company_role} at PropDiscover.`}
+  ogImage={author.photo_url}
+  jsonLd={schemas}
 >
   <main class="bg-gray-50 min-h-screen pb-20">
     <!-- Header/Profile Section -->
