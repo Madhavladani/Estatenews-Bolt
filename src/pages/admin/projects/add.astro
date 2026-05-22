@@ -421,7 +421,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	    document.getElementById('p-short-desc').value = p.short_description || '';
 	    setFullDescHtml(p.full_description || '');
 	    document.getElementById('p-image').value = p.featured_image || '';
-	    document.getElementById('p-gallery').value = (p.gallery_images || []).join('\n');
+	    document.getElementById('p-gallery').value = JSON.stringify(p.gallery_images || []);
 	    document.getElementById('p-amenities').value = (p.amenities || []).join(', ');
 	    document.getElementById('p-highlights').value = (p.highlights || []).join(', ');
 	    document.getElementById('p-floor-plans').value = JSON.stringify(p.floor_plans || []);
@@ -514,7 +514,7 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         short_description: document.getElementById('p-short-desc').value,
         full_description: document.getElementById('p-full-desc').value,
         featured_image: document.getElementById('p-image').value,
-        gallery_images: document.getElementById('p-gallery').value,
+        gallery_images: (() => { try { return JSON.parse(document.getElementById('p-gallery').value || '[]'); } catch { return []; } })(),
         amenities: document.getElementById('p-amenities').value,
         highlights: document.getElementById('p-highlights').value,
         floor_plans: document.getElementById('p-floor-plans').value,
@@ -656,13 +656,13 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         if (!url) continue;
         uploadedUrls.push(url);
       }
-      galleryInput.value = uploadedUrls.join('\n');
+      galleryInput.value = JSON.stringify(uploadedUrls);
       renderGalleryPreview(uploadedUrls);
       if (id) {
         const saveRes = await fetch(`/admin/api/projects?id=${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gallery_images: galleryInput.value }),
+          body: JSON.stringify({ gallery_images: uploadedUrls }),
         });
         if (!saveRes.ok) {
           const saveErr = await saveRes.json();
