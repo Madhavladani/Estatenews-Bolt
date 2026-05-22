@@ -207,59 +207,94 @@ if (props.kind === "project") {
     },
   ]}
 >
-  <!-- Project Hero / Gallery -->
-  <section class="bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="relative overflow-hidden rounded-xl aspect-[16/10]">
-          {
-            featuredImage ? (
+<!-- Project Hero Gallery -->
+<section class="bg-gray-900">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    {
+      (() => {
+        const allGalleryImages = [
+          ...(featuredImage ? [featuredImage] : []),
+          ...galleryImages.filter((img) => img !== featuredImage),
+        ];
+
+        return (
+          <div class="grid grid-cols-1 gap-4">
+
+            <!-- Main Preview -->
+            <div class="relative overflow-hidden rounded-2xl bg-black border border-white/10">
               <img
-                src={featuredImage}
-                alt={`${project.title} in ${project.location}, ${city.name}`}
-                class="w-full h-full object-cover"
+                id="mainGalleryImage"
+                src={allGalleryImages[0] || ""}
+                alt={project.title}
+                class="w-full h-[260px] sm:h-[400px] md:h-[550px] object-contain bg-black"
                 loading="eager"
-                width="800"
-                height="500"
               />
-            ) : (
-              <div class="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950 flex items-center justify-center">
-                <span class="text-gray-300 text-sm font-medium px-6 text-center">
-                  {project.title}
+
+              <div class="absolute top-4 left-4 flex gap-2 z-10">
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm">
+                  {statusLabel}
+                </span>
+
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white">
+                  {typeLabel}
                 </span>
               </div>
-            )
-          }
-          <div class="absolute top-4 left-4 flex gap-2">
-            <span
-              class="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 backdrop-blur-sm"
-              >{statusLabel}</span
-            >
-            <span
-              class="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent-500 text-white"
-              >{typeLabel}</span
-            >
+            </div>
+
+            <!-- Thumbnails -->
+            {
+              allGalleryImages.length > 1 && (
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+
+                  {allGalleryImages.map((img, i) => (
+                    <button
+                      type="button"
+                      class="gallery-thumb relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-gray-800 hover:border-accent-500 transition-all"
+                      data-image={img}
+                    >
+                      <img
+                        src={img}
+                        alt={`${project.title} image ${i + 1}`}
+                        loading="lazy"
+                        class="w-full h-full object-cover"
+                      />
+
+                      {
+                        i === 4 && allGalleryImages.length > 5 && (
+                          <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-white font-bold text-lg">
+                            +{allGalleryImages.length - 5} More
+                          </div>
+                        )
+                      }
+                    </button>
+                  ))}
+
+                </div>
+              )
+            }
+
           </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          {
-            galleryImages.slice(0, 4).map((img, i) => (
-              <div class="relative overflow-hidden rounded-xl aspect-[4/3]">
-                <img
-                  src={img}
-                  alt={`${project.title} gallery image ${i + 1}`}
-                  loading="lazy"
-                  width="400"
-                  height="300"
-                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  </section>
+        );
+      })()
+    }
+
+  </div>
+</section>
+
+<script is:inline>
+  const mainImage = document.getElementById("mainGalleryImage");
+
+  document.querySelectorAll(".gallery-thumb").forEach((thumb) => {
+    thumb.addEventListener("click", () => {
+      const image = thumb.getAttribute("data-image");
+
+      if (mainImage && image) {
+        mainImage.setAttribute("src", image);
+      }
+    });
+  });
+</script>
 
   <!-- Project Info -->
   <section class="py-8">
