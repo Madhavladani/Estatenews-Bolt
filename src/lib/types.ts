@@ -91,6 +91,7 @@ export interface Blog {
   content_html: string;
   featured_image: string;
   author_name: string;
+  author_id: string | null;
   city_id: string | null;
   tags: string[];
   is_published: boolean;
@@ -105,8 +106,24 @@ export interface Blog {
   og_image: string;
   noindex: boolean;
   city?: City;
+  author?: Author;
   linked_collection_ids?: string[];
   faqs?: { question: string; answer: string }[];
+}
+
+export interface Author {
+  id: string;
+  full_name: string;
+  slug: string;
+  photo_url: string;
+  short_bio: string;
+  experience: string;
+  company_role: string;
+  expertise_areas: string[];
+  linkedin_profile: string;
+  social_links: { platform: string; url: string }[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Faq {
@@ -185,6 +202,11 @@ export interface Database {
           news_id: string;
           collection_id: string;
         }>;
+      };
+      authors: {
+        Row: Author;
+        Insert: Omit<Author, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Author, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
   };

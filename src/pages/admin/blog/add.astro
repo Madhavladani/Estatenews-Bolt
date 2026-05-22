@@ -13,6 +13,9 @@ if (blogId) {
   articleToEdit = data;
 }
 
+const { data: authorsRes } = await supabase.from('authors' as any).select('id, full_name').order('full_name');
+const authors: { id: string; full_name: string }[] = authorsRes || [];
+
 const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
 ---
 
@@ -43,8 +46,15 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Author Name</label>
-          <input type="text" id="n-author" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Author *</label>
+          <select id="n-author-id" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+            <option value="">Select Author</option>
+            {authors.map((a) => <option value={a.id} selected={articleToEdit?.author_id === a.id}>{a.full_name}</option>)}
+          </select>
+          <div class="mt-1 flex items-center justify-between">
+            <p class="text-xs text-gray-500">Assign an author from the database.</p>
+            <a href="/admin/authors/add" target="_blank" class="text-xs text-primary-600 hover:text-primary-700 font-medium">+ Create New Author</a>
+          </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Related City (optional)</label>
@@ -220,7 +230,7 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
     document.getElementById('n-id').value = articleToEdit.id || '';
     titleInput.value = articleToEdit.title || '';
     slugInput.value = articleToEdit.slug || '';
-    document.getElementById('n-author').value = articleToEdit.author_name || '';
+    document.getElementById('n-author-id').value = articleToEdit.author_id || '';
     document.getElementById('n-city').value = articleToEdit.city_id || '';
     document.getElementById('n-featured').value = articleToEdit.featured_image || '';
     document.getElementById('n-published').checked = !!articleToEdit.is_published;
@@ -360,7 +370,8 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
       const body = {
         title: document.getElementById('n-title').value,
         slug: document.getElementById('n-slug').value,
-        author_name: document.getElementById('n-author').value,
+        author_id: document.getElementById('n-author-id').value,
+        author_name: document.getElementById('n-author-id').options[document.getElementById('n-author-id').selectedIndex].text,
         city_id: document.getElementById('n-city').value || null,
         featured_image: document.getElementById('n-featured').value,
         is_published: document.getElementById('n-published').checked,

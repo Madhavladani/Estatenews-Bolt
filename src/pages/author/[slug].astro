@@ -1,0 +1,156 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supabase } from '../../lib/supabase';
+import type { Author, Blog } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const { data: authors } = await supabase.from('authors' as any).select('slug');
+  return (authors || []).map((author: any) => ({
+    params: { slug: author.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+
+const { data: author } = await supabase
+  .from('authors' as any)
+  .select('*')
+  .eq('slug', slug)
+  .single();
+
+if (!author) {
+  return Astro.redirect('/404');
+}
+
+// Fetch blogs by this author
+const { data: blogs } = await supabase
+  .from('news')
+  .select('*, city:cities(*)')
+  .eq('author_id', author.id)
+  .eq('is_published', true)
+  .order('published_at', { ascending: false });
+
+const typedBlogs = (blogs || []) as Blog[];
+---
+
+<BaseLayout
+  title={`${author.full_name} | Expert Author at PropDiscover`}
+  description={author.short_bio || `Read articles and insights from ${author.full_name}, ${author.company_role} at PropDiscover.`}
+>
+  <main class="bg-gray-50 min-h-screen pb-20">
+    <!-- Header/Profile Section -->
+    <div class="bg-white border-b border-gray-100 pt-12 pb-16">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+          <div class="relative">
+            <img
+              src={author.photo_url || 'https://via.placeholder.com/150'}
+              alt={author.full_name}
+              class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-lg"
+            />
+          </div>
+          
+          <div class="flex-1">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">{author.full_name}</h1>
+                <p class="text-lg text-primary-700 font-medium">{author.company_role}</p>
+              </div>
+              
+              <div class="flex items-center justify-center md:justify-end gap-3">
+                {author.linkedin_profile && (
+                  <a href={author.linkedin_profile} target="_blank" rel="noopener noreferrer" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors" title="LinkedIn Profile">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
+                )}
+                {(author.social_links || []).map((link: any) => (
+                  <a href={link.url} target="_blank" rel="noopener noreferrer" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors" title={link.platform}>
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.826a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+            
+            <div class="prose prose-gray max-w-none mb-6">
+              <p class="text-gray-600 leading-relaxed text-lg">{author.short_bio}</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
+              {author.experience && (
+                <div class="flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full font-medium">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  {author.experience}
+                </div>
+              )}
+              {author.expertise_areas && author.expertise_areas.length > 0 && (
+                <div class="flex flex-wrap gap-2">
+                  {author.expertise_areas.map((area: string) => (
+                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium">{area}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-4xl mx-auto px-6 py-16">
+      <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+        <h2 class="text-2xl font-bold text-gray-900">Articles by {author.full_name}</h2>
+        <span class="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{typedBlogs.length} {typedBlogs.length === 1 ? 'Article' : 'Articles'}</span>
+      </div>
+
+      {typedBlogs.length === 0 ? (
+          <div class="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+            <p class="text-gray-500">No published articles yet. Check back soon!</p>
+          </div>
+      ) : (
+        <div class="space-y-12">
+          {typedBlogs.map((blog) => (
+            <article class="group relative flex flex-col md:flex-row gap-6 md:gap-10 transition-all duration-300">
+              <a href={`/blog/${blog.slug}`} class="block w-full md:w-64 flex-shrink-0">
+                <div class="aspect-[16/9] md:aspect-square overflow-hidden rounded-2xl shadow-sm group-hover:shadow-xl transition-all duration-500">
+                  <img
+                    src={blog.featured_image || 'https://via.placeholder.com/400x300'}
+                    alt={blog.title}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                </div>
+              </a>
+              <div class="flex-1 py-2">
+                <div class="flex items-center gap-3 mb-3">
+                    {blog.city && (
+                        <span class="px-2.5 py-1 bg-primary-50 text-primary-700 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                            {blog.city.name}
+                        </span>
+                    )}
+                    <time class="text-sm text-gray-500" datetime={blog.published_at}>
+                        {new Date(blog.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </time>
+                </div>
+                <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors leading-tight">
+                  <a href={`/blog/${blog.slug}`}>{blog.title}</a>
+                </h3>
+                <p class="text-gray-600 line-clamp-2 md:line-clamp-3 mb-4 leading-relaxed">
+                  {blog.excerpt}
+                </p>
+                <a href={`/blog/${blog.slug}`} class="inline-flex items-center gap-2 text-primary-700 font-bold text-sm tracking-wide group-hover:gap-3 transition-all duration-300">
+                  READ FULL ARTICLE
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .prose p {
+    margin-bottom: 0px !important;
+  }
+</style>
