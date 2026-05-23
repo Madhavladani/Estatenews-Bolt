@@ -107,8 +107,33 @@ export interface Blog {
   noindex: boolean;
   city?: City;
   author?: Author;
-  linked_collection_ids?: string[];
+  category: string;
+  sub_category?: string;
+  category_id?: string;
+  sub_category_id?: string;
   faqs?: { question: string; answer: string }[];
+}
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+  sub_categories?: BlogSubCategory[];
+}
+
+export interface BlogSubCategory {
+  id: string;
+  category_id: string;
+  name: string;
+  slug: string;
+  image_url: string;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+  category?: BlogCategory;
 }
 
 export interface Author {

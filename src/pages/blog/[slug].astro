@@ -5,6 +5,9 @@ import ArticleTOC from "../../components/ArticleTOC.astro";
 import ArticleShareBar from "../../components/ArticleShareBar.astro";
 import RelatedArticles from "../../components/RelatedArticles.astro";
 import ArticleFAQ from "../../components/ArticleFAQ.astro";
+import BlogCard from "../../components/BlogCard.astro";
+import CategoryCard from "../../components/CategoryCard.astro";
+import BlogNavigation from "../../components/BlogNavigation.astro";
 import { supabase } from "../../lib/supabase";
 import {
   buildBreadcrumbSchema,
@@ -17,304 +20,213 @@ import {
 import type { Blog } from "../../lib/types";
 
 export async function getStaticPaths() {
-  const { data } = await supabase
-    .from("news")
-    .select("*, author:authors(*)")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false });
+  const { data: categories } = await supabase.from('blog_categories').select('*, sub_categories:blog_sub_categories(*)');
+  const { data: articles } = await supabase.from('news').select('*, author:authors(*)').eq('is_published', true).order('published_at', { ascending: false });
 
-  const articles = (data || []) as Blog[];
-
-  return articles.map((article) => ({
+  const articlePaths = (articles || []).map(article => ({
     params: { slug: article.slug },
-    props: { article, allArticles: articles },
+    props: { type: 'article', article, allArticles: articles || [] }
   }));
+
+  const categoryPaths = (categories || []).map(category => ({
+    params: { slug: category.slug },
+    props: { type: 'category', category, allArticles: articles || [] }
+  }));
+
+  return [...articlePaths, ...categoryPaths];
 }
 
-const { article, allArticles } = Astro.props as {
-  article: Blog;
-  allArticles: Blog[];
-};
+const { type, article, category, allArticles } = Astro.props;
 
-const author = article.author;
+// ── ARTICLE MODE LOGIC ──
+let articleProps: any = {};
+if (type === 'article' && article) {
+  const author = article.author;
+  const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
+  const canonicalUrl = `https://propdiscover.com${canonicalPath}`;
+  const ogImage = article.og_image || article.featured_image || undefined;
+  const heroImage = article.featured_image || undefined;
 
-const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
-const canonicalUrl = `https://propdiscover.com${canonicalPath}`;
-const ogImage = article.og_image || article.featured_image || undefined;
-const heroImage = article.featured_image || undefined;
+  const html = article.content_html || "";
+  const readingTime = calculateReadingTime(html);
+  const toc = extractTOC(html);
+  const htmlFaqs = extractFAQs(html);
+  const faqs = [...(article.faqs || []), ...htmlFaqs];
 
-// ── Content utilities
-const html = article.content_html || "";
-const readingTime = calculateReadingTime(html);
-const toc = extractTOC(html);
-const htmlFaqs = extractFAQs(html);
-const faqs = [...(article.faqs || []), ...htmlFaqs];
+  const keywords = article.meta_keywords ? article.meta_keywords : article.tags?.join(", ") || undefined;
 
-// ── Keywords
-const keywords = article.meta_keywords
-  ? article.meta_keywords
-  : article.tags?.join(", ") || undefined;
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", url: "https://propdiscover.com" },
+    { name: "Blog", url: "https://propdiscover.com/blog" },
+    { name: article.title, url: canonicalUrl },
+  ]);
+  const articleSchema = buildBlogArticleSchema(article);
+  const faqSchema = faqs.length > 0 ? buildFAQSchema(faqs) : null;
+  const schemas = [breadcrumbSchema, articleSchema, ...(faqSchema ? [faqSchema] : [])];
 
-// ── Schema
-const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: "Home", url: "https://propdiscover.com" },
-  { name: "Blog", url: "https://propdiscover.com/blog" },
-  { name: article.title, url: canonicalUrl },
-]);
-const articleSchema = buildBlogArticleSchema(article);
-const faqSchema = faqs.length > 0 ? buildFAQSchema(faqs) : null;
-const schemas = [
-  breadcrumbSchema,
-  articleSchema,
-  ...(faqSchema ? [faqSchema] : []),
-];
+  const publishedDate = new Date(article.published_at);
+  const formattedDate = publishedDate.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "2-digit" });
 
-// ── Formatted date
-const publishedDate = new Date(article.published_at);
-const formattedDate = publishedDate.toLocaleDateString("en-IN", {
-  year: "numeric",
-  month: "long",
-  day: "2-digit",
-});
+  articleProps = { author, canonicalUrl, ogImage, heroImage, html, readingTime, toc, faqs, keywords, schemas, formattedDate };
+}
 
-// ── Author display
-const authorSlug = article.author_name
-  ? article.author_name.toLowerCase().replace(/\s+/g, "-")
-  : null;
+// ── CATEGORY MODE LOGIC ──
+let categoryArticles: Blog[] = [];
+if (type === 'category' && category) {
+  categoryArticles = allArticles.filter(a => a.category_id === category.id || a.category === category.name);
+}
 ---
 
-<BaseLayout
-  title={article.meta_title || `${article.title} | PropDiscover`}
-  description={article.meta_description ||
-    article.excerpt ||
-    "Latest real estate blog and updates."}
-  canonical={canonicalUrl}
-  ogImage={ogImage}
-  noindex={article.noindex}
-  jsonLd={schemas}
-  breadcrumbs={[
-    { name: "Blog", url: "/blog" },
-    { name: article.title, url: `/blog/${article.slug}` },
-  ]}
-  keywords={keywords}
-  heroImagePreload={heroImage}
-  ogType="article"
-  articlePublishedTime={article.published_at}
-  articleModifiedTime={article.updated_at || article.published_at}
-  articleTags={article.tags || []}
->
-  {/* ── Progress bar + sticky share (desktop sidebar) */}
-  <ArticleShareBar
-    title={article.meta_title || article.title}
-    url={canonicalUrl}
-  />
-
-  <article
-    class="py-10 lg:py-14"
-    itemscope
-    itemtype="https://schema.org/BlogPosting"
+{type === 'article' && article ? (
+  <BaseLayout
+    title={article.meta_title || `${article.title} | PropDiscover`}
+    description={article.meta_description || article.excerpt || "Latest real estate blog and updates."}
+    canonical={articleProps.canonicalUrl}
+    ogImage={articleProps.ogImage}
+    noindex={article.noindex}
+    jsonLd={articleProps.schemas}
+    breadcrumbs={[
+      { name: "Blog", url: "/blog" },
+      { name: article.title, url: `/blog/${article.slug}` },
+    ]}
+    keywords={articleProps.keywords}
+    heroImagePreload={articleProps.heroImage}
+    ogType="article"
+    articlePublishedTime={article.published_at}
+    articleModifiedTime={article.updated_at || article.published_at}
+    articleTags={article.tags || []}
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* ── Two-column layout: article + sticky TOC sidebar */}
-      <div
-        class:list={[
-          toc.length > 1 ? "lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start" : "max-w-4xl mx-auto"
-        ]}
-      >
-        {/* ── Main article column */}
-        {
-          toc.length > 1 && (
+    <BlogNavigation />
+    <ArticleShareBar
+      title={article.meta_title || article.title}
+      url={articleProps.canonicalUrl}
+    />
+    <article class="py-10 lg:py-14" itemscope itemtype="https://schema.org/BlogPosting">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class:list={[ articleProps.toc.length > 1 ? "lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start" : "max-w-4xl mx-auto" ]}>
+          {articleProps.toc.length > 1 && (
             <div class="hidden lg:block self-start">
-              <ArticleTOC toc={toc} />
+              <ArticleTOC toc={articleProps.toc} />
             </div>
-          )
-        }
-
-        <div class="min-w-0">
-          {/* ── Article header */}
-          <header class="mb-8">
-            {/* Category / tags row */}
-            {
-              article.tags?.length > 0 && (
+          )}
+          <div class="min-w-0">
+            <header class="mb-8">
+              {article.tags?.length > 0 && (
                 <div class="flex flex-wrap items-center gap-2 mb-4">
-                  {article.tags.slice(0, 4).map((tag) => (
+                  <span class="inline-block text-xs font-bold px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-100 uppercase tracking-wider">
+                    {article.sub_category || article.tags?.[0] || 'Blog'}
+                  </span>
+                  {article.tags?.slice(article.sub_category ? 0 : 1, 4).map((tag: any) => (
                     <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                       {tag}
                     </span>
                   ))}
                 </div>
-              )
-            }
-
-            <h1
-              class="text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold text-gray-900 leading-tight tracking-tight"
-              itemprop="headline"
-            >
-              {article.title}
-            </h1>
-
-            {
-              (article.excerpt || article.meta_description) && (
-                <p
-                  class="text-lg text-gray-500 mt-4 leading-relaxed"
-                  itemprop="description"
-                >
+              )}
+              <h1 class="text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold text-gray-900 leading-tight tracking-tight" itemprop="headline">
+                {article.title}
+              </h1>
+              {(article.excerpt || article.meta_description) && (
+                <p class="text-lg text-gray-500 mt-4 leading-relaxed" itemprop="description">
                   {article.excerpt || article.meta_description}
                 </p>
-              )
-            }
-
-            {/* ── Meta row: date · author · read time */}
-            <div
-              class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-sm text-gray-400"
-            >
-              <time
-                datetime={article.published_at}
-                itemprop="datePublished"
-                class="font-medium text-gray-500"
-              >
-                {formattedDate}
-              </time>
-
-              {
-                article.author_name && (
-                  <a
-                    href={author ? `/author/${author.slug}` : '#'}
-                    class="flex items-center gap-1.5 hover:text-primary-700 transition-colors"
-                    itemprop="author"
-                    itemscope
-                    itemtype="https://schema.org/Person"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                      />
-                    </svg>
+              )}
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-sm text-gray-400">
+                <time datetime={article.published_at} itemprop="datePublished" class="font-medium text-gray-500">
+                  {articleProps.formattedDate}
+                </time>
+                {article.author_name && (
+                  <a href={articleProps.author ? `/author/${articleProps.author.slug}` : '#'} class="flex items-center gap-1.5 hover:text-primary-700 transition-colors" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                     <span itemprop="name">{article.author_name}</span>
                   </a>
-                )
-              }
-
-              <span class="flex items-center gap-1.5">
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {readingTime} min read
-              </span>
-            </div>
-          </header>
-
-          {/* ── Mobile TOC (above hero image) */}
-          {toc.length > 1 && (
-            <div class="lg:hidden">
-              <ArticleTOC toc={toc} />
-            </div>
-          )}
-
-          {/* ── Hero image */}
-          {
-            heroImage && (
-              <figure class="mb-10 rounded-2xl overflow-hidden border border-gray-100 shadow-md">
-                <img
-                  src={heroImage}
-                  alt={`${article.title} — PropDiscover`}
-                  class="w-full object-cover"
-                  loading="eager"
-                  fetchpriority="high"
-                  width="1200"
-                  height="630"
-                  itemprop="image"
-                />
-                {article.excerpt && (
-                  <figcaption class="sr-only">{article.excerpt}</figcaption>
                 )}
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {articleProps.readingTime} min read
+                </span>
+              </div>
+            </header>
+            {articleProps.toc.length > 1 && (
+              <div class="lg:hidden">
+                <ArticleTOC toc={articleProps.toc} />
+              </div>
+            )}
+            {articleProps.heroImage && (
+              <figure class="mb-10 rounded-2xl overflow-hidden border border-gray-100 shadow-md">
+                <img src={articleProps.heroImage} alt={`${article.title} — PropDiscover`} class="w-full object-cover" loading="eager" fetchpriority="high" width="1200" height="630" itemprop="image" />
+                {article.excerpt && <figcaption class="sr-only">{article.excerpt}</figcaption>}
               </figure>
-            )
-          }
-
-          {/* ── Article body */}
-          <div
-            class="prose prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm"
-            itemprop="articleBody"
-          >
-            <div set:html={html} />
-          </div>
-
-          {/* ── Author Box */}
-          {author && (
-            <div class="mt-12 p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
-              <a href={`/author/${author.slug}`} class="flex-shrink-0">
-                <img
-                  src={author.photo_url || 'https://via.placeholder.com/80'}
-                  alt={author.full_name}
-                  class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow"
-                />
-              </a>
-              <div class="flex-1">
-                <p class="text-xs font-bold text-primary-700 uppercase tracking-widest mb-1">Written By</p>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">
-                  <a href={`/author/${author.slug}`} class="hover:text-primary-700 transition-colors">{author.full_name}</a>
-                </h3>
-                <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">
-                  {author.short_bio}
-                </p>
-                <div class="flex items-center justify-center md:justify-start gap-4">
-                  <a href={`/author/${author.slug}`} class="text-sm font-bold text-primary-700 hover:underline">View Profile</a>
-                  {author.linkedin_profile && (
-                    <a href={author.linkedin_profile} target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-600 transition-colors">
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                    </a>
-                  )}
-                </div>
-              </div>
+            )}
+            <div class="prose prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm" itemprop="articleBody">
+              <div set:html={articleProps.html} />
             </div>
-          )}
-
-          {/* ── Tags */}
-          {
-            article.tags?.length > 0 && (
-              <div class="mt-10 pt-8 border-t border-gray-100">
-                <h2 class="text-sm font-semibold text-gray-900 mb-3">Topics</h2>
-                <div class="flex flex-wrap gap-2">
-                  {article.tags.map((t) => (
-                    <span class="text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-default">
-                      {t}
-                    </span>
-                  ))}
+            {articleProps.author && (
+              <div class="mt-12 p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+                <a href={`/author/${articleProps.author.slug}`} class="flex-shrink-0">
+                  <img src={articleProps.author.photo_url || 'https://via.placeholder.com/80'} alt={articleProps.author.full_name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow" />
+                </a>
+                <div class="flex-1">
+                  <p class="text-xs font-bold text-primary-700 uppercase tracking-widest mb-1">Written By</p>
+                  <h3 class="text-xl font-bold text-gray-900 mb-2">
+                    <a href={`/author/${articleProps.author.slug}`} class="hover:text-primary-700 transition-colors">{articleProps.author.full_name}</a>
+                  </h3>
+                  <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">{articleProps.author.short_bio}</p>
                 </div>
               </div>
-            )
-          }
-
-          {/* ── FAQ section */}
-          <ArticleFAQ faqs={faqs} />
-
-          {/* ── Related articles */}
-          <RelatedArticles
-            articles={allArticles}
-            currentSlug={article.slug}
-            currentTags={article.tags || []}
-          />
+            )}
+            <ArticleFAQ faqs={articleProps.faqs} />
+            <RelatedArticles articles={allArticles} currentSlug={article.slug} currentTags={article.tags || []} />
+          </div>
         </div>
-
       </div>
-    </div>
-  </article>
-</BaseLayout>
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout
+    title={`${category?.meta_title || category?.name + ' - Real Estate Insights'}`}
+    description={category?.meta_description || `Explore the latest ${category?.name} articles and news.`}
+  >
+    <BlogNavigation />
+    <main class="bg-gray-50 pb-20">
+      <div class="py-12 bg-white border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">{category?.name}</h1>
+          {category?.meta_description && <p class="text-lg text-gray-600 max-w-2xl mx-auto">{category?.meta_description}</p>}
+        </div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* ── Sub-category Cards ── */}
+        {category?.sub_categories && category.sub_categories.length > 0 && (
+          <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8">Explore Sub-categories</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {category.sub_categories.map((sub: any) => (
+                <CategoryCard
+                  name={sub.name}
+                  count={allArticles.filter((a: any) => a.sub_category_id === sub.id || a.sub_category === sub.name).length}
+                  image={sub.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400'}
+                  href={`/blog/${category.slug}/${sub.slug}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <h2 class="text-2xl font-bold text-gray-900 mb-8">Latest in {category?.name}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {categoryArticles.map(article => (
+            <BlogCard article={article} />
+          ))}
+        </div>
+        
+        {categoryArticles.length === 0 && (
+          <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-gray-500">No articles found in this category.</p>
+          </div>
+        )}
+      </div>
+    </main>
+  </BaseLayout>
+)}

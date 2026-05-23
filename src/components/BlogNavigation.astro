@@ -1,0 +1,63 @@
+---
+import { supabase } from '../lib/supabase';
+
+const { data: categoriesRes } = await supabase
+  .from('blog_categories')
+  .select('name, slug, sub_categories:blog_sub_categories(name, slug)')
+  .order('name');
+
+const categories = (categoriesRes || []).map(cat => ({
+  name: cat.name,
+  href: `/blog/${cat.slug}`,
+  sub: (cat.sub_categories || []).map((s: any) => ({ name: s.name, slug: s.slug }))
+}));
+---
+
+<div class="bg-white border-b border-gray-100 sticky top-16 z-[60]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="flex flex-wrap items-center space-x-1 py-3">
+      <a href="/blog" class="px-4 py-2 text-sm font-semibold text-gray-900 border-b-2 border-primary-600 whitespace-nowrap">
+        Blog Homepage
+      </a>
+      
+      {categories.map((cat) => (
+        <div class="relative group">
+          <a
+            href={cat.href}
+            class="flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors whitespace-nowrap"
+          >
+            {cat.name}
+            {cat.sub.length > 0 && (
+              <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            )}
+          </a>
+          
+          {cat.sub.length > 0 && (
+            <div class="absolute left-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200 z-[70]">
+              {cat.sub.map((sub: any) => (
+                <a
+                  href={`${cat.href}/${sub.slug}`}
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                >
+                  {sub.name}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

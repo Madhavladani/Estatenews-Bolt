@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogNavigation from '../../../components/BlogNavigation.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+import { supabase } from '../../../lib/supabase';
+import type { Blog, BlogSubCategory } from '../../../lib/types';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const { data: subCategories } = await supabase
+    .from('blog_sub_categories')
+    .select('*, category:blog_categories(slug)');
+
+  const { data: articles } = await supabase
+    .from('news')
+    .select('*')
+    .eq('is_published', true);
+
+  return (subCategories || []).map(sub => {
+    const subArticles = (articles || []).filter(a => a.sub_category_id === sub.id || a.sub_category === sub.name);
+    return {
+      params: { 
+        category: sub.category?.slug, 
+        subcategory: sub.slug 
+      },
+      props: { 
+        subCategory: sub,
+        articles: subArticles
+      }
+    };
+  });
+}
+
+const { subCategory, articles } = Astro.props;
+---
+
+<BaseLayout
+  title={`${subCategory.meta_title || subCategory.name + ' - Real Estate Insights'}`}
+  description={subCategory.meta_description || `Explore the latest ${subCategory.name} articles and insights.`}
+>
+  <BlogNavigation />
+
+  <main class="bg-gray-50 pb-20">
+    <div class="relative py-20 overflow-hidden">
+      {subCategory.image_url && (
+        <div class="absolute inset-0 z-0">
+          <img src={subCategory.image_url} class="w-full h-full object-cover blur-sm opacity-20" alt="" />
+          <div class="absolute inset-0 bg-gradient-to-b from-white/80 to-gray-50"></div>
+        </div>
+      )}
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span class="text-sm font-bold text-red-600 uppercase tracking-widest mb-4 inline-block">
+          {subCategory.category?.name || 'Blog'}
+        </span>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{subCategory.name}</h1>
+        {subCategory.meta_description && <p class="text-lg text-gray-600 max-w-2xl mx-auto">{subCategory.meta_description}</p>}
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {articles.map(article => (
+          <BlogCard article={article} />
+        ))}
+      </div>
+      
+      {articles.length === 0 && (
+        <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+          <p class="text-gray-500">No articles found in this sub-category.</p>
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>

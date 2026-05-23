@@ -9,6 +9,7 @@ const paths = [
   '/sitemap-authors.xml',
   '/sitemap-localities.xml',
   '/sitemap-guides.xml',
+  '/sitemap-blog-categories.xml',
 ];
 
 export async function GET() {
