@@ -1,38 +1,32 @@
 ---
+export const prerender = true;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { supabase } from '../../lib/supabase';
 import type { Author, Blog } from '../../lib/types';
 
 export async function getStaticPaths() {
-  const { data: authors } = await supabase.from('authors' as any).select('slug');
-  return (authors || []).map((author: any) => ({
-    params: { slug: author.slug },
-  }));
+  const { data: authors } = await supabase.from('authors' as any).select('*');
+  const { data: blogs } = await supabase
+    .from('news')
+    .select('*, city:cities(*)')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false });
+
+  return (authors || []).map((author: any) => {
+    const authorBlogs = (blogs || []).filter((blog: any) => blog.author_id === author.id);
+    return {
+      params: { slug: author.slug },
+      props: { author, blogs: authorBlogs },
+    };
+  });
 }
 
-const { slug } = Astro.params;
+const { author, blogs } = Astro.props;
+const typedBlogs = (blogs || []) as Blog[];
 
-const { data: authorData } = await supabase
-  .from('authors' as any)
-  .select('*')
-  .eq('slug', slug)
-  .single();
-
-const author = (authorData as any) || ({} as any);
-
-if (!authorData) {
+if (!author) {
   return Astro.redirect('/404');
 }
-
-// Fetch blogs by this author
-const { data: blogs } = await supabase
-  .from('news')
-  .select('*, city:cities(*)')
-  .eq('author_id', author.id)
-  .eq('is_published', true)
-  .order('published_at', { ascending: false });
-
-const typedBlogs = (blogs || []) as Blog[];
 
 // ── JSON-LD Schema
 const personSchema = {
