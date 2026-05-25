@@ -1,7 +1,10 @@
 import type { APIRoute } from 'astro';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const getEnv = (key: string) => import.meta.env[key] || '';
+
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL') || getEnv('PUBLIC_SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY') || getEnv('PUBLIC_SUPABASE_ANON_KEY');
+
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const authToken = request.headers.get('Authorization')?.replace('Bearer ', '') || '';
