@@ -60,7 +60,7 @@ const faqSchema = buildFAQSchema(faqs);
   <!-- City Hero -->
   <section class="relative bg-primary-800 text-white overflow-hidden">
     <div class="absolute inset-0 opacity-20">
-      <img src={city.hero_image} alt="" class="w-full h-full object-cover" loading="eager" width="1920" height="1080" />
+      <img src={city.hero_image} alt={`Luxury real estate and new projects in ${city.name}`} class="w-full h-full object-cover" loading="eager" fetchpriority="high" width="1920" height="1080" />
     </div>
     <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">

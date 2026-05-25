@@ -93,7 +93,7 @@ if (type === 'article' && article) {
 // ── CATEGORY MODE LOGIC ──
 let categoryArticles: Blog[] = [];
 if (type === 'category' && category) {
-  categoryArticles = allArticles.filter(a => a.category_id === category.id || a.category === category.name);
+  categoryArticles = allArticles.filter((a: Blog) => a.category_id === category.id || a.category === category.name);
 }
 ---
 
@@ -184,7 +184,7 @@ if (type === 'category' && category) {
             {articleProps.author && (
               <div class="mt-12 p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
                 <a href={`/author/${articleProps.author.slug}`} class="flex-shrink-0">
-                  <img src={articleProps.author.photo_url || 'https://via.placeholder.com/80'} alt={articleProps.author.full_name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow" />
+                  <img src={articleProps.author.photo_url || 'https://via.placeholder.com/80'} alt={articleProps.author.full_name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow" width="96" height="96" />
                 </a>
                 <div class="flex-1">
                   <p class="text-xs font-bold text-primary-700 uppercase tracking-widest mb-1">Written By</p>

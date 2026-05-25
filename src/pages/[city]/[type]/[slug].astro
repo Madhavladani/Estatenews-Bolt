@@ -220,9 +220,12 @@ if (props.kind === "project") {
               <img
                 id="mainGalleryImage"
                 src={allGalleryImages[0] || ""}
-                alt={project.title}
+                alt={`${project.title} - ${project.project_type} project in ${project.location}, ${city.name}`}
                 class="w-full h-[260px] sm:h-[400px] md:h-[550px] object-contain bg-black"
                 loading="eager"
+                fetchpriority="high"
+                width="1200"
+                height="675"
               />
 
               <div class="absolute top-4 left-4 flex gap-2 z-10">
@@ -249,9 +252,11 @@ if (props.kind === "project") {
                     >
                       <img
                         src={img}
-                        alt={`${project.title} image ${i + 1}`}
+                        alt={`${project.title} gallery image ${i + 1}`}
                         loading="lazy"
                         class="w-full h-full object-cover"
+                        width="200"
+                        height="200"
                       />
 
                       {

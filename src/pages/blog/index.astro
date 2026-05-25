@@ -48,15 +48,19 @@ const heroArticle = articles[0];
 const heroSideArticles = articles.slice(1, 4);
 
 // Highlights / Main Categories (Dynamic from Sub-categories)
-const mainCategories = subCategories.map(s => {
-  const cat = categories.find(c => c.id === s.category_id);
-  return {
-    name: s.name,
-    count: articles.filter(a => a.sub_category_id === s.id || a.sub_category === s.name).length,
-    image: s.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400',
-    href: `/blog/${cat?.slug || 'uncategorized'}/${s.slug}`
-  };
-}).slice(0, 7);
+const mainCategories = subCategories
+  .map(s => {
+    const cat = categories.find(c => c.id === s.category_id);
+    if (!cat) return null;
+    return {
+      name: s.name,
+      count: articles.filter(a => a.sub_category_id === s.id || a.sub_category === s.name).length,
+      image: s.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400',
+      href: `/blog/${cat.slug}/${s.slug}`
+    };
+  })
+  .filter((c): c is NonNullable<typeof c> => c !== null)
+  .slice(0, 7);
 
 ---
 
