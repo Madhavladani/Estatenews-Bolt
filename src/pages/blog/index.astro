@@ -1,5 +1,6 @@
 ---
-export const prerender = true;
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BlogNavigation from '../../components/BlogNavigation.astro';
 import FeaturedBlogCard from '../../components/FeaturedBlogCard.astro';

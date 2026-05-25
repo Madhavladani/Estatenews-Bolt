@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ArticleTOC from "../../components/ArticleTOC.astro";
 import ArticleShareBar from "../../components/ArticleShareBar.astro";
@@ -19,24 +19,44 @@ import {
 } from "../../lib/seo";
 import type { Blog } from "../../lib/types";
 
-export async function getStaticPaths() {
-  const { data: categories } = await supabase.from('blog_categories').select('*, sub_categories:blog_sub_categories(*)');
-  const { data: articles } = await supabase.from('news').select('*, author:authors(*)').eq('is_published', true).order('published_at', { ascending: false });
+const { slug } = Astro.params;
 
-  const articlePaths = (articles || []).map(article => ({
-    params: { slug: article.slug },
-    props: { type: 'article', article, allArticles: articles || [] }
-  }));
+// Try to find article first
+const { data: article } = await supabase
+  .from('news')
+  .select('*, author:authors(*)')
+  .eq('slug', slug)
+  .eq('is_published', true)
+  .maybeSingle();
 
-  const categoryPaths = (categories || []).map(category => ({
-    params: { slug: category.slug },
-    props: { type: 'category', category, allArticles: articles || [] }
-  }));
+const { data: allArticles } = await supabase
+  .from('news')
+  .select('*')
+  .eq('is_published', true)
+  .order('published_at', { ascending: false });
 
-  return [...articlePaths, ...categoryPaths];
+let type: 'article' | 'category' = 'article';
+let category: any = null;
+
+if (article) {
+  type = 'article';
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+} else {
+  // Try to find category
+  const { data: categoryData } = await supabase
+    .from('blog_categories')
+    .select('*, sub_categories:blog_sub_categories(*)')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (!categoryData) {
+    return new Response(null, { status: 404 });
+  }
+
+  type = 'category';
+  category = categoryData;
+  Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 }
-
-const { type, article, category, allArticles } = Astro.props;
 
 // ── ARTICLE MODE LOGIC ──
 let articleProps: any = {};

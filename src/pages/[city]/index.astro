@@ -1,27 +1,26 @@
 ---
-export const prerender = true;
+export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import CollectionCard from '../../components/CollectionCard.astro';
 import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
-import type { GetStaticPaths } from 'astro';
 import type { City, Project, Collection, Locality } from '../../lib/types';
 
-type Props = {
-  city: City;
-};
+const { city: citySlug } = Astro.params;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: cities } = await supabase.from('cities').select('*');
-  return (cities || []).map((city) => ({
-    params: { city: city.slug },
-    props: { city },
-  }));
-};
+const { data: city } = await supabase
+  .from('cities')
+  .select('*')
+  .eq('slug', citySlug)
+  .single();
 
-const { city } = Astro.props as Props;
+if (!city) {
+  return new Response(null, { status: 404 });
+}
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
 const [projectsRes, collectionsRes, localitiesRes, faqsRes] = await Promise.all([
   supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),

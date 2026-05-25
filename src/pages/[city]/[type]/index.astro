@@ -1,37 +1,30 @@
 ---
-export const prerender = true;
+export const prerender = false;
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ProjectCard from '../../../components/ProjectCard.astro';
 import FilterSidebar from '../../../components/FilterSidebar.astro';
 import FAQSection from '../../../components/FAQSection.astro';
 import { supabase } from '../../../lib/supabase';
 import { buildBreadcrumbSchema, buildFAQSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../lib/seo';
-import type { GetStaticPaths } from 'astro';
 import type { City, Project } from '../../../lib/types';
 
-type Props = {
-  city: City;
-  projectType: Project['project_type'];
-};
+const { city: citySlug, type: projectType } = Astro.params;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: cities } = await supabase.from('cities').select('*');
-  const paths: { params: { city: string; type: string }; props: Props }[] = [];
-  for (const city of cities || []) {
-    const { data: projects } = await supabase.from('projects').select('*').eq('city_id', city.id);
-    const types = [...new Set((projects || []).map((p) => p.project_type))];
-    for (const type of types) {
-      if (!city?.slug || !type) continue;
-      paths.push({
-        params: { city: city.slug, type },
-        props: { city, projectType: type },
-      });
-    }
-  }
-  return paths;
-};
+if (!['residential', 'commercial'].includes(projectType || '')) {
+  return new Response(null, { status: 404 });
+}
 
-const { city, projectType } = Astro.props as Props;
+const { data: city } = await supabase
+  .from('cities')
+  .select('*')
+  .eq('slug', citySlug)
+  .single();
+
+if (!city) {
+  return new Response(null, { status: 404 });
+}
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
 const { data: projectsData } = await supabase
   .from('projects')

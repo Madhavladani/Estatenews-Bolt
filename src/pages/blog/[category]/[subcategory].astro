@@ -5,34 +5,31 @@ import BlogCard from '../../../components/BlogCard.astro';
 import { supabase } from '../../../lib/supabase';
 import type { Blog, BlogSubCategory } from '../../../lib/types';
 
-export const prerender = true;
+export const prerender = false;
 
-export async function getStaticPaths() {
-  const { data: subCategories } = await supabase
-    .from('blog_sub_categories')
-    .select('*, category:blog_categories(slug)');
+const { category: categorySlug, subcategory: subcategorySlug } = Astro.params;
 
-  const { data: articles } = await supabase
-    .from('news')
-    .select('*')
-    .eq('is_published', true);
+const { data: subCategoryData } = await supabase
+  .from('blog_sub_categories')
+  .select('*, category:blog_categories(*)')
+  .eq('slug', subcategorySlug as string)
+  .single();
 
-  return (subCategories || []).map(sub => {
-    const subArticles = (articles || []).filter(a => a.sub_category_id === sub.id || a.sub_category === sub.name);
-    return {
-      params: { 
-        category: sub.category?.slug, 
-        subcategory: sub.slug 
-      },
-      props: { 
-        subCategory: sub,
-        articles: subArticles
-      }
-    };
-  });
+const subCategory = subCategoryData as any;
+
+if (!subCategory || subCategory.category?.slug !== categorySlug) {
+  return new Response(null, { status: 404 });
 }
 
-const { subCategory, articles } = Astro.props;
+const { data: articlesData } = await supabase
+  .from('news')
+  .select('*')
+  .eq('is_published', true)
+  .or(`sub_category_id.eq.${subCategory.id},sub_category.eq.${subCategory.name}`);
+
+const articles: Blog[] = articlesData || [];
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 ---
 
 <BaseLayout

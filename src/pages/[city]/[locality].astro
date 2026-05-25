@@ -1,41 +1,36 @@
 ---
-export const prerender = true;
+export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
-import type { GetStaticPaths } from 'astro';
 import type { City, Locality, Project, Collection } from '../../lib/types';
 
-type Props = {
-  city: City;
-  locality: Locality;
-};
+const { city: citySlug, locality: localitySlug } = Astro.params;
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: cities } = await supabase.from('cities').select('*');
-  const paths: { params: { city: string; locality: string }; props: Props }[] = [];
+const { data: city } = await supabase
+  .from('cities')
+  .select('*')
+  .eq('slug', citySlug)
+  .single();
 
-  for (const city of cities || []) {
-    const { data: localities } = await supabase
-      .from('localities')
-      .select('*')
-      .eq('city_id', city.id);
+if (!city) {
+  return new Response(null, { status: 404 });
+}
 
-    for (const locality of localities || []) {
-      if (!city?.slug || !locality?.slug) continue;
-      paths.push({
-        params: { city: city.slug, locality: locality.slug },
-        props: { city, locality },
-      });
-    }
-  }
+const { data: locality } = await supabase
+  .from('localities')
+  .select('*')
+  .eq('city_id', city.id)
+  .eq('slug', localitySlug)
+  .single();
 
-  return paths;
-};
+if (!locality) {
+  return new Response(null, { status: 404 });
+}
 
-const { city, locality } = Astro.props as Props;
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
 
 // Fetch projects for the current locality
 const { data: projectsData } = await supabase
