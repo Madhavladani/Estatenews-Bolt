@@ -195,12 +195,50 @@ if (type === 'category' && category) {
                 </div>
               </div>
             )}
+              </div>
+            )}
+
+            <!-- Property Tools CTA -->
+            <div class="mt-12 p-8 bg-gradient-to-br from-gray-900 to-primary-900 rounded-2xl text-white shadow-xl relative overflow-hidden group">
+              <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c0 1.1.9-2 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h-2V7h4v10z"/></svg>
+              </div>
+              <div class="relative z-10">
+                <h3 class="text-2xl font-bold mb-3">Planning a Property Purchase?</h3>
+                <p class="text-gray-300 mb-6 max-w-lg">Use our smart calculators to estimate your Home Loan EMI, check Affordability, or calculate Property ROI in seconds.</p>
+                <a href="/tools" class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all">
+                  Explore All Tools
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+              </div>
+            </div>
+
             <ArticleFAQ faqs={articleProps.faqs} />
             <RelatedArticles articles={allArticles} currentSlug={article.slug} currentTags={article.tags || []} />
           </div>
         </div>
       </div>
     </article>
+
+    <!-- ── Property Tools CTA ── -->
+    <section class="py-16 bg-gradient-to-br from-primary-900 to-header text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-10">
+          <div class="max-w-2xl text-center lg:text-left">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Plan Your Property Purchase Like a Pro</h2>
+            <p class="text-lg text-gray-300 mb-8">
+              Use our advanced real estate calculators and tools to estimate EMI, affordability, ROI, and more. Make informed decisions with PropDiscover.
+            </p>
+            <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+              <a href="/tools" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40">Try Property Tools</a>
+              <a href="/loan-emi-calculator" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm">EMI Calculator</a>
+            </div>
+          </div>
+          <div class="hidden lg:block w-72 h-72 bg-gradient-to-br from-red-500/20 to-transparent rounded-full blur-3xl"></div>
+        </div>
+      </div>
+    </section>
+
   </BaseLayout>
 ) : (
   <BaseLayout
