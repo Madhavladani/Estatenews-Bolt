@@ -85,7 +85,15 @@ const mainCategories = subCategories
             {heroSideArticles.map(article => (
               <a href={`/blog/${article.slug}`} class="flex gap-4 group">
                 <div class="w-24 h-24 flex-none rounded-lg overflow-hidden">
-                  <img src={article.featured_image} alt={article.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <img
+                    src={article.featured_image}
+                    alt={article.title}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    width="96"
+                    height="96"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
                 <div class="flex-1">
                   <span class="text-[10px] uppercase font-bold text-red-600 tracking-wider inline-block mb-1">{article.sub_category || article.category}</span>
@@ -140,7 +148,15 @@ const mainCategories = subCategories
                  i === 0 ? "md:row-span-2 md:col-span-2" : ""
                ]}
              >
-               <img src={article.featured_image} alt={article.title} class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+               <img
+                 src={article.featured_image}
+                 alt={article.title}
+                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                 width="1200"
+                 height="675"
+                 loading="lazy"
+                 decoding="async"
+               />
                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                <div class="absolute bottom-0 p-6 w-full">
                   <span class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2 inline-block">Experts Choice</span>
@@ -167,7 +183,15 @@ const mainCategories = subCategories
                {policiesArticles.map(article => (
                  <div class="flex flex-col md:flex-row gap-6 group">
                    <a href={`/blog/${article.slug}`} class="md:w-1/3 aspect-video rounded-xl overflow-hidden shadow-md flex-none">
-                     <img src={article.featured_image} alt={article.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                     <img
+                       src={article.featured_image}
+                       alt={article.title}
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                       width="800"
+                       height="450"
+                       loading="lazy"
+                       decoding="async"
+                     />
                    </a>
                    <div class="flex-1 flex flex-col justify-center">
                      <span class="text-[10px] uppercase font-bold text-red-600 tracking-wider mb-2">Policy Update</span>
@@ -219,7 +243,15 @@ const mainCategories = subCategories
            {articles.slice(10, 14).map(article => (
              <div class="group">
                 <div class="relative aspect-video rounded-xl overflow-hidden mb-4 shadow-2xl">
-                   <img src={article.featured_image} alt={article.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                   <img
+                     src={article.featured_image}
+                     alt={article.title}
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                     width="800"
+                     height="450"
+                     loading="lazy"
+                     decoding="async"
+                   />
                    <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
                    <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
                       <span class="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
@@ -252,7 +284,15 @@ const mainCategories = subCategories
               {financeArticles.slice(1).map(article => (
                 <div class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
                    <div class="w-40 h-24 flex-none overflow-hidden rounded-lg">
-                      <img src={article.featured_image} alt={article.title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <img
+                        src={article.featured_image}
+                        alt={article.title}
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        width="160"
+                        height="96"
+                        loading="lazy"
+                        decoding="async"
+                      />
                    </div>
                    <div class="flex-1">
                       <span class="text-[9px] uppercase font-bold text-red-600 mb-1 block">Legal Update</span>
@@ -290,7 +330,15 @@ const mainCategories = subCategories
            {articles.slice(0, 6).map(article => (
              <div class="city-article group" data-city-id={article.city_id || 'all'}>
                <div class="aspect-[16/9] rounded-xl overflow-hidden mb-4 shadow-md bg-gray-100">
-                  <img src={article.featured_image} alt={article.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img
+                    src={article.featured_image}
+                    alt={article.title}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    width="800"
+                    height="450"
+                    loading="lazy"
+                    decoding="async"
+                  />
                </div>
                <span class="text-[10px] uppercase font-bold text-gray-400 mb-2 block">{article.category}</span>
                <h4 class="text-lg font-extrabold text-gray-900 group-hover:text-red-700 transition-colors leading-tight mb-2">
