@@ -1,0 +1,121 @@
+---
+export const prerender = true;
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Property Appreciation Calculator | PropDiscover"
+  description="Estimate the future value of your property based on historical or expected appreciation rates with PropDiscover."
+>
+  <header class="page-header">
+    <span class="header-badge">🚀 Growth Projection</span>
+    <h1>Property Appreciation Calculator<span class="accent-dot">.</span></h1>
+    <p>
+      Project the future market value of your property over time.
+    </p>
+  </header>
+
+  <main class="main-container">
+    <div class="calculator-card">
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="currentPrice">Current Property Value (INR)</label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input type="number" id="currentPrice" value="5000000" step="50000" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="rate">Annual Appreciation Rate (%)</label>
+          <div class="input-wrapper">
+            <span class="prefix">%</span>
+            <input type="number" id="rate" value="6" step="0.5" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="years">Time Period (Years)</label>
+          <div class="input-wrapper">
+            <input type="number" id="years" value="5" step="1" />
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-btn-wrapper">
+        <button id="calculateBtn" class="btn-calculate">Project Future Value</button>
+        <button id="resetBtn" class="btn-reset">↺ Reset</button>
+      </div>
+
+      <div id="resultContainer" class="results-container">
+        <p class="result-header">📈 Projected Growth</p>
+        <div class="result-inner-grid">
+          <div class="result-item emi-highlight">
+            <p class="result-label">Estimated Future Value</p>
+            <p id="futureValueText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Appreciation</p>
+            <p id="totalAppreciationText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Overall Growth (%)</p>
+            <p id="growthPercentText" class="result-value">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script is:inline>
+  function calculateAppreciation() {
+    const current = parseFloat(document.getElementById('currentPrice').value) || 0;
+    const rate = parseFloat(document.getElementById('rate').value) || 0;
+    const years = parseFloat(document.getElementById('years').value) || 0;
+
+    const futureValue = current * Math.pow(1 + (rate/100), years);
+    const totalAppreciation = futureValue - current;
+    const growthPercent = (totalAppreciation / current) * 100;
+
+    document.getElementById('futureValueText').innerText = '₹' + Math.round(futureValue).toLocaleString('en-IN');
+    document.getElementById('totalAppreciationText').innerText = '₹' + Math.round(totalAppreciation).toLocaleString('en-IN');
+    document.getElementById('growthPercentText').innerText = growthPercent.toFixed(1) + '%';
+    
+    document.getElementById('resultContainer').classList.add('visible');
+  }
+
+  document.getElementById('calculateBtn').addEventListener('click', calculateAppreciation);
+  document.getElementById('resetBtn').addEventListener('click', () => { location.reload(); });
+</script>
+
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #f97316;
+    --text-dark: #1a1a2e;
+    --text-medium: #4a5568;
+    --text-light: #718096;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-200: #e2e8f0;
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --radius-xl: 24px;
+  }
+  .page-header { background: linear-gradient(160deg, #0a1929 0%, #0d2137 40%, #122d4a 100%); padding: 3rem 1.5rem 3.5rem; text-align: center; color: white; }
+  .header-badge { background: rgba(249, 115, 22, 0.15); color: #fca35d; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; margin-bottom: 1rem; display: inline-block; }
+  .main-container { max-width: 960px; margin: -2rem auto 0; padding: 0 1.25rem 3rem; }
+  .calculator-card { background: white; border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: var(--shadow-lg); }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .input-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .input-wrapper { position: relative; margin-bottom: 0.5rem; }
+  .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-weight: 700; }
+  .input-wrapper input { width: 100%; padding: 0.75rem 1rem 0.75rem 2rem; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 1.1rem; }
+  .calc-btn-wrapper { display: flex; gap: 1rem; }
+  .btn-calculate { background: var(--accent); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 700; cursor: pointer; }
+  .results-container { margin-top: 2rem; background: #1e3a5f; color: white; padding: 2rem; border-radius: 20px; display: none; }
+  .results-container.visible { display: block; }
+  .result-inner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .result-item { background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 15px; }
+  @media (max-width: 768px) { .input-grid { grid-template-columns: 1fr; } .result-inner-grid { grid-template-columns: 1fr; } }
+</style>

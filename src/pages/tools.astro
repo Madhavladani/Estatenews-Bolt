@@ -1,0 +1,740 @@
+---
+export const prerender = true;
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const calculators = [
+  {
+    title: "Home Loan EMI Calculator",
+    description:
+      "Calculate monthly EMI, total interest payable, and complete repayment schedule instantly.",
+    href: "/loan-emi-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2V22"/>
+        <path d="M17 6H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Property ROI Calculator",
+    description:
+      "Analyze rental yield, appreciation, and overall property investment return.",
+    href: "/properties-roi-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 18L10 12L14 16L20 8"/>
+        <path d="M14 8H20V14"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Home Affordability Calculator",
+    description:
+      "Know how much property you can afford based on your salary and expenses.",
+    href: "/home-affordability-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 11L12 4L21 11"/>
+        <path d="M5 10V20H19V10"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Down Payment Calculator",
+    description:
+      "Estimate the ideal down payment before buying residential or commercial property.",
+    href: "/down-payment-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <path d="M2 10H22"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Rent vs Buy Calculator",
+    description:
+      "Compare long-term financial impact between renting and buying a property.",
+    href: "/rent-vs-buy-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 20V10L12 4L20 10V20"/>
+        <path d="M9 20V14H15V20"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Office Space Calculator",
+    description:
+      "Calculate ideal office workspace requirements for your business team.",
+    href: "/office-space-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="3" width="16" height="18" rx="2"/>
+        <path d="M8 7H16"/>
+        <path d="M8 11H16"/>
+        <path d="M8 15H13"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Rental Yield Calculator",
+    description:
+      "Calculate gross and net rental yield for residential and commercial property.",
+    href: "/rental-yield-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 19H20"/>
+        <path d="M7 15L10 12L13 14L18 8"/>
+      </svg>
+    `,
+  },
+
+  {
+    title: "Property Appreciation Calculator",
+    description:
+      "Predict future property value growth using annual appreciation rate.",
+    href: "/property-appreciation-calculator",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 20V4"/>
+        <path d="M5 11L12 4L19 11"/>
+      </svg>
+    `,
+  },
+];
+
+const converters = [
+  {
+    title: "Land Unit / Area Converter",
+    description:
+      "Convert Sq Ft, Sq Yard, Acre, Guntha, Bigha, Hectare, and more.",
+    href: "/land-unit-area-converter",
+    icon: `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M7 7H17V17H7Z"/>
+        <path d="M3 12H7"/>
+        <path d="M17 12H21"/>
+        <path d="M12 3V7"/>
+        <path d="M12 17V21"/>
+      </svg>
+    `,
+  },
+];
+
+const faq = [
+  {
+    question: "What are real estate calculators?",
+    answer:
+      "Real estate calculators help buyers and investors estimate EMI, affordability, rental returns, appreciation, and investment profitability.",
+  },
+
+  {
+    question: "Why should I use an EMI calculator?",
+    answer:
+      "EMI calculators help estimate monthly loan payments and total repayment cost before applying for a home loan.",
+  },
+
+  {
+    question: "What is rental yield?",
+    answer:
+      "Rental yield represents annual rental income as a percentage of property value and helps measure investment performance.",
+  },
+];
+---
+
+<BaseLayout
+  title="Real Estate Calculators & Property Tools"
+  description="Use advanced real estate calculators for EMI, ROI, affordability, rental yield, appreciation, office space planning, and land unit conversion."
+>
+  <!-- HERO -->
+
+  <section class="hero-section">
+    <div class="hero-bg-grid"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">Smart Property Finance Tools</div>
+
+      <h1>
+        Real Estate <span>Calculators</span> & Tools
+      </h1>
+
+      <p>
+        Professional property finance tools for home buyers, investors,
+        builders, agents, and real estate professionals.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat-card">
+          <strong>8+</strong>
+          <span>Financial Tools</span>
+        </div>
+
+        <div class="stat-card">
+          <strong>Instant</strong>
+          <span>Calculations</span>
+        </div>
+
+        <div class="stat-card">
+          <strong>100%</strong>
+          <span>Free Access</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+
+  <main class="main-container">
+    <!-- CALCULATORS -->
+
+    <section class="tools-section">
+      <div class="section-heading">
+        <h2>Property Calculators</h2>
+
+        <p>
+          Advanced financial calculators for property buying, investment
+          analysis, and loan planning.
+        </p>
+      </div>
+
+      <div class="tools-grid">
+        {
+          calculators.map((tool) => (
+            <a href={tool.href} class="tool-card">
+              <div class="tool-icon" set:html={tool.icon} />
+
+              <div class="tool-content">
+                <h3>{tool.title}</h3>
+
+                <p>{tool.description}</p>
+              </div>
+
+              <div class="tool-arrow">→</div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- CONVERTERS -->
+
+    <section class="tools-section">
+      <div class="section-heading">
+        <h2>Area & Land Converters</h2>
+
+        <p>
+          Instantly convert Indian and international land measurement units.
+        </p>
+      </div>
+
+      <div class="tools-grid">
+        {
+          converters.map((tool) => (
+            <a href={tool.href} class="tool-card">
+              <div class="tool-icon" set:html={tool.icon} />
+
+              <div class="tool-content">
+                <h3>{tool.title}</h3>
+
+                <p>{tool.description}</p>
+              </div>
+
+              <div class="tool-arrow">→</div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- SEO -->
+
+    <section class="seo-section">
+      <div class="seo-card">
+        <h2>Real Estate Financial Planning Made Simple</h2>
+
+        <p>
+          Real estate decisions involve large financial commitments. Smart
+          calculators help estimate loan repayments, rental returns,
+          affordability, appreciation potential, and investment profitability.
+        </p>
+
+        <p>
+          These tools are designed for property buyers, investors, real estate
+          consultants, and developers looking for accurate property finance
+          calculations.
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+
+    <section class="faq-section">
+      <div class="section-heading">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-grid">
+        {
+          faq.map((item) => (
+            <div class="faq-card">
+              <h3>{item.question}</h3>
+
+              <p>{item.answer}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #f97316;
+    --header: #0a1929;
+
+    --white: #ffffff;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+
+    --text: #111827;
+    --text-light: #64748b;
+
+    --radius: 26px;
+
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 14px 40px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.16);
+
+    --transition: 0.35s ease;
+  }
+
+  /* BODY */
+
+  body {
+    background: linear-gradient(to bottom, #f8fafc, #edf4fb);
+    color: var(--text);
+  }
+
+  /* HERO */
+
+  .hero-section {
+    position: relative;
+    overflow: hidden;
+
+    padding: 5rem 1.5rem 5rem;
+
+    background:
+      radial-gradient(
+        circle at top right,
+        rgba(249, 115, 22, 0.18),
+        transparent 28%
+      ),
+      linear-gradient(135deg, #07111d 0%, #0a1929 45%, #1e3a5f 100%);
+  }
+
+  .hero-bg-grid {
+    position: absolute;
+    inset: 0;
+
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+
+    background-size: 40px 40px;
+
+    opacity: 0.4;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+
+    max-width: 1150px;
+    margin: auto;
+
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 0.75rem 1.2rem;
+
+    border-radius: 999px;
+
+    background: rgba(249, 115, 22, 0.12);
+
+    border: 1px solid rgba(249, 115, 22, 0.2);
+
+    color: #ffbf8d;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    margin-bottom: 1.4rem;
+  }
+
+  .hero-content h1 {
+    color: #fff;
+
+    font-size: clamp(2.2rem, 5vw, 4rem);
+
+    line-height: 1.05;
+
+    font-weight: 900;
+
+    letter-spacing: -0.05em;
+
+    max-width: 850px;
+
+    margin: auto;
+  }
+
+  .hero-content h1 span {
+    color: var(--accent);
+  }
+
+  .hero-content p {
+    color: #c5d3e2;
+
+    max-width: 680px;
+
+    margin: 1.2rem auto 0;
+
+    line-height: 1.8;
+
+    font-size: 1rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    flex-wrap: wrap;
+
+    margin-top: 2rem;
+  }
+
+  .stat-card {
+    min-width: 150px;
+
+    padding: 1.1rem 1.2rem;
+
+    border-radius: 22px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .stat-card strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 1.45rem;
+
+    margin-bottom: 0.3rem;
+  }
+
+  .stat-card span {
+    color: #d0dae5;
+
+    font-size: 0.9rem;
+  }
+
+  /* MAIN */
+
+  .main-container {
+    position: relative;
+    z-index: 5;
+
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  /* SECTION */
+
+  .tools-section {
+    margin-bottom: 5rem;
+  }
+
+  .section-heading {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading h2 {
+    color: var(--header);
+
+    font-size: 1.9rem;
+
+    font-weight: 800;
+
+    margin-bottom: 0.7rem;
+  }
+
+  .section-heading p {
+    max-width: 760px;
+
+    color: var(--text-light);
+
+    line-height: 1.8;
+  }
+
+  /* GRID */
+
+  .tools-grid {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+
+    gap: 1.6rem;
+  }
+
+  /* CARD */
+
+  .tool-card {
+    position: relative;
+
+    overflow: hidden;
+
+    background: #fff;
+
+    border-radius: var(--radius);
+
+    padding: 2rem;
+
+    text-decoration: none;
+
+    border: 1px solid rgba(30, 58, 95, 0.08);
+
+    box-shadow: var(--shadow-sm);
+
+    transition: var(--transition);
+  }
+
+  .tool-card::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+      135deg,
+      rgba(249, 115, 22, 0.08),
+      transparent 60%
+    );
+
+    opacity: 0;
+
+    transition: var(--transition);
+  }
+
+  .tool-card:hover {
+    transform: translateY(-8px);
+
+    border-color: rgba(249, 115, 22, 0.28);
+
+    box-shadow: var(--shadow-lg);
+  }
+
+  .tool-card:hover::before {
+    opacity: 1;
+  }
+
+  /* ICON */
+
+  .tool-icon {
+    width: 74px;
+    height: 74px;
+
+    border-radius: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 1.5rem;
+
+    background: linear-gradient(
+      135deg,
+      rgba(249, 115, 22, 0.14),
+      rgba(30, 58, 95, 0.08)
+    );
+
+    border: 1px solid rgba(249, 115, 22, 0.14);
+
+    transition: var(--transition);
+  }
+
+  .tool-icon svg {
+    width: 34px;
+    height: 34px;
+
+    stroke: var(--primary);
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    transition: var(--transition);
+  }
+
+  .tool-card:hover .tool-icon {
+    background: linear-gradient(135deg, var(--accent), #ff9d58);
+
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  .tool-card:hover .tool-icon svg {
+    stroke: #fff;
+  }
+
+  /* CONTENT */
+
+  .tool-content h3 {
+    color: var(--header);
+
+    font-size: 1.22rem;
+
+    line-height: 1.45;
+
+    font-weight: 800;
+
+    margin-bottom: 0.7rem;
+  }
+
+  .tool-content p {
+    color: var(--text-light);
+
+    line-height: 1.75;
+
+    font-size: 0.97rem;
+  }
+
+  .tool-arrow {
+    margin-top: 1.5rem;
+
+    color: var(--accent);
+
+    font-weight: 700;
+
+    font-size: 1rem;
+  }
+
+  /* SEO */
+
+  .seo-section {
+    margin-bottom: 5rem;
+  }
+
+  .seo-card {
+    padding: 3rem;
+
+    border-radius: 32px;
+
+    background: linear-gradient(135deg, #0c1d30, #1e3a5f);
+
+    box-shadow: var(--shadow-lg);
+  }
+
+  .seo-card h2 {
+    color: #fff;
+
+    font-size: 2rem;
+
+    margin-bottom: 1rem;
+  }
+
+  .seo-card p {
+    color: #d6e0eb;
+
+    line-height: 1.9;
+
+    max-width: 920px;
+  }
+
+  /* FAQ */
+
+  .faq-grid {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+    gap: 1.5rem;
+  }
+
+  .faq-card {
+    background: #fff;
+
+    border-radius: 24px;
+
+    padding: 2rem;
+
+    border: 1px solid var(--border);
+
+    box-shadow: var(--shadow-sm);
+  }
+
+  .faq-card h3 {
+    color: var(--header);
+
+    margin-bottom: 0.8rem;
+
+    font-size: 1.12rem;
+  }
+
+  .faq-card p {
+    color: var(--text-light);
+
+    line-height: 1.75;
+  }
+
+  /* MOBILE */
+
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 4rem 1rem 4rem;
+    }
+
+    .hero-content h1 {
+      font-size: 2.1rem;
+    }
+
+    .main-container {
+      padding: 3rem 1rem 4rem;
+    }
+
+    .seo-card {
+      padding: 2rem;
+    }
+
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-card {
+      padding: 1.7rem;
+    }
+  }
+</style>

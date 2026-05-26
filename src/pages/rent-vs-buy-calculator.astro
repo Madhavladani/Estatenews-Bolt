@@ -1,0 +1,147 @@
+---
+export const prerender = true;
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Rent vs Buy Calculator | PropDiscover"
+  description="Should you rent or buy? Compare the total costs and benefits over time with our Rent vs Buy calculator."
+>
+  <header class="page-header">
+    <span class="header-badge">⚖️ Strategic Planning</span>
+    <h1>Rent vs Buy Calculator<span class="accent-dot">.</span></h1>
+    <p>
+      Determine the financial impact of renting versus buying a home over your expected tenure.
+    </p>
+  </header>
+
+  <main class="main-container">
+    <div class="calculator-card">
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="propertyPrice">Property Price (INR)</label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input type="number" id="propertyPrice" value="6000000" step="50000" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="monthlyRent">Monthly Rent (INR)</label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input type="number" id="monthlyRent" value="25000" step="500" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="tenure">Duration of Stay (Years)</label>
+          <div class="input-wrapper">
+            <input type="number" id="tenure" value="10" />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="appreciation">Expected Appreciation (%)</label>
+          <div class="input-wrapper">
+            <span class="prefix">%</span>
+            <input type="number" id="appreciation" value="5" step="0.5" />
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-btn-wrapper">
+        <button id="calculateBtn" class="btn-calculate">Compare Now</button>
+        <button id="resetBtn" class="btn-reset">↺ Reset</button>
+      </div>
+
+      <div id="resultContainer" class="results-container">
+        <p class="result-header">📊 10-Year Comparison Summary</p>
+        <div class="result-inner-grid">
+          <div id="buyRecommendation" class="result-item emi-highlight">
+            <p class="result-label">Recommendation</p>
+            <p id="recommendationText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Net Gain if Buying</p>
+            <p id="netGainText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Rent Paid</p>
+            <p id="totalRentText" class="result-value">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script is:inline>
+  function calculateRentVsBuy() {
+    const price = parseFloat(document.getElementById('propertyPrice').value) || 0;
+    const rent = parseFloat(document.getElementById('monthlyRent').value) || 0;
+    const years = parseFloat(document.getElementById('tenure').value) || 0;
+    const appreciation = parseFloat(document.getElementById('appreciation').value) || 0;
+
+    // Simplified cost analysis
+    let totalRent = 0;
+    let currentRent = rent;
+    for(let i=0; i<years; i++) {
+        totalRent += currentRent * 12;
+        currentRent *= 1.05; // 5% annual rent increase
+    }
+
+    const futureValue = price * Math.pow(1 + (appreciation/100), years);
+    const gainFromBuying = futureValue - price - (price * 0.08); // subtract initial costs (8% stamp/reg)
+    
+    // This is a VERY simplified model. Real models include EMI, maintenance, tax benefits etc.
+    // For a static tool, we'll keep it focused on main drivers.
+    
+    const netBenefitOfBuying = gainFromBuying - totalRent;
+
+    document.getElementById('totalRentText').innerText = '₹' + Math.round(totalRent).toLocaleString('en-IN');
+    document.getElementById('netGainText').innerText = '₹' + Math.round(gainFromBuying).toLocaleString('en-IN');
+    
+    if (netBenefitOfBuying > 0) {
+        document.getElementById('recommendationText').innerText = 'BUY';
+    } else {
+        document.getElementById('recommendationText').innerText = 'RENT';
+    }
+    
+    document.getElementById('resultContainer').classList.add('visible');
+  }
+
+  document.getElementById('calculateBtn').addEventListener('click', calculateRentVsBuy);
+  document.getElementById('resetBtn').addEventListener('click', () => { location.reload(); });
+</script>
+
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #f97316;
+    --text-dark: #1a1a2e;
+    --text-medium: #4a5568;
+    --text-light: #718096;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-200: #e2e8f0;
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --radius-xl: 24px;
+  }
+  .page-header { background: linear-gradient(160deg, #0a1929 0%, #0d2137 40%, #122d4a 100%); padding: 3rem 1.5rem 3.5rem; text-align: center; color: white; }
+  .header-badge { background: rgba(249, 115, 22, 0.15); color: #fca35d; padding: 0.35rem 1rem; border-radius: 50px; font-size: 0.8rem; margin-bottom: 1rem; display: inline-block; }
+  .main-container { max-width: 960px; margin: -2rem auto 0; padding: 0 1.25rem 3rem; }
+  .calculator-card { background: white; border-radius: var(--radius-xl); padding: 2.5rem; box-shadow: var(--shadow-lg); }
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  .input-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .input-wrapper { position: relative; margin-bottom: 0.5rem; }
+  .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-weight: 700; }
+  .input-wrapper input { width: 100%; padding: 0.75rem 1rem 0.75rem 2rem; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 1.1rem; }
+  .calc-btn-wrapper { display: flex; gap: 1rem; }
+  .btn-calculate { background: var(--accent); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 700; cursor: pointer; }
+  .results-container { margin-top: 2rem; background: #1e3a5f; color: white; padding: 2rem; border-radius: 20px; display: none; }
+  .results-container.visible { display: block; }
+  .result-inner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .result-item { background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 15px; }
+  @media (max-width: 768px) { .input-grid { grid-template-columns: 1fr; } .result-inner-grid { grid-template-columns: 1fr; } }
+</style>

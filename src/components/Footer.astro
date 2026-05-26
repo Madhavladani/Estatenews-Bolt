@@ -1,15 +1,21 @@
 ---
 const cities = [
-  { name: 'Ahmedabad', slug: 'ahmedabad' },
-  { name: 'Surat', slug: 'surat' },
-  { name: 'Rajkot', slug: 'rajkot' },
+  { name: "Ahmedabad", slug: "ahmedabad" },
+  { name: "Surat", slug: "surat" },
+  { name: "Rajkot", slug: "rajkot" },
 ];
 const collections = [
-  { title: 'Top Projects in Ahmedabad', slug: 'top-projects-in-ahmedabad' },
-  { title: 'Luxury Apartments in Surat', slug: 'luxury-apartments-in-surat' },
-  { title: 'Best Commercial in Rajkot', slug: 'best-commercial-projects-in-rajkot' },
-  { title: 'New Launch in Ahmedabad', slug: 'new-launch-projects-in-ahmedabad' },
-  { title: 'Ready to Move in Surat', slug: 'ready-to-move-in-surat' },
+  { title: "Top Projects in Ahmedabad", slug: "top-projects-in-ahmedabad" },
+  { title: "Luxury Apartments in Surat", slug: "luxury-apartments-in-surat" },
+  {
+    title: "Best Commercial in Rajkot",
+    slug: "best-commercial-projects-in-rajkot",
+  },
+  {
+    title: "New Launch in Ahmedabad",
+    slug: "new-launch-projects-in-ahmedabad",
+  },
+  { title: "Ready to Move in Surat", slug: "ready-to-move-in-surat" },
 ];
 ---
 
@@ -17,73 +23,178 @@ const collections = [
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
       <div>
-        <a href="/" class="flex items-center gap-2 text-xl font-bold text-white mb-4">
-          <svg class="w-8 h-8 text-accent-500" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+        <a
+          href="/"
+          class="flex items-center gap-2 text-xl font-bold text-white mb-4"
+        >
+          <svg
+            class="w-8 h-8 text-accent-500"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"></path>
           </svg>
           <span>Prop<span class="text-accent-500">Discover</span></span>
         </a>
         <p class="text-sm text-gray-400 leading-relaxed">
-          Discover the best residential and commercial real estate projects across Gujarat. Your trusted property discovery platform.
+          Discover the best residential and commercial real estate projects
+          across Gujarat. Your trusted property discovery platform.
         </p>
       </div>
       <div>
         <h3 class="text-white font-semibold mb-4">Cities</h3>
         <ul class="space-y-2">
-          {cities.map((city) => (
-            <li>
-              <a href={`/${city.slug}`} class="text-sm text-gray-400 hover:text-accent-400 transition-colors">{city.name} Properties</a>
-            </li>
-          ))}
+          {
+            cities.map((city) => (
+              <li>
+                <a
+                  href={`/${city.slug}`}
+                  class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+                >
+                  {city.name} Properties
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
       <div>
         <h3 class="text-white font-semibold mb-4">Project Types</h3>
         <ul class="space-y-2">
-          {cities.map((city) => (
-            <li>
-              <a href={`/${city.slug}/residential`} class="text-sm text-gray-400 hover:text-accent-400 transition-colors">{city.name} Residential</a>
-            </li>
-          ))}
-          {cities.map((city) => (
-            <li>
-              <a href={`/${city.slug}/commercial`} class="text-sm text-gray-400 hover:text-accent-400 transition-colors">{city.name} Commercial</a>
-            </li>
-          ))}
+          {
+            cities.map((city) => (
+              <li>
+                <a
+                  href={`/${city.slug}/residential`}
+                  class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+                >
+                  {city.name} Residential
+                </a>
+              </li>
+            ))
+          }
+          {
+            cities.map((city) => (
+              <li>
+                <a
+                  href={`/${city.slug}/commercial`}
+                  class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+                >
+                  {city.name} Commercial
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
       <div>
         <h3 class="text-white font-semibold mb-4">Collections</h3>
         <ul class="space-y-2">
-          {collections.map((col) => (
-            <li>
-              <a href={`/collections/${col.slug}`} class="text-sm text-gray-400 hover:text-accent-400 transition-colors">{col.title}</a>
-            </li>
-          ))}
+          {
+            collections.map((col) => (
+              <li>
+                <a
+                  href={`/collections/${col.slug}`}
+                  class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+                >
+                  {col.title}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
       <div>
         <h3 class="text-white font-semibold mb-4">Quick Links</h3>
         <ul class="space-y-2">
-          <li><a href="/about-us" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">About Us</a></li>
-          <li><a href="/contact-us" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">Contact Us</a></li>
-          <li><a href="/buying-guide" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">Buying Guide</a></li>
-          <li><a href="/properties-roi-calculator" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">Properties ROI Calculator</a></li>
-          <li><a href="/loan-emi-calculator" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">Loan EMI Calculator</a></li>
-          <li><a href="/list-your-project-properties" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">List Your Project / Properties</a></li>
-          <li><a href="/advertise-with-us" class="text-sm text-gray-400 hover:text-accent-400 transition-colors">Advertise With Us</a></li>
+          <li>
+            <a
+              href="/about-us"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >About Us</a>
+          </li>
+          <li>
+            <a
+              href="/contact-us"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Contact Us</a>
+          </li>
+          <li>
+            <a
+              href="/buying-guide"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Buying Guide</a>
+          </li>
+          <li>
+            <a
+              href="/properties-roi-calculator"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Properties ROI Calculator</a>
+          </li>
+          <li>
+            <a
+              href="/loan-emi-calculator"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Loan EMI Calculator</a>
+          </li>
+          <li>
+            <a
+              href="/list-your-project-properties"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >List Your Project / Properties</a>
+          </li>
+          <li>
+            <a
+              href="/advertise-with-us"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Advertise With Us</a>
+          </li>
+          <li>
+            <a
+              href="/tools"
+              class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
+              >Tools</a>
+          </li>
         </ul>
       </div>
     </div>
-    <div class="border-t border-primary-700 mt-10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p class="text-sm text-gray-500">&copy; {new Date().getFullYear()} PropDiscover. All rights reserved.</p>
+    <div
+      class="border-t border-primary-700 mt-10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
+    >
+      <p class="text-sm text-gray-500">
+        &copy; {new Date().getFullYear()} PropDiscover. All rights reserved.
+      </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <a href="/disclaimer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Disclaimer</a>
-        <a href="/editorial-policy" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Editorial Policy</a>
-        <a href="/verification-process" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Verification Process</a>
-        <a href="/privacy-policy" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Privacy Policy</a>
-        <a href="/terms-and-conditions" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Terms and Conditions</a>
-        <a href="/careers" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Careers</a>
+        <a
+          href="/disclaimer"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Disclaimer</a
+        >
+        <a
+          href="/editorial-policy"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Editorial Policy</a
+        >
+        <a
+          href="/verification-process"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Verification Process</a
+        >
+        <a
+          href="/privacy-policy"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Privacy Policy</a
+        >
+        <a
+          href="/terms-and-conditions"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Terms and Conditions</a
+        >
+        <a
+          href="/careers"
+          class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >Careers</a
+        >
       </div>
     </div>
   </div>

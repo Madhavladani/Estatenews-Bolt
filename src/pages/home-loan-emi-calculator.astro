@@ -1,0 +1,213 @@
+---
+export const prerender = true;
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Home Loan EMI Calculator | PropDiscover"
+  description="Calculate your monthly home loan EMI, total interest payable, and total payment. Use PropDiscover's Home Loan EMI Calculator to plan your finances."
+>
+  <header class="page-header">
+    <span class="header-badge">💰 Financial Tool</span>
+    <h1>Home Loan EMI Calculator<span class="accent-dot">.</span></h1>
+    <p>
+      Plan your home financing with our accurate and easy-to-use EMI calculator.
+    </p>
+  </header>
+
+  <main class="main-container">
+    <div class="calculator-card">
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="loanAmount">Home Loan Amount (INR)</label>
+          <div class="input-wrapper">
+            <span class="prefix">₹</span>
+            <input type="number" id="loanAmount" value="5000000" step="50000" />
+          </div>
+          <input type="range" id="loanAmountSlider" class="range-slider" min="100000" max="50000000" step="50000" value="5000000" />
+        </div>
+
+        <div class="input-group">
+          <label for="interestRate">Interest Rate (% P.A.)</label>
+          <div class="input-wrapper">
+            <span class="prefix">%</span>
+            <input type="number" id="interestRate" value="8.5" step="0.1" />
+          </div>
+          <input type="range" id="interestRateSlider" class="range-slider" min="1" max="20" step="0.1" value="8.5" />
+        </div>
+
+        <div class="input-group">
+          <label for="tenure">Loan Tenure (Years)</label>
+          <div class="input-wrapper">
+            <input type="number" id="tenure" value="20" />
+          </div>
+          <input type="range" id="tenureSlider" class="range-slider" min="1" max="30" step="1" value="20" />
+        </div>
+      </div>
+
+      <div class="calc-btn-wrapper">
+        <button id="calculateBtn" class="btn-calculate">Calculate EMI</button>
+        <button id="resetBtn" class="btn-reset">↺ Reset</button>
+      </div>
+
+      <div id="resultContainer" class="results-container">
+        <p class="result-header">📑 Your Home Loan Breakdown</p>
+        <div class="result-inner-grid">
+          <div class="result-item emi-highlight">
+            <p class="result-label">Monthly EMI</p>
+            <p id="monthlyEmiText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Interest Payable</p>
+            <p id="totalInterestText" class="result-value">—</p>
+          </div>
+          <div class="result-item">
+            <p class="result-label">Total Payment</p>
+            <p id="totalPaymentText" class="result-value">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="faq-section">
+      <h2>Home Loan EMI FAQ</h2>
+      <div class="faq-grid">
+        <details class="faq-item">
+          <summary>How is the interest calculated?</summary>
+          <div class="faq-answer">
+            Most home loans in India use the "Reducing Balance" method, where interest is calculated on the remaining principal every month.
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I reduce my EMI later?</summary>
+          <div class="faq-answer">
+            Yes, you can reduce your EMI by making part-prepayments towards your principal or by extending your loan tenure (subject to bank approval).
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script is:inline>
+  function calculateEMI() {
+    const principal = parseFloat(document.getElementById('loanAmount').value) || 0;
+    const rate = parseFloat(document.getElementById('interestRate').value) || 0;
+    const years = parseFloat(document.getElementById('tenure').value) || 0;
+
+    const monthlyRate = rate / 12 / 100;
+    const months = years * 12;
+
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+    const totalPayment = emi * months;
+    const totalInterest = totalPayment - principal;
+
+    document.getElementById('monthlyEmiText').innerText = '₹' + Math.round(emi).toLocaleString('en-IN');
+    document.getElementById('totalInterestText').innerText = '₹' + Math.round(totalInterest).toLocaleString('en-IN');
+    document.getElementById('totalPaymentText').innerText = '₹' + Math.round(totalPayment).toLocaleString('en-IN');
+    
+    document.getElementById('resultContainer').classList.add('visible');
+  }
+
+  const inputs = ['loanAmount', 'interestRate', 'tenure'];
+  inputs.forEach(id => {
+    const input = document.getElementById(id);
+    const slider = document.getElementById(id + 'Slider');
+    if (slider) {
+      input.addEventListener('input', () => { slider.value = input.value; });
+      slider.addEventListener('input', () => { input.value = slider.value; });
+    }
+  });
+
+  document.getElementById('calculateBtn').addEventListener('click', calculateEMI);
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    location.reload();
+  });
+</script>
+
+<style is:global>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #f97316;
+    --text-dark: #1a1a2e;
+    --text-medium: #4a5568;
+    --text-light: #718096;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-200: #e2e8f0;
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --radius-xl: 24px;
+  }
+
+  .page-header {
+    background: linear-gradient(160deg, #0a1929 0%, #0d2137 40%, #122d4a 100%);
+    padding: 3rem 1.5rem 3.5rem;
+    text-align: center;
+    color: white;
+  }
+  .header-badge {
+    background: rgba(249, 115, 22, 0.15);
+    color: #fca35d;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+
+  .main-container {
+    max-width: 960px;
+    margin: -2rem auto 0;
+    padding: 0 1.25rem 3rem;
+  }
+
+  .calculator-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .input-wrapper { position: relative; margin-bottom: 0.5rem; }
+  .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-weight: 700; }
+  .input-wrapper input { width: 100%; padding: 0.75rem 1rem 0.75rem 2rem; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 1.1rem; }
+
+  .range-slider { width: 100%; accent-color: var(--primary); }
+
+  .calc-btn-wrapper { display: flex; gap: 1rem; }
+  .btn-calculate { background: var(--accent); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 700; cursor: pointer; }
+
+  .results-container {
+    margin-top: 2rem;
+    background: #1e3a5f;
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    display: none;
+  }
+  .results-container.visible { display: block; }
+  .result-inner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .result-item { background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 15px; }
+
+  .faq-section { margin-top: 4rem; }
+  .faq-item { background: white; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; }
+
+  @media (max-width: 768px) {
+    .input-grid { grid-template-columns: 1fr; }
+    .result-inner-grid { grid-template-columns: 1fr; }
+  }
+</style>
