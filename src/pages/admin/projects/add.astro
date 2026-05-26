@@ -117,10 +117,10 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         <textarea id="p-short-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
       </div>
       
-	      <div>
-	        <label class="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
-	        <div class="rounded-lg border border-gray-200 overflow-hidden">
-	          <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+		      <div>
+		        <label class="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
+		        <div class="rounded-lg border border-gray-200 overflow-hidden">
+		          <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
 	            <button type="button" data-rte-cmd="bold" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Bold</button>
 	            <button type="button" data-rte-cmd="italic" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Italic</button>
 	            <button type="button" data-rte-cmd="underline" class="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded hover:bg-gray-100">Underline</button>
@@ -136,13 +136,34 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 	          <div id="p-full-desc-editor" contenteditable="true" class="min-h-[160px] px-4 py-3 text-sm outline-none"></div>
 	          <textarea id="p-full-desc-textarea" class="hidden w-full min-h-[160px] px-4 py-3 text-sm font-mono border-0 focus:ring-0 outline-none"></textarea>
 	        </div>
-	        <textarea id="p-full-desc" class="hidden"></textarea>
-	        <p class="mt-2 text-xs text-gray-500">Rich text is saved as HTML.</p>
-	      </div>
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
-        <input type="file" id="p-featured-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+		        <textarea id="p-full-desc" class="hidden"></textarea>
+		        <p class="mt-2 text-xs text-gray-500">Rich text is saved as HTML.</p>
+		      </div>
+
+        <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold text-gray-900">Custom FAQs</p>
+              <p class="text-xs text-gray-500">Enable to override the default FAQs on the project page.</p>
+            </div>
+            <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 select-none">
+              <input id="p-use-custom-faqs" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-primary-700 focus:ring-primary-500" />
+              Use custom FAQs
+            </label>
+          </div>
+
+          <div id="p-custom-faqs-section" class="mt-4 hidden">
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-xs text-gray-500">Add any number of questions/answers (empty items are ignored).</p>
+              <button type="button" id="p-add-faq" class="px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-700 rounded-lg font-medium transition-colors border border-gray-200">+ Add Question</button>
+            </div>
+            <div id="p-faq-container" class="mt-3 space-y-3"></div>
+          </div>
+        </div>
+	      
+	      <div>
+	        <label class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+	        <input type="file" id="p-featured-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
         <p id="p-featured-status" class="mt-2 text-xs text-gray-500"></p>
         <input type="hidden" id="p-image" />
         <img id="p-featured-preview" alt="Project featured preview" class="hidden mt-3 w-full h-52 object-cover rounded-lg border border-gray-200" />
@@ -297,10 +318,41 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
 		  const brochureStatus = document.getElementById('p-brochure-status');
 		  const galleryPreview = document.getElementById('p-gallery-preview');
 		  const brochurePreview = document.getElementById('p-brochure-preview');
-		  const brochureLink = document.getElementById('p-brochure-link');
-		  const citySelect = document.getElementById('p-city');
-		  const localitySelect = document.getElementById('p-locality');
-		  const locationHidden = document.getElementById('p-location');
+			  const brochureLink = document.getElementById('p-brochure-link');
+			  const citySelect = document.getElementById('p-city');
+			  const localitySelect = document.getElementById('p-locality');
+			  const locationHidden = document.getElementById('p-location');
+			  const useCustomFaqsCheckbox = document.getElementById('p-use-custom-faqs');
+			  const customFaqsSection = document.getElementById('p-custom-faqs-section');
+			  const addFaqBtn = document.getElementById('p-add-faq');
+			  const faqContainer = document.getElementById('p-faq-container');
+
+			  function createFaqElement(question = '', answer = '') {
+			    const div = document.createElement('div');
+			    div.className = 'faq-item bg-white p-4 rounded-lg relative border border-gray-200';
+			    div.innerHTML = `
+			      <button type="button" class="remove-faq absolute top-3 right-3 text-red-500 hover:text-red-700 p-1" aria-label="Remove FAQ">
+			        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+			      </button>
+			      <div class="space-y-2">
+			        <div>
+			          <label class="block text-xs font-medium text-gray-700 mb-1">Question</label>
+			          <input type="text" class="faq-question w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-primary-500 outline-none" value="${String(question || '').replace(/\"/g, '&quot;')}" />
+			        </div>
+			        <div>
+			          <label class="block text-xs font-medium text-gray-700 mb-1">Answer</label>
+			          <textarea rows="2" class="faq-answer w-full px-3 py-2 border border-gray-200 rounded text-sm focus:ring-2 focus:ring-primary-500 outline-none">${String(answer || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+			        </div>
+			      </div>
+			    `;
+			    div.querySelector('.remove-faq')?.addEventListener('click', () => div.remove());
+			    return div;
+			  }
+
+			  function setCustomFaqsVisible(isVisible) {
+			    if (!customFaqsSection) return;
+			    customFaqsSection.classList.toggle('hidden', !isVisible);
+			  }
   function sanitizeSegment(value) {
     return String(value || '')
       .toLowerCase()
@@ -429,17 +481,44 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     document.getElementById('p-brochure').value = p.brochure_url || '';
     document.getElementById('p-lat').value = p.latitude || '';
     document.getElementById('p-lng').value = p.longitude || '';
-	    document.getElementById('p-meta-title').value = p.meta_title || '';
-	    document.getElementById('p-meta-desc').value = p.meta_description || '';
-	  }
+		    document.getElementById('p-meta-title').value = p.meta_title || '';
+		    document.getElementById('p-meta-desc').value = p.meta_description || '';
+
+		    if (useCustomFaqsCheckbox) {
+		      useCustomFaqsCheckbox.checked = !!p.use_custom_faqs;
+		      setCustomFaqsVisible(useCustomFaqsCheckbox.checked);
+		      if (faqContainer) faqContainer.innerHTML = '';
+		      if (useCustomFaqsCheckbox.checked && Array.isArray(p.custom_faqs) && p.custom_faqs.length > 0) {
+		        p.custom_faqs.forEach((faq) => {
+		          faqContainer?.appendChild(createFaqElement(faq?.question || '', faq?.answer || ''));
+		        });
+		      } else if (useCustomFaqsCheckbox.checked) {
+		        faqContainer?.appendChild(createFaqElement());
+		      }
+		    }
+		  }
 	  if (!p) setFullDescHtml('');
 	    updateFeaturedPreview(featuredInput.value);
       updateBrochurePreview(brochureInput.value);
-  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
+	  renderGalleryPreview((p?.gallery_images || []).filter(Boolean));
 
-  async function loadLocalities(cityId, selectedLocalityId, fallbackLocationName) {
-    if (!localitySelect) return;
-    localitySelect.innerHTML = '<option value="">Select Locality</option>';
+	  if (useCustomFaqsCheckbox) {
+	    setCustomFaqsVisible(useCustomFaqsCheckbox.checked);
+	    useCustomFaqsCheckbox.addEventListener('change', () => {
+	      setCustomFaqsVisible(useCustomFaqsCheckbox.checked);
+	      if (useCustomFaqsCheckbox.checked && faqContainer && faqContainer.children.length === 0) {
+	        faqContainer.appendChild(createFaqElement());
+	      }
+	    });
+	  }
+
+	  addFaqBtn?.addEventListener('click', () => {
+	    faqContainer?.appendChild(createFaqElement());
+	  });
+
+	  async function loadLocalities(cityId, selectedLocalityId, fallbackLocationName) {
+	    if (!localitySelect) return;
+	    localitySelect.innerHTML = '<option value="">Select Locality</option>';
     if (!cityId) return;
 
     try {
@@ -496,13 +575,22 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
     submitBtn.textContent = 'Saving...';
     submitBtn.disabled = true;
     
-    try {
-      const id = document.getElementById('p-id').value;
-      const body = {
-        title: document.getElementById('p-title').value,
-        slug: document.getElementById('p-slug').value,
-        city_id: document.getElementById('p-city').value,
-        project_type: document.getElementById('p-type').value,
+	    try {
+	      const id = document.getElementById('p-id').value;
+	      const useCustomFaqs = !!useCustomFaqsCheckbox?.checked;
+	      const customFaqs = useCustomFaqs
+	        ? Array.from(document.querySelectorAll('#p-faq-container .faq-item'))
+	            .map((item) => ({
+	              question: item.querySelector('.faq-question')?.value?.trim() || '',
+	              answer: item.querySelector('.faq-answer')?.value?.trim() || '',
+	            }))
+	            .filter((f) => f.question && f.answer)
+	        : [];
+	      const body = {
+	        title: document.getElementById('p-title').value,
+	        slug: document.getElementById('p-slug').value,
+	        city_id: document.getElementById('p-city').value,
+	        project_type: document.getElementById('p-type').value,
 	        builder_name: document.getElementById('p-builder').value,
 	        builder_phone: document.getElementById('p-phone').value,
 	        locality_id: document.getElementById('p-locality').value || null,
@@ -519,13 +607,15 @@ const pageTitle = projectToEdit ? 'Edit Project' : 'Add Project';
         highlights: document.getElementById('p-highlights').value,
         floor_plans: document.getElementById('p-floor-plans').value,
         rera_number: document.getElementById('p-rera').value,
-        brochure_url: document.getElementById('p-brochure').value,
-        latitude: parseFloat(document.getElementById('p-lat').value) || 0,
-        longitude: parseFloat(document.getElementById('p-lng').value) || 0,
-        meta_title: document.getElementById('p-meta-title').value,
-        meta_description: document.getElementById('p-meta-desc').value,
-        collection_ids: Array.from(document.querySelectorAll('.coll-checkbox:checked')).map(cb => cb.value),
-      };
+	        brochure_url: document.getElementById('p-brochure').value,
+	        latitude: parseFloat(document.getElementById('p-lat').value) || 0,
+	        longitude: parseFloat(document.getElementById('p-lng').value) || 0,
+	        use_custom_faqs: useCustomFaqs,
+	        custom_faqs: customFaqs,
+	        meta_title: document.getElementById('p-meta-title').value,
+	        meta_description: document.getElementById('p-meta-desc').value,
+	        collection_ids: Array.from(document.querySelectorAll('.coll-checkbox:checked')).map(cb => cb.value),
+	      };
 
       const res = await fetch(id ? `/admin/api/projects?id=${id}` : '/admin/api/projects', {
         method: id ? 'PUT' : 'POST',

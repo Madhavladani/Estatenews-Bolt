@@ -38,6 +38,8 @@ export interface Project {
   rera_number: string;
   latitude: number;
   longitude: number;
+  use_custom_faqs?: boolean;
+  custom_faqs?: { question: string; answer: string }[] | any;
   meta_title: string;
   meta_description: string;
   published_at: string;

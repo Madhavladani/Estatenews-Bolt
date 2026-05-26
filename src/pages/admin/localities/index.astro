@@ -1,11 +1,12 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import type { City, Locality } from '../../../lib/types';
+import { supabase } from '../../../lib/supabase';
 
 const url = new URL(Astro.request.url);
 const selectedCity = url.searchParams.get('city') || '';
 
-const client = Astro.locals.supabase;
+const client = Astro.locals.supabase ?? supabase;
 const { data: citiesRes } = await client.from('cities').select('*').order('name');
 const cities: City[] = citiesRes || [];
 

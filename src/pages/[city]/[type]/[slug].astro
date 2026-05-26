@@ -120,7 +120,11 @@ if (props.kind === "project") {
       : galleryImages[0] || "";
 
   floorPlans = Array.isArray(project.floor_plans) ? project.floor_plans : [];
-  faqs = generateProjectFAQs(project, city);
+  const hasCustomFaqs =
+    !!(project as any)?.use_custom_faqs &&
+    Array.isArray((project as any)?.custom_faqs) &&
+    (project as any).custom_faqs.length > 0;
+  faqs = hasCustomFaqs ? (project as any).custom_faqs : generateProjectFAQs(project, city);
   statusLabel = formatStatus(project.project_status);
   typeLabel = formatProjectType(project.project_type);
 

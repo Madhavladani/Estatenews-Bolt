@@ -1,22 +1,137 @@
 ---
 export const prerender = true;
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+import type { City } from '../lib/types';
+
+const { data: citiesRes } = await supabase.from('cities').select('*').eq('index_city', true).order('name').limit(4);
+const cities: City[] = citiesRes || [];
+
+// Fallback cities in case data is empty
+const fallbackCities = [
+  { name: 'Ahmedabad', slug: 'ahmedabad', state: 'Gujarat' },
+  { name: 'Surat', slug: 'surat', state: 'Gujarat' },
+  { name: 'Vadodara', slug: 'vadodara', state: 'Gujarat' },
+  { name: 'Rajkot', slug: 'rajkot', state: 'Gujarat' }
+];
+
+const displayCities = cities.length > 0 ? cities : fallbackCities;
 ---
 
-<BaseLayout title="Page Not Found | PropDiscover" description="The page you are looking for does not exist. Browse our real estate projects across Gujarat.">
-  <section class="py-24">
-    <div class="max-w-2xl mx-auto px-4 text-center">
-      <p class="text-8xl font-bold text-primary-700 mb-4">404</p>
-      <h1 class="text-3xl font-bold text-gray-900 mb-4">Page Not Found</h1>
-      <p class="text-gray-600 mb-8">The page you are looking for does not exist or has been moved.</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/" class="px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
-          Go to Homepage
-        </a>
-        <a href="/ahmedabad" class="px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm">
-          Explore Ahmedabad
-        </a>
+<BaseLayout title="404 - Page Not Found | PropDiscover" description="Oops! The page you're looking for doesn't exist. Explore premium real estate projects across Gujarat's top cities on PropDiscover.">
+  <main>
+    <!-- Hero Section -->
+    <section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-primary-900 pt-20 pb-12">
+      <div class="absolute inset-0 opacity-20 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-500 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-500 rounded-full blur-[120px]"></div>
       </div>
-    </div>
-  </section>
+      
+      <div class="relative max-w-4xl mx-auto px-4 text-center z-10">
+        <div class="inline-block mb-6">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-600 text-9xl md:text-[12rem] font-black tracking-tighter leading-none opacity-20">404</span>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white">Oops! Lost in <span class="text-accent-400">Gujarat?</span></h1>
+          </div>
+        </div>
+        
+        <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+          The page you are looking for has either moved or doesn't exist. Let's get you back on track to finding your dream property.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/" class="px-8 py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-accent-500/25 flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Back to Home
+          </a>
+          <a href="/cities" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl border border-white/20 backdrop-blur-sm transition-all duration-300 flex items-center justify-center gap-2">
+            View All Cities
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explore Cities Section -->
+    <section class="py-24 bg-gray-50 border-t border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-black text-gray-900 mb-4">Explore Property in Top <span class="text-primary-700">Cities</span></h2>
+          <div class="w-24 h-1.5 bg-accent-500 mx-auto rounded-full mb-6"></div>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">Don't let a 404 stop your search. Explore premium projects in these thriving real estate hubs.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {displayCities.map((city) => (
+            <a href={`/${city.slug}`} class="group relative block rounded-2xl overflow-hidden shadow-xl bg-white aspect-[4/5] transform transition-transform duration-500 hover:scale-[1.02]">
+              <div class="absolute inset-0">
+                {city.hero_image ? (
+                  <img 
+                    src={city.hero_image} 
+                    alt={city.name} 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="w-full h-full bg-gradient-to-br from-primary-800 to-primary-600 flex items-center justify-center">
+                    <span class="text-white/20 text-8xl font-black italic">{city.name.substring(0, 1)}</span>
+                  </div>
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+              </div>
+              
+              <div class="absolute bottom-0 left-0 right-0 p-6 text-white transform transition-transform duration-300 group-hover:-translate-y-2">
+                <p class="text-accent-400 text-sm font-bold uppercase tracking-wider mb-1">{city.state || 'Gujarat'}</p>
+                <h3 class="text-2xl font-black mb-2">{city.name}</h3>
+                <div class="flex items-center gap-2 text-sm text-gray-300 font-medium">
+                  <span>Explore Projects</span>
+                  <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div class="mt-16 text-center">
+          <p class="text-gray-500 mb-6 font-medium">Looking for another location?</p>
+          <div class="flex flex-wrap justify-center gap-3">
+            {['Ahmedabad', 'Surat', 'Rajkot', 'Vadodara', 'Gandhinagar', 'Jamnagar', 'Bhavnagar'].map((c) => (
+              <a href={`/${c.toLowerCase()}`} class="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-700 hover:border-accent-500 hover:text-accent-600 transition-colors shadow-sm">
+                {c}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Project Assistance Section -->
+    <section class="py-16 bg-primary-800 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+          <div class="text-center md:text-left">
+            <h2 class="text-3xl font-bold mb-2">Need Expert Assistance?</h2>
+            <p class="text-primary-100 text-lg">Our experts can help you find the right property in any city.</p>
+          </div>
+          <a href="/contact" class="px-10 py-4 bg-accent-500 hover:bg-accent-600 text-white font-bold rounded-xl shadow-lg transition-all duration-300 whitespace-nowrap">
+            Contact Experts
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
 </BaseLayout>
+
+<style>
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  .animate-blob {
+    animation: blob 7s infinite alternate;
+  }
+</style>

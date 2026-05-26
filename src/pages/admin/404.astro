@@ -1,0 +1,30 @@
+---
+// This page is NOT prerendered to avoid "Forbidden rewrite to a static route"
+// errors when the middleware attempts to rewrite to it from an SSR context.
+---
+
+<div title="404 - Page Not Found">
+  <div
+    class="flex flex-col items-center justify-center min-h-[60vh] text-center"
+  >
+    <div class="mb-8">
+      <span class="text-9xl font-black text-primary-100">404</span>
+      <h1 class="text-4xl font-bold text-primary-900 -mt-12 relative z-10">
+        Page Not Found
+      </h1>
+    </div>
+
+    <p class="text-xl text-gray-600 mb-10 max-w-lg mx-auto">
+      The page you are looking for doesn't exist or has been moved.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="/"
+        class="px-8 py-3 bg-white border border-gray-200 text-primary-900 font-bold rounded-xl shadow-sm hover:bg-gray-50 transition-all duration-300"
+      >
+        Go to Website
+      </a>
+    </div>
+  </div>
+</div>
