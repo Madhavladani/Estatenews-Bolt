@@ -320,7 +320,23 @@ if (props.kind === "project") {
                     d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
                     clip-rule="evenodd"></path>
                 </svg>
-                {project.location}, {city.name}
+               <a
+  href={`/${city.slug}/${project.project_type}/${project.location
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")}`}
+  class="inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
+>
+  {project.location}
+</a>,
+
+<a
+  href={`/${city.slug}`}
+  class="class=inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
+>
+  {city.name}
+</a>
               </span>
               <span
                 >by <strong class="text-gray-700">{project.builder_name}</strong
@@ -334,15 +350,20 @@ if (props.kind === "project") {
                   {project.price_range}
                 </p>
               </div>
-              <div class="bg-accent-50 rounded-lg px-4 py-2">
-                <p class="text-xs text-gray-500">Possession</p>
-                <p class="text-lg font-bold text-accent-700">
-                  {project.possession_date}
-                </p>
-              </div>
+              {
+  project.possession_date &&
+  String(project.possession_date).trim() !== "" && (
+    <div class="bg-accent-50 rounded-lg px-4 py-2">
+      <p class="text-xs text-gray-500">Possession</p>
+      <p class="text-lg font-bold text-accent-700">
+        {project.possession_date}
+      </p>
+    </div>
+  )
+} 
               <div class="bg-green-50 rounded-lg px-4 py-2">
                 <p class="text-xs text-gray-500">Status</p>
-                <p class="text-lg font-bold text-green-700">{statusLabel}</p>
+                <p class="text-lg font-bold text-primary-700">{statusLabel}</p>
               </div>
             </div>
           </div>
@@ -571,73 +592,224 @@ if (props.kind === "project") {
         <!-- Sidebar -->
         <div class="space-y-6 sticky top-20 self-start">
           <!-- Quick Facts -->
-          <div class="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 class="font-semibold text-gray-900 mb-4">Quick Facts</h3>
-            <div class="space-y-3 text-sm">
-              <div class="flex justify-between">
-                <span class="text-gray-500">Project Type</span>
-                <span class="font-medium text-gray-900">{typeLabel}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Builder</span>
-                <span class="font-medium text-gray-900"
-                  >{project.builder_name}</span
-                >
-              </div>
-	              <div class="flex justify-between">
-	                <span class="text-gray-500">Location</span>
-	                <span class="font-medium text-gray-900">{project.location}</span
-	                >
-	              </div>
-                {project.address && (
-                  <div class="flex justify-between">
-                    <span class="text-gray-500">Address</span>
-                    <span class="font-medium text-gray-900">{project.address}</span>
-                  </div>
-                )}
-	              <div class="flex justify-between">
-	                <span class="text-gray-500">Price</span>
-	                <span class="font-medium text-primary-700"
-	                  >{project.price_range}</span
-	                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Possession</span>
-                <span class="font-medium text-gray-900"
-                  >{project.possession_date}</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Status</span>
-                <span class="font-medium text-gray-900">{statusLabel}</span>
-              </div>
-            </div>
+          <!-- Quick Facts -->
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+
+  <!-- Header -->
+  <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-primary-50 to-accent-50">
+    <h3 class="text-lg font-bold text-gray-900">
+      Project Quick Facts
+    </h3>
+
+    <p class="text-sm text-gray-500 mt-1">
+      Essential project information at a glance
+    </p>
+  </div>
+
+  <!-- Content -->
+  <div class="p-6 space-y-4">
+
+    <!-- Project Type -->
+    <div class="flex items-start gap-4">
+      <div class="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
+        <svg
+          class="w-5 h-5 text-primary-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"
+          />
+        </svg>
+      </div>
+
+      <div class="flex-1">
+        <p class="text-xs uppercase tracking-wide text-gray-400">
+          Project Type
+        </p>
+
+        <p class="font-semibold text-gray-900 mt-1">
+          {typeLabel}
+        </p>
+      </div>
+    </div>
+
+    <!-- Builder -->
+    <div class="flex items-start gap-4">
+      <div class="w-11 h-11 rounded-xl bg-accent-50 flex items-center justify-center flex-shrink-0">
+        <svg
+          class="w-5 h-5 text-accent-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5V4H2v16h5m10 0v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4m10 0H7"
+          />
+        </svg>
+      </div>
+
+      <div class="flex-1">
+        <p class="text-xs uppercase tracking-wide text-gray-400">
+          Builder
+        </p>
+
+        <p class="font-semibold text-gray-900 mt-1">
+          {project.builder_name}
+        </p>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div class="flex items-start gap-4">
+      <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+        <svg
+          class="w-5 h-5 text-green-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+
+      <div class="flex-1">
+        <p class="text-xs uppercase tracking-wide text-gray-400">
+          Locality Area
+        </p>
+
+        <a
+  href={`/${city.slug}/${project.project_type}/${project.location
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")}`}
+  class="inline-flex items-center gap-1 font-semibold text-primary-700 hover:text-accent-600 transition-colors mt-1"
+>
+  {project.location}
+
+  <svg
+    class="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M9 5l7 7-7 7"
+    />
+  </svg>
+</a>
+      </div>
+    </div>
+
+    <!-- Address -->
+    {
+      project.address && (
+        <div class="flex items-start gap-4">
+          <div class="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+            <svg
+              class="w-5 h-5 text-orange-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.243-4.243a8 8 0 1111.313 0z"
+              />
+            </svg>
           </div>
+
+          <div class="flex-1">
+            <p class="text-xs uppercase tracking-wide text-gray-400">
+              Address
+            </p>
+
+            <p class="font-semibold text-gray-900 mt-1 leading-relaxed">
+              {project.address}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    
+
+    
+
+  </div>
+</div>
 {
-            project.brochure_url && (
-              <a
-                href={project.brochure_url}
-                class="block bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow text-center"
-              >
-                <svg
-                  class="w-8 h-8 text-primary-600 mx-auto mb-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <p class="text-sm font-medium text-gray-900">
-                  Download Brochure
-                </p>
-              </a>
-            )
-          }
+  project.brochure_url && (
+    <a
+      href={project.brochure_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative overflow-hidden block rounded-2xl p-5 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-primary-500"
+    >
+      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+      <div class="relative flex items-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10">
+          <svg
+            class="w-7 h-7 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </div>
+
+        <div class="flex-1 text-left">
+          <p class="text-lg font-bold leading-tight">
+            Download Brochure
+          </p>
+
+          <p class="text-sm text-white/70 mt-1">
+            Floor plans, pricing, amenities & project details
+          </p>
+        </div>
+
+        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-accent-500 group-hover:scale-110 transition-transform">
+          <svg
+            class="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 7l5 5m0 0l-5 5m5-5H6"
+            />
+          </svg>
+        </div>
+      </div>
+    </a>
+  )
+}
           <!-- Contact CTA -->
           <div class="bg-primary-800 text-white rounded-xl p-6">
             <h3 class="text-lg font-bold mb-2">
