@@ -1,0 +1,79 @@
+---
+
+---
+
+<section
+  class="relative overflow-hidden bg-primary-900 pt-16 pb-20 lg:pt-24 lg:pb-32"
+>
+  <!-- Dynamic Background Decorations -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div
+      class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-red-600/20 rounded-full blur-[120px] animate-pulse"
+    >
+    </div>
+    <div
+      class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-primary-600/20 rounded-full blur-[120px] animate-pulse"
+      style="animation-delay: 2s;"
+    >
+    </div>
+    <div
+      class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"
+    >
+    </div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
+    >
+      <span class="relative flex h-2 w-2">
+        <span
+          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+        ></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"
+        ></span>
+      </span>
+      <span class="text-xs font-bold text-gray-200 uppercase tracking-widest"
+        >Real Estate Insights Hub</span
+      >
+    </div>
+
+    <h1
+      class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-1000"
+    >
+      Real Estate News, <br class="hidden md:block" />
+      <span
+        class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-red-600"
+        >Insights & Trends</span
+      > in Gujarat
+    </h1>
+
+    <p
+      class="max-w-2xl mx-auto text-lg md:text-xl text-gray-300 mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200"
+    >
+      Stay ahead in the Gujarat property market with expert analysis, RERA
+      updates, investment guides, and home decor inspiration.
+    </p>
+
+    <!-- Search Section -->
+
+    <!-- Quick Links -->
+  </div>
+</section>
+
+<style>
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.15;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.25;
+      transform: scale(1.1);
+    }
+  }
+  .animate-pulse {
+    animation: pulse-soft 8s ease-in-out infinite;
+  }
+</style>

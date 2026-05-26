@@ -14,7 +14,7 @@ const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Pro
   supabase.from('cities').select('*').order('name'),
   supabase.from('projects').select('*, city:cities(*)').order('published_at', { ascending: false }),
   supabase.from('collections').select('*, city:cities(*)').order('created_at', { ascending: false }),
-  supabase.from('news').select('*').eq('is_published', true).order('published_at', { ascending: false }).limit(6),
+  supabase.from('news').select('*, author:authors(*)').eq('is_published', true).order('published_at', { ascending: false }).limit(6),
   supabase
     .from('faqs')
     .select('question,answer')

@@ -57,7 +57,7 @@ const formattedDate = new Date(article.published_at).toLocaleDateString('en-IN',
       <span class="mx-2 text-gray-300">•</span>
       <span>{readingTime} min read</span>
       <span class="mx-2 text-gray-300">•</span>
-      <span class="text-gray-500">By {article.author_name || 'Admin'}</span>
+      <span class="text-gray-500">By {article.author?.full_name || article.author_name || 'Admin'}</span>
     </div>
   </div>
 </a>
