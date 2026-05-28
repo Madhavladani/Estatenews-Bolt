@@ -1,110 +1,272 @@
 ---
-import { supabase } from '../lib/supabase';
-import type { City } from '../lib/types';
+import { supabase } from "../lib/supabase";
+import type { City } from "../lib/types";
 
 // Fetch top 6 cities for the dropdown
-const { data: citiesData } = await supabase.from('cities').select('name, slug').order('name').limit(6);
+const { data: citiesData } = await supabase
+  .from("cities")
+  .select("name, slug")
+  .order("name")
+  .limit(6);
 const topCities: Partial<City>[] = citiesData || [];
 ---
 
-<header class="bg-primary-800 text-white sticky top-0 z-50 shadow-lg">
+<header
+  class="bg-[#0a1929] text-white sticky top-0 z-50 border-b border-white/5 backdrop-blur-md bg-opacity-95 shadow-xl"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <a href="/" class="flex items-center gap-2 text-xl font-bold tracking-tight">
-        <svg class="w-8 h-8 text-accent-500" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
-        </svg>
-        <span>Prop<span class="text-accent-500">Discover</span></span>
+      <!-- Logo -->
+      <a
+        href="/"
+        class="flex items-center gap-2.5 text-2xl font-black tracking-tight group"
+      >
+        <div
+          class="p-2 bg-[#1e3a5f]/50 rounded-xl border border-white/10 group-hover:border-[#f97316]/40 transition-colors duration-300"
+        >
+          <svg
+            class="w-6 h-6 text-[#f97316] transform group-hover:scale-110 transition-transform duration-300"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"></path>
+          </svg>
+        </div>
+        <span
+          class="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
+          >Prop<span class="text-[#f97316]">Discover</span></span
+        >
       </a>
-      <nav class="hidden md:flex items-center gap-6">
-        <a href="/" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Home</a>
-        
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1">
+        <a
+          href="/"
+          class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5"
+          >Home</a
+        >
+
         <!-- Cities Dropdown -->
         <div class="relative group">
-          <button class="flex items-center gap-1 text-gray-200 group-hover:text-white transition-colors text-sm font-medium">
+          <button
+            class="flex items-center gap-1.5 px-3 py-2 text-gray-300 group-hover:text-white transition-colors text-sm font-semibold rounded-lg group-hover:bg-white/5"
+          >
             Cities
-            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            <svg
+              class="w-4 h-4 transition-transform duration-300 group-hover:rotate-180 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
-          
-          <div class="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200">
-            {topCities.map(city => (
-              <a href={`/${city.slug}`} class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
-                {city.name}
-              </a>
-            ))}
-            <div class="border-t border-gray-100 mt-2 pt-2">
-              <a href="/cities" class="block px-4 py-2 text-sm font-bold text-primary-700 hover:bg-primary-50 transition-colors">
-                View All Cities
+
+          <!-- Dropdown Menu -->
+          <div
+            class="absolute left-0 mt-2 w-56 bg-[#0a1929] rounded-2xl shadow-2xl border border-white/10 p-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 z-50"
+          >
+            <div class="grid grid-cols-1 gap-0.5">
+              {
+                topCities.map((city) => (
+                  <a
+                    href={`/${city.slug}`}
+                    class="block px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1e3a5f] hover:text-white rounded-xl transition-all duration-200"
+                  >
+                    {city.name}
+                  </a>
+                ))
+              }
+            </div>
+            <div class="border-t border-white/10 mt-2 pt-2">
+              <a
+                href="/cities"
+                class="block px-4 py-2.5 text-sm font-bold text-[#f97316] hover:bg-[#f97316]/10 rounded-xl transition-colors"
+              >
+                View All Cities →
               </a>
             </div>
           </div>
         </div>
 
-        <a href="/collections" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Collections</a>
-        <a href="/blog" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Blog</a>
-        <a href="/compare-properties" class="text-gray-200 hover:text-white transition-colors text-sm font-medium">Compare Property</a>
-        <a href="/list-your-project-properties" class="add-properties-cta text-white text-sm font-semibold">Add Properties</a>
+        <a
+          href="/collections"
+          class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5"
+          >Collections</a
+        >
+        <a
+          href="/blog"
+          class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5"
+          >Blog</a
+        >
+        <a
+          href="/compare-properties"
+          class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5 mr-4"
+          >Compare Property</a
+        >
+
+        <a
+          href="/list-your-project-properties"
+          class="add-properties-cta text-white text-sm font-bold tracking-wide shadow-lg shadow-[#f97316]/20"
+        >
+          Add Properties
+        </a>
       </nav>
-      <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-primary-700 transition-colors" aria-label="Toggle menu">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+
+      <!-- Hamburger Button -->
+      <button
+        id="mobile-menu-btn"
+        class="md:hidden p-2.5 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <svg
+          class="w-6 h-6 text-gray-200"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            id="menu-icon"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
     </div>
   </div>
-  <div id="mobile-menu" class="hidden md:hidden bg-primary-900 border-t border-primary-700">
-    <div class="px-4 py-3 space-y-2">
-      <a href="/" class="block py-2 text-gray-200 hover:text-white text-sm">Home</a>
-      <a href="/cities" class="block py-2 text-gray-200 hover:text-white text-sm">Cities</a>
-      <a href="/collections" class="block py-2 text-gray-200 hover:text-white text-sm">Collections</a>
-      <a href="/blog" class="block py-2 text-gray-200 hover:text-white text-sm">Blog</a>
-      <a href="/compare-properties" class="block py-2 text-gray-200 hover:text-white text-sm">Compare Property</a>
-      <a href="/list-your-project-properties" class="add-properties-cta-mobile block py-2 text-sm font-semibold text-center">Add Properties</a>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden bg-[#0a1929]/98 border-t border-white/10 backdrop-blur-lg transition-all duration-300 ease-in-out"
+  >
+    <div class="px-4 py-4 space-y-1.5 max-h-[calc(100vh-5rem)] overflow-y-auto">
+      <a
+        href="/"
+        class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
+        >Home</a
+      >
+
+      <!-- Accordion Option for Mobile Cities -->
+      <div class="space-y-1">
+        <div
+          class="px-4 py-3 text-gray-400 text-xs font-bold tracking-wider uppercase"
+        >
+          Top Cities
+        </div>
+        <div class="grid grid-cols-2 gap-2 px-2 pb-2">
+          {
+            topCities.map((city) => (
+              <a
+                href={`/${city.slug}`}
+                class="block px-3 py-2 text-sm text-gray-300 bg-[#1e3a5f]/40 border border-white/5 rounded-xl hover:text-white hover:bg-[#1e3a5f]"
+              >
+                {city.name}
+              </a>
+            ))
+          }
+        </div>
+        <a
+          href="/cities"
+          class="block mx-2 px-3 py-2 text-sm font-bold text-[#f97316] bg-[#f97316]/5 border border-[#f97316]/10 text-center rounded-xl"
+        >
+          View All Cities
+        </a>
+      </div>
+
+      <div class="border-t border-white/5 my-2"></div>
+
+      <a
+        href="/collections"
+        class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
+        >Collections</a
+      >
+      <a
+        href="/blog"
+        class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
+        >Blog</a
+      >
+      <a
+        href="/compare-properties"
+        class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
+        >Compare Property</a
+      >
+
+      <div class="pt-4 px-2">
+        <a
+          href="/list-your-project-properties"
+          class="add-properties-cta-mobile block py-3 text-base font-bold text-center tracking-wide shadow-lg shadow-[#f97316]/20"
+        >
+          Add Properties
+        </a>
+      </div>
     </div>
   </div>
 </header>
 
 <script>
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
-  btn?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
+  const btn = document.getElementById("mobile-menu-btn");
+  const menu = document.getElementById("mobile-menu");
+  const menuIcon = document.getElementById("menu-icon");
+
+  btn?.addEventListener("click", () => {
+    const isHidden = menu?.classList.toggle("hidden");
+    btn.setAttribute("aria-expanded", String(!isHidden));
+
+    if (menuIcon) {
+      if (!isHidden) {
+        // Switch to "X" close icon
+        menuIcon.setAttribute("d", "M6 18L18 6M6 6l12 12");
+      } else {
+        // Switch back to "Hamburger" icon
+        menuIcon.setAttribute("d", "M4 6h16M4 12h16M4 18h16");
+      }
+    }
   });
 </script>
 
 <style>
   .add-properties-cta {
-    padding: 0.45rem 0.9rem;
-    border-radius: 0.6rem;
-    background: linear-gradient(135deg, #f97316, #fb923c);
-    box-shadow: 0 0 0 rgba(251, 146, 60, 0.35);
-    animation: ctaPulse 1.8s ease-in-out infinite;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.25);
+    animation: ctaPulse 2s ease-in-out infinite;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .add-properties-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(249, 115, 22, 0.35);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #fb923c, #f97316);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45);
+  }
+
+  .add-properties-cta:active {
+    transform: translateY(0);
   }
 
   .add-properties-cta-mobile {
-    border-radius: 0.6rem;
+    border-radius: 0.75rem;
     color: #ffffff;
-    background: linear-gradient(135deg, #f97316, #fb923c);
-    animation: ctaPulse 1.8s ease-in-out infinite;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    animation: ctaPulse 2s ease-in-out infinite;
   }
 
   @keyframes ctaPulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.4);
+      box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.5);
     }
     70% {
-      box-shadow: 0 0 0 12px rgba(251, 146, 60, 0);
+      box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(251, 146, 60, 0);
+      box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
     }
   }
 </style>

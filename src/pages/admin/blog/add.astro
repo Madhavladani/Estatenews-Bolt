@@ -180,8 +180,6 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
         </div>
       </div>
 
-      </div>
-
       <div class="border-t border-gray-100 pt-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-900">Frequently Asked Questions</h2>
@@ -418,7 +416,6 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
         title: document.getElementById('n-title').value,
         slug: document.getElementById('n-slug').value,
         author_id: document.getElementById('n-author-id').value,
-        author_name: document.getElementById('n-author-id').options[document.getElementById('n-author-id').selectedIndex].text,
         city_id: document.getElementById('n-city').value || null,
         featured_image: document.getElementById('n-featured').value,
         is_published: document.getElementById('n-published').checked,
@@ -427,8 +424,6 @@ const pageTitle = articleToEdit ? 'Edit Blog' : 'Add Blog';
         tags: document.getElementById('n-tags').value,
         category_id: document.getElementById('n-category-id').value,
         sub_category_id: document.getElementById('n-sub-category-id').value,
-        category: document.getElementById('n-category-id').options[document.getElementById('n-category-id').selectedIndex].text,
-        sub_category: document.getElementById('n-sub-category-id').options[document.getElementById('n-sub-category-id').selectedIndex].text === 'None' ? '' : document.getElementById('n-sub-category-id').options[document.getElementById('n-sub-category-id').selectedIndex].text,
         published_at: publishedAtIso,
         meta_title: document.getElementById('n-meta-title').value,
         meta_description: document.getElementById('n-meta-desc').value,
