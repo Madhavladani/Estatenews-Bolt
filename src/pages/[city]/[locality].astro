@@ -268,7 +268,7 @@ const metaDescription =
 	            {commercialProjects.length > 0 ? (
 	              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
 	                {commercialProjects.map((project) => (
-	                  <ProjectCard project={{ ...project, city }} />
+	                  <ProjectCard project={{ ...project, city, locality }} />
 	                ))}
 	              </div>
 	            ) : (
@@ -312,7 +312,7 @@ const metaDescription =
 	            {residentialProjects.length > 0 ? (
 	              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
 	                {residentialProjects.map((project) => (
-	                  <ProjectCard project={{ ...project, city }} />
+	                  <ProjectCard project={{ ...project, city, locality }} />
 	                ))}
 	              </div>
 	            ) : (

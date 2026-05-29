@@ -15,7 +15,12 @@ const statusColor: Record<string, string> = {
   'ready-to-move': 'bg-blue-100 text-blue-800',
 };
 const typeColor = project.project_type === 'residential' ? 'bg-primary-100 text-primary-800' : 'bg-accent-100 text-accent-800';
-const projectUrl = city ? `/${city.slug}/${project.project_type}/${project.slug}` : '#';
+const localitySlug = (project as any)?.locality?.slug as string | undefined;
+const projectUrl = city
+  ? localitySlug
+    ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}`
+    : `/${city.slug}/${project.project_type}/${project.slug}`
+  : '#';
 ---
 
 <article class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100">

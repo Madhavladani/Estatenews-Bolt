@@ -30,7 +30,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
         .from('projects')
         .select('*')
         .in('id', projectIds);
-      projects = pData || [];
+      const rawProjects = pData || [];
+      const cityIds = [...new Set(rawProjects.map((p: any) => p.city_id).filter(Boolean))];
+      let localities: { id: string; slug: string; name: string; city_id: string }[] = [];
+      if (cityIds.length > 0) {
+        const { data: locData } = await supabase
+          .from('localities')
+          .select('id,slug,name,city_id')
+          .in('city_id', cityIds);
+        localities = (locData || []) as any;
+      }
+      const localityById = new Map(localities.map((l) => [l.id, l]));
+      const localityByCityAndName = new Map(
+        localities.map((l) => [`${l.city_id}::${l.name}`.toLowerCase(), l]),
+      );
+      projects = rawProjects.map((p: any) => {
+        const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
+        const byName =
+          !byId && p.location && p.city_id
+            ? localityByCityAndName.get(`${p.city_id}::${p.location}`.toLowerCase())
+            : undefined;
+        const loc = byId || byName;
+        return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+      });
     }
     let city: City | null = null;
     if (collection.city_id) {

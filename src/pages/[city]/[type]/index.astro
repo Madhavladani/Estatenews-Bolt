@@ -6,7 +6,7 @@ import FilterSidebar from '../../../components/FilterSidebar.astro';
 import FAQSection from '../../../components/FAQSection.astro';
 import { supabase } from '../../../lib/supabase';
 import { buildBreadcrumbSchema, buildFAQSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../lib/seo';
-import type { City, Project } from '../../../lib/types';
+import type { City, Project, Locality } from '../../../lib/types';
 
 const { city: citySlug, type: projectType } = Astro.params;
 
@@ -33,7 +33,20 @@ const { data: projectsData } = await supabase
   .eq('project_type', projectType)
   .order('published_at', { ascending: false });
 
-const projects: Project[] = projectsData || [];
+const { data: localitiesData } = await supabase
+  .from('localities')
+  .select('*')
+  .eq('city_id', city.id);
+const localities: Locality[] = localitiesData || [];
+const localityById = new Map(localities.map((l) => [l.id, l]));
+const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
+
+const projects: (Project & { locality?: { slug: string; name: string } })[] = (projectsData || []).map((p: any) => {
+  const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
+  const byName = !byId && typeof p.location === 'string' ? localityByName.get(p.location.trim().toLowerCase()) : undefined;
+  const loc = byId || byName;
+  return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+});
 const totalPages = Math.max(1, Math.ceil(projects.length / ITEMS_PER_PAGE));
 const paginatedProjects = projects.slice(0, ITEMS_PER_PAGE);
 const locations = [...new Set(projects.map((p) => p.location).filter(Boolean))];

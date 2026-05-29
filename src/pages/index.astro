@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
 import { buildBreadcrumbSchema } from '../lib/seo';
 import type { City, Project, Collection, Blog } from '../lib/types';
 
-const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Promise.all([
+const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes, localitiesRes] = await Promise.all([
   // Build-time fetch only; page is prerendered.
   supabase.from('cities').select('*').order('name'),
   supabase.from('projects').select('*, city:cities(*)').order('published_at', { ascending: false }),
@@ -23,13 +23,32 @@ const [citiesRes, projectsRes, collectionsRes, newsRes, homeFaqsRes] = await Pro
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
     .limit(8),
+  supabase.from('localities').select('id,slug,name,city_id'),
 ]);
 
 const cities: City[] = citiesRes.data || [];
-const allProjects: (Project & { city?: City })[] = projectsRes.data || [];
+const allProjectsRaw: (Project & { city?: City })[] = projectsRes.data || [];
 const collections: (Collection & { city?: City })[] = collectionsRes.data || [];
 const latestBlog: Blog[] = newsRes.data || [];
 const homeFaqs = (homeFaqsRes.data || []) as { question: string; answer: string }[];
+const allLocalities = (localitiesRes.data || []) as { id: string; slug: string; name: string; city_id: string }[];
+
+const localityById = new Map(allLocalities.map((l) => [l.id, l]));
+const localityByCityAndName = new Map(
+  allLocalities.map((l) => [`${l.city_id}::${l.name}`.toLowerCase(), l]),
+);
+
+const allProjects: (Project & { city?: City; locality?: { slug: string; name: string } })[] = allProjectsRaw.map(
+  (p) => {
+    const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
+    const byName =
+      !byId && p.location && p.city_id
+        ? localityByCityAndName.get(`${p.city_id}::${p.location}`.toLowerCase())
+        : undefined;
+    const locality = byId || byName;
+    return locality ? ({ ...p, locality: { slug: locality.slug, name: locality.name } } as any) : (p as any);
+  },
+);
 
 const residentialProjects = allProjects.filter((p) => p.project_type === 'residential');
 const commercialProjects = allProjects.filter((p) => p.project_type === 'commercial');

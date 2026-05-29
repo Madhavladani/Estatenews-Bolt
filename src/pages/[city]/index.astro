@@ -35,11 +35,19 @@ const [projectsRes, collectionsRes, localitiesRes, faqsRes] = await Promise.all(
     .order('created_at', { ascending: false }),
 ]);
 
-const projects: Project[] = projectsRes.data || [];
+const localities: Locality[] = localitiesRes.data || [];
+const localityById = new Map(localities.map((l) => [l.id, l]));
+const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
+
+const projects: (Project & { locality?: { slug: string; name: string } })[] = (projectsRes.data || []).map((p: any) => {
+  const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
+  const byName = !byId && typeof p.location === 'string' ? localityByName.get(p.location.trim().toLowerCase()) : undefined;
+  const loc = byId || byName;
+  return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+});
 const collections: Collection[] = collectionsRes.data || [];
 const residentialProjects = projects.filter((p) => p.project_type === 'residential');
 const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
-const localities: Locality[] = localitiesRes.data || [];
 
 const faqsFromDb = (faqsRes.data || []).map((f: any) => ({ question: f.question, answer: f.answer }));
 const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
