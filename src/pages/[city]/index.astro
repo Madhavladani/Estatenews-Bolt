@@ -1,39 +1,53 @@
 ---
 export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import CollectionCard from '../../components/CollectionCard.astro';
-import FAQSection from '../../components/FAQSection.astro';
-import { supabase } from '../../lib/supabase';
-import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
-import type { City, Project, Collection, Locality } from '../../lib/types';
+	import ProjectCard from '../../components/ProjectCard.astro';
+	import CollectionCard from '../../components/CollectionCard.astro';
+	import FAQSection from '../../components/FAQSection.astro';
+	import { supabase } from '../../lib/supabase';
+	import { normalizeCitySlug, fallbackCityFromStatic } from '../../lib/city-slug';
+	import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
+	import type { City, Project, Collection, Locality } from '../../lib/types';
 
-const { city: citySlug } = Astro.params;
+	const { city: rawCitySlug } = Astro.params;
+	const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
 
-const { data: city } = await supabase
-  .from('cities')
-  .select('*')
-  .eq('slug', citySlug)
-  .single();
+	if (rawCitySlug && citySlug !== rawCitySlug) {
+	  return Astro.redirect(`/${citySlug}`, 301);
+	}
 
-if (!city) {
-  return new Response(null, { status: 404 });
-}
+	const { data: cityData } = await supabase
+	  .from('cities')
+	  .select('*')
+	  .eq('slug', citySlug)
+	  .single();
 
-Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+	const city: City | null = (cityData as City) || fallbackCityFromStatic(citySlug);
+	const hasDbCity = Boolean(cityData);
 
-const [projectsRes, collectionsRes, localitiesRes, faqsRes] = await Promise.all([
-  supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
-  supabase.from('collections').select('*').eq('city_id', city.id).order('created_at', { ascending: false }),
-  supabase.from('localities').select('*').eq('city_id', city.id).order('name'),
-  supabase
-    .from('faqs')
-    .select('question,answer,city_id,sort_order,created_at')
-    .eq('is_active', true)
-    .or(`city_id.eq.${city.id},city_id.is.null`)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false }),
-]);
+	if (!city) return new Response(null, { status: 404 });
+
+	Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+
+	const [projectsRes, collectionsRes, localitiesRes, faqsRes] = hasDbCity
+	  ? await Promise.all([
+	      supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
+	      supabase.from('collections').select('*').eq('city_id', city.id).order('created_at', { ascending: false }),
+	      supabase.from('localities').select('*').eq('city_id', city.id).order('name'),
+	      supabase
+	        .from('faqs')
+	        .select('question,answer,city_id,sort_order,created_at')
+	        .eq('is_active', true)
+	        .or(`city_id.eq.${city.id},city_id.is.null`)
+	        .order('sort_order', { ascending: true })
+	        .order('created_at', { ascending: false }),
+	    ])
+	  : [
+	      { data: [] as any[] } as any,
+	      { data: [] as any[] } as any,
+	      { data: [] as any[] } as any,
+	      { data: [] as any[] } as any,
+	    ];
 
 const localities: Locality[] = localitiesRes.data || [];
 const localityById = new Map(localities.map((l) => [l.id, l]));
@@ -51,27 +65,29 @@ const commercialProjects = projects.filter((p) => p.project_type === 'commercial
 
 const faqsFromDb = (faqsRes.data || []).map((f: any) => ({ question: f.question, answer: f.answer }));
 const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
-const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
-  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
-]);
-const citySchema = buildCitySchema(city);
-const faqSchema = buildFAQSchema(faqs);
----
+	const breadcrumbSchema = buildBreadcrumbSchema([
+	  { name: 'Home', url: 'https://propdiscover.com' },
+	  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+	]);
+	const citySchema = hasDbCity ? buildCitySchema(city) : null;
+	const faqSchema = buildFAQSchema(faqs);
+	---
 
-<BaseLayout
-  title={city.meta_title || `${city.name} Real Estate | Top Residential & Commercial Projects`}
-  description={city.meta_description || `Discover the best residential and commercial real estate projects in ${city.name}, ${city.state}. Explore new launches, luxury apartments, villas, and office spaces.`}
-  jsonLd={[breadcrumbSchema, citySchema, faqSchema]}
-  breadcrumbs={[{ name: city.name, url: `/${city.slug}` }]}
->
-  <!-- City Hero -->
-  <section class="relative bg-primary-800 text-white overflow-hidden">
-    <div class="absolute inset-0 opacity-20">
-      <img src={city.hero_image} alt={`Luxury real estate and new projects in ${city.name}`} class="w-full h-full object-cover" loading="eager" fetchpriority="high" width="1920" height="1080" />
-    </div>
-    <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+	<BaseLayout
+	  title={city.meta_title || `${city.name} Real Estate | Top Residential & Commercial Projects`}
+	  description={city.meta_description || `Discover the best residential and commercial real estate projects in ${city.name}, ${city.state}. Explore new launches, luxury apartments, villas, and office spaces.`}
+	  jsonLd={[breadcrumbSchema, ...(citySchema ? [citySchema] : []), faqSchema]}
+	  breadcrumbs={[{ name: city.name, url: `/${city.slug}` }]}
+	>
+	  <!-- City Hero -->
+	  <section class="relative bg-primary-800 text-white overflow-hidden">
+	    {city.hero_image && (
+	      <div class="absolute inset-0 opacity-20">
+	        <img src={city.hero_image} alt={`Luxury real estate and new projects in ${city.name}`} class="w-full h-full object-cover" loading="eager" fetchpriority="high" width="1920" height="1080" />
+	      </div>
+	    )}
+	    <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
+	    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <div class="max-w-3xl">
         <p class="text-accent-400 font-medium text-sm mb-3 uppercase tracking-wider">{city.state}</p>
         <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">

@@ -1,0 +1,14 @@
+---
+export const prerender = false;
+import CityTypeIndex from '../_components/CityTypeIndex.astro';
+import { normalizeCitySlug } from '../../../lib/city-slug';
+
+const { city: rawCitySlug } = Astro.params;
+const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
+if (rawCitySlug && citySlug !== rawCitySlug) {
+  return Astro.redirect(`/${citySlug}/residential`, 301);
+}
+---
+
+<CityTypeIndex citySlug={citySlug} projectType="residential" />
+

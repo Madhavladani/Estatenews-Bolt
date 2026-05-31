@@ -1,53 +1,48 @@
 ---
-export const prerender = false;
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ProjectCard from '../../../components/ProjectCard.astro';
-	import FilterSidebar from '../../../components/FilterSidebar.astro';
-	import FAQSection from '../../../components/FAQSection.astro';
-	import { supabase } from '../../../lib/supabase';
-	import { normalizeCitySlug, fallbackCityFromStatic } from '../../../lib/city-slug';
-	import { buildBreadcrumbSchema, buildFAQSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../lib/seo';
-	import type { City, Project, Locality } from '../../../lib/types';
+import FilterSidebar from '../../../components/FilterSidebar.astro';
+import FAQSection from '../../../components/FAQSection.astro';
+import { supabase } from '../../../lib/supabase';
+import { fallbackCityFromStatic } from '../../../lib/city-slug';
+import { buildBreadcrumbSchema, buildFAQSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../lib/seo';
+import type { City, Project, Locality } from '../../../lib/types';
 
-	const { city: rawCitySlug, type: projectType } = Astro.params;
-	const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
+type Props = {
+  citySlug: string;
+  projectType: 'residential' | 'commercial';
+};
 
-	if (rawCitySlug && citySlug !== rawCitySlug) {
-	  return Astro.redirect(`/${citySlug}/${projectType}`, 301);
-	}
+const { citySlug, projectType } = Astro.props as Props;
 
-	if (!['residential', 'commercial'].includes(projectType || '')) {
-	  return new Response(null, { status: 404 });
-	}
+const { data: cityData } = await supabase
+  .from('cities')
+  .select('*')
+  .eq('slug', citySlug)
+  .single();
 
-	const { data: cityData } = await supabase
-	  .from('cities')
-	  .select('*')
-	  .eq('slug', citySlug)
-	  .single();
+const city: City | null = (cityData as City) || fallbackCityFromStatic(citySlug);
+const hasDbCity = Boolean(cityData);
 
-	const city: City | null = (cityData as City) || fallbackCityFromStatic(citySlug);
-	const hasDbCity = Boolean(cityData);
+if (!city) return new Response(null, { status: 404 });
 
-	if (!city) return new Response(null, { status: 404 });
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 
-	Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+const { data: projectsData } = hasDbCity
+  ? await supabase
+      .from('projects')
+      .select('*')
+      .eq('city_id', city.id)
+      .eq('project_type', projectType)
+      .order('published_at', { ascending: false })
+  : { data: [] as any[] };
 
-	const { data: projectsData } = hasDbCity
-	  ? await supabase
-	      .from('projects')
-	      .select('*')
-	      .eq('city_id', city.id)
-	      .eq('project_type', projectType)
-	      .order('published_at', { ascending: false })
-	  : { data: [] as any[] };
-
-	const { data: localitiesData } = hasDbCity
-	  ? await supabase.from('localities').select('*').eq('city_id', city.id)
-	  : { data: [] as any[] };
-	const localities: Locality[] = localitiesData || [];
-	const localityById = new Map(localities.map((l) => [l.id, l]));
-	const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
+const { data: localitiesData } = hasDbCity
+  ? await supabase.from('localities').select('*').eq('city_id', city.id)
+  : { data: [] as any[] };
+const localities: Locality[] = localitiesData || [];
+const localityById = new Map(localities.map((l) => [l.id, l]));
+const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
 
 const projects: (Project & { locality?: { slug: string; name: string } })[] = (projectsData || []).map((p: any) => {
   const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
@@ -57,9 +52,21 @@ const projects: (Project & { locality?: { slug: string; name: string } })[] = (p
 });
 const totalPages = Math.max(1, Math.ceil(projects.length / ITEMS_PER_PAGE));
 const paginatedProjects = projects.slice(0, ITEMS_PER_PAGE);
+const suggestedProjects =
+  projects.length > ITEMS_PER_PAGE ? projects.slice(ITEMS_PER_PAGE, ITEMS_PER_PAGE + 6) : projects.slice(0, 6);
 const locations = [...new Set(projects.map((p) => p.location).filter(Boolean))];
 const amenities = [...new Set(projects.flatMap((p) => p.amenities).filter(Boolean))].sort();
 const statuses = [...new Set(projects.map((p) => p.project_status).filter(Boolean))];
+const otherLocalities = [...localities].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 24);
+
+const tools = [
+  { title: 'Loan EMI Calculator', href: '/loan-emi-calculator' },
+  { title: 'Home Loan EMI Calculator', href: '/home-loan-emi-calculator' },
+  { title: 'Down Payment Calculator', href: '/down-payment-calculator' },
+  { title: 'Rent vs Buy Calculator', href: '/rent-vs-buy-calculator' },
+  { title: 'ROI Calculator', href: '/properties-roi-calculator' },
+  { title: 'All Tools', href: '/tools' },
+];
 
 const typeLabel = formatProjectType(projectType);
 const otherType = projectType === 'residential' ? 'commercial' : 'residential';
@@ -105,47 +112,25 @@ const faqSchema = buildFAQSchema(faqs);
         {typeLabel} Projects in {city.name}
       </h1>
       <p class="text-gray-300 text-lg">
-        {projects.length} {typeLabel.toLowerCase()} projects available across {locations.length} localities
+        Browse {typeLabel.toLowerCase()} projects across {city.name}. Filter by location, amenities, and status to find the right match.
       </p>
     </div>
   </section>
 
-  <!-- Main Content -->
+  <!-- Projects Listing with Filters -->
   <section class="py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row gap-8">
-        <FilterSidebar
-          projectType={projectType}
-          citySlug={city.slug}
-          cityName={city.name}
-          locations={locations}
-          amenities={amenities}
-          statuses={statuses}
-        />
-        <div class="flex-1">
-          <div class="flex items-center justify-between mb-6">
-            <p class="text-sm text-gray-500">
-              Showing <span class="font-medium text-gray-900">{paginatedProjects.length}</span> of <span class="font-medium text-gray-900">{projects.length}</span> projects
-            </p>
-            <select id="sort-projects" class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 outline-none">
-              <option value="latest">Latest First</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
-          </div>
-          <div id="projects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-projects={JSON.stringify(projects.map(p => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            location: p.location,
-            builder_name: p.builder_name,
-            price_range: p.price_range,
-            short_description: p.short_description,
-            featured_image: p.featured_image,
-            project_type: p.project_type,
-            project_status: p.project_status,
-            amenities: p.amenities,
-          })))} data-city={JSON.stringify(city)} data-type={projectType}>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="lg:col-span-1">
+          <FilterSidebar
+            locations={locations}
+            amenities={amenities}
+            statuses={statuses}
+            baseUrl={`/${city.slug}/${projectType}`}
+          />
+        </div>
+        <div class="lg:col-span-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedProjects.map((project) => (
               <div class="project-item" data-location={project.location} data-status={project.project_status} data-amenities={project.amenities.join(',')}>
                 <ProjectCard project={{ ...project, city }} />
@@ -169,6 +154,75 @@ const faqSchema = buildFAQSchema(faqs);
             </div>
           )}
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Suggested Projects -->
+  {suggestedProjects.length > 0 && (
+    <section class="py-12 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-6 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Suggested {typeLabel} Projects in {city.name}</h2>
+            <p class="text-sm text-gray-600 mt-1">Handpicked picks based on latest updates in {city.name}.</p>
+          </div>
+          {totalPages > 1 && (
+            <a href={`/${city.slug}/${projectType}/page/2`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
+              View more
+            </a>
+          )}
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {suggestedProjects.map((project) => (
+            <ProjectCard project={{ ...project, city }} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Other Localities -->
+  {otherLocalities.length > 0 && (
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-6 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Other Localities in {city.name}</h2>
+            <p class="text-sm text-gray-600 mt-1">Explore locality-wise pages for {typeLabel.toLowerCase()} options.</p>
+          </div>
+          <a href={`/${city.slug}`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
+            City overview
+          </a>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          {otherLocalities.map((l) => (
+            <a
+              href={`/${city.slug}/${l.slug}`}
+              class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors"
+            >
+              {l.name}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Tools -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Tools</h2>
+      <p class="text-sm text-gray-600 mb-6">Plan budgets, compare options, and estimate EMIs.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tools.map((t) => (
+          <a href={t.href} class="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-sm transition-all">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-900">{t.title}</span>
+              <span class="text-gray-400" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        ))}
       </div>
     </div>
   </section>

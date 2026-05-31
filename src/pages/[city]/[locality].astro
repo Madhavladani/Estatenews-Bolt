@@ -1,51 +1,83 @@
 ---
 export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import FAQSection from '../../components/FAQSection.astro';
-import { supabase } from '../../lib/supabase';
-import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
-import type { City, Locality, Project, Collection } from '../../lib/types';
+		import ProjectCard from '../../components/ProjectCard.astro';
+		import FAQSection from '../../components/FAQSection.astro';
+		import CityTypeIndex from './_components/CityTypeIndex.astro';
+		import { supabase } from '../../lib/supabase';
+		import { normalizeCitySlug } from '../../lib/city-slug';
+		import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
+		import type { City, Locality, Project, Collection } from '../../lib/types';
 
-const { city: citySlug, locality: localitySlug } = Astro.params;
+		const { city: rawCitySlug, locality: localitySlug } = Astro.params;
+		const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
 
-const { data: city } = await supabase
-  .from('cities')
-  .select('*')
-  .eq('slug', citySlug)
-  .single();
+		// Fix SSR dynamic-route collision where `/:city/:locality` may receive `residential|commercial`.
+		const typeLike = localitySlug === 'residential' || localitySlug === 'commercial'
+		  ? (localitySlug as 'residential' | 'commercial')
+		  : null;
 
-if (!city) {
-  return new Response(null, { status: 404 });
-}
+		if (rawCitySlug && citySlug !== rawCitySlug) {
+		  return Astro.redirect(typeLike ? `/${citySlug}/${typeLike}` : `/${citySlug}/${localitySlug}`, 301);
+		}
 
-const { data: locality } = await supabase
-  .from('localities')
-  .select('*')
-  .eq('city_id', city.id)
-  .eq('slug', localitySlug)
-  .single();
+		let city: City | null = null;
+		let locality: Locality | null = null;
+		let projects: Project[] = [];
+		let residentialProjects: Project[] = [];
+		let commercialProjects: Project[] = [];
+		let builderNames: string[] = [];
+		let seoIntroRaw = '';
+		let infra: any = {};
+		let localityFaqs: { question: string; answer: string }[] = [];
+		let cityCollections: Collection[] = [];
+		let otherLocalities: Locality[] = [];
+		let breadcrumbSchema: any = null;
+		let faqs: { question: string; answer: string }[] = [];
+		let faqSchema: any = null;
+		let metaTitle = '';
+		let metaDescription = '';
 
-if (!locality) {
-  return new Response(null, { status: 404 });
-}
+		if (!typeLike) {
+		const { data: cityData } = await supabase
+		  .from('cities')
+		  .select('*')
+		  .eq('slug', citySlug)
+	  .single();
+
+	city = (cityData as City) || null;
+	if (!city) {
+	  return new Response(null, { status: 404 });
+	}
+
+	const { data: localityData } = await supabase
+	  .from('localities')
+	  .select('*')
+	  .eq('city_id', city.id)
+	  .eq('slug', localitySlug)
+	  .single();
+
+	locality = (localityData as Locality) || null;
+	if (!locality) {
+	  return new Response(null, { status: 404 });
+	}
 
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
 
 // Fetch projects for the current locality
-const { data: projectsData } = await supabase
-  .from('projects')
-  .select('*')
-  .eq('city_id', city.id)
-  .or(`locality_id.eq.${locality.id},location.eq.${locality.name}`)
-  .order('published_at', { ascending: false });
+	const { data: projectsData } = await supabase
+	  .from('projects')
+	  .select('*')
+	  .eq('city_id', city.id)
+	  .or(`locality_id.eq.${locality.id},location.eq.${locality.name}`)
+	  .order('published_at', { ascending: false });
 
-const projects: Project[] = projectsData || [];
-const residentialProjects = projects.filter((p) => p.project_type === 'residential');
-const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
-const builderNames = Array.from(
-  new Set(projects.map((p) => String(p.builder_name || '').trim()).filter(Boolean))
-).slice(0, 6);
+	projects = projectsData || [];
+	residentialProjects = projects.filter((p) => p.project_type === 'residential');
+	commercialProjects = projects.filter((p) => p.project_type === 'commercial');
+	builderNames = Array.from(
+	  new Set(projects.map((p) => String(p.builder_name || '').trim()).filter(Boolean))
+	).slice(0, 6);
 
 const parseJsonLoose = <T,>(value: any, fallback: T): T => {
   if (!value) return fallback;
@@ -59,51 +91,51 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
   return value as T;
 };
 
-const seoIntroRaw = String((locality as any)?.seo_intro || '').trim();
-
-const infra = parseJsonLoose<any>((locality as any)?.infrastructure, {});
-const dbFaqs = parseJsonLoose<any>((locality as any)?.faqs, []);
-const localityFaqs: { question: string; answer: string }[] = Array.isArray(dbFaqs)
-  ? dbFaqs
-      .map((f) => ({
-        question: String(f?.question || '').trim(),
-        answer: String(f?.answer || '').trim(),
+	seoIntroRaw = String((locality as any)?.seo_intro || '').trim();
+	
+	infra = parseJsonLoose<any>((locality as any)?.infrastructure, {});
+	const dbFaqs = parseJsonLoose<any>((locality as any)?.faqs, []);
+	localityFaqs = Array.isArray(dbFaqs)
+	  ? dbFaqs
+	      .map((f) => ({
+	        question: String(f?.question || '').trim(),
+	        answer: String(f?.answer || '').trim(),
       }))
       .filter((f) => f.question && f.answer)
   : [];
 
 // City collections for internal topical clustering
-const { data: cityCollectionsData } = await supabase
-  .from('collections')
-  .select('*')
-  .eq('city_id', city.id)
-  .order('created_at', { ascending: false })
-  .limit(6);
-const cityCollections: Collection[] = cityCollectionsData || [];
+	const { data: cityCollectionsData } = await supabase
+	  .from('collections')
+	  .select('*')
+	  .eq('city_id', city.id)
+	  .order('created_at', { ascending: false })
+	  .limit(6);
+	cityCollections = cityCollectionsData || [];
 
 // NEW: Fetch other popular localities in the same city (excluding the current one)
-const { data: otherLocalitiesData } = await supabase
-  .from('localities')
-  .select('*')
-  .eq('city_id', city.id)
-  .neq('id', locality.id)
-  .limit(6);
-
-const otherLocalities: Locality[] = otherLocalitiesData || [];
-
-const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
-  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
-  {
-    name: locality.name,
+	const { data: otherLocalitiesData } = await supabase
+	  .from('localities')
+	  .select('*')
+	  .eq('city_id', city.id)
+	  .neq('id', locality.id)
+	  .limit(6);
+	
+	otherLocalities = otherLocalitiesData || [];
+	
+	breadcrumbSchema = buildBreadcrumbSchema([
+	  { name: 'Home', url: 'https://propdiscover.com' },
+	  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+	  {
+	    name: locality.name,
     url: `https://propdiscover.com/${city.slug}/${locality.slug}`,
   },
 ]);
 
-const faqs = [
-  ...localityFaqs,
-  ...(localityFaqs.length === 0
-    ? [
+	faqs = [
+	  ...localityFaqs,
+	  ...(localityFaqs.length === 0
+	    ? [
         {
           question: `What type of properties are available in ${locality.name}, ${city.name}?`,
           answer: `${locality.name} offers both residential and commercial options. Explore commercial spaces (shops, offices, showrooms) and residential projects (apartments, villas) based on your need, budget, and connectivity preferences.`,
@@ -127,20 +159,24 @@ const faqs = [
       ]
     : []),
 ];
-const faqSchema = buildFAQSchema(faqs);
-
-const metaTitle =
-  String((locality as any)?.meta_title || '').trim() ||
-  `${locality.name}, ${city.name} Real Estate | Commercial & Residential Projects`;
-const metaDescription =
-  String((locality as any)?.meta_description || '').trim() ||
-  `Explore commercial property (shops, offices, showrooms) and residential projects in ${locality.name}, ${city.name}. Compare new launches, under-construction, and ready-to-move listings with builders, amenities, and locality insights.`;
+	faqSchema = buildFAQSchema(faqs);
+	
+	metaTitle =
+	  String((locality as any)?.meta_title || '').trim() ||
+	  `${locality.name}, ${city.name} Real Estate | Commercial & Residential Projects`;
+	metaDescription =
+	  String((locality as any)?.meta_description || '').trim() ||
+	  `Explore commercial property (shops, offices, showrooms) and residential projects in ${locality.name}, ${city.name}. Compare new launches, under-construction, and ready-to-move listings with builders, amenities, and locality insights.`;
+		}
 ---
 
-<BaseLayout
-  title={metaTitle}
-  description={metaDescription}
-  canonical={`https://propdiscover.com/${city.slug}/${locality.slug}`}
+{typeLike ? (
+  <CityTypeIndex citySlug={citySlug} projectType={typeLike} />
+) : (
+	<BaseLayout
+	  title={metaTitle}
+	  description={metaDescription}
+	  canonical={`https://propdiscover.com/${city.slug}/${locality.slug}`}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },
@@ -522,3 +558,4 @@ const metaDescription =
     </section>
   )}
 </BaseLayout>
+)}
