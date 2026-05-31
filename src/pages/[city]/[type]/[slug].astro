@@ -162,15 +162,15 @@ if (props.kind === "project") {
   typeLabel = formatProjectType(project.project_type);
 
   breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Home", url: "https://propdiscover.com" },
-    { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+    { name: "Home", url: "https://homenesto.com" },
+    { name: city.name, url: `https://homenesto.com/${city.slug}` },
     {
       name: typeLabel,
-      url: `https://propdiscover.com/${city.slug}/${project.project_type}`,
+      url: `https://homenesto.com/${city.slug}/${project.project_type}`,
     },
     {
       name: project.title,
-      url: `https://propdiscover.com/${city.slug}/${project.project_type}/${project.slug}`,
+      url: `https://homenesto.com/${city.slug}/${project.project_type}/${project.slug}`,
     },
   ]);
   projectSchema = buildProjectSchema(project, city);
@@ -191,15 +191,15 @@ if (props.kind === "project") {
   localityProjects = projectsData || [];
 
   localityBreadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Home", url: "https://propdiscover.com" },
-    { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+    { name: "Home", url: "https://homenesto.com" },
+    { name: city.name, url: `https://homenesto.com/${city.slug}` },
     {
       name: typeLabel,
-      url: `https://propdiscover.com/${city.slug}/${projectType}`,
+      url: `https://homenesto.com/${city.slug}/${projectType}`,
     },
     {
       name: locality.name,
-      url: `https://propdiscover.com/${city.slug}/${projectType}/${locality.slug}`,
+      url: `https://homenesto.com/${city.slug}/${projectType}/${locality.slug}`,
     },
   ]);
 
@@ -934,7 +934,7 @@ if (props.kind === "project") {
 <BaseLayout
   title={`${typeLabel} Projects in ${locality?.name}, ${city.name} | Properties & Prices`}
   description={`Explore ${typeLabel.toLowerCase()} projects in ${locality?.name}, ${city.name}. Compare prices, amenities, and project status.`}
-  canonical={`https://propdiscover.com/${city.slug}/${localityProjectType}/${locality?.slug}`}
+  canonical={`https://homenesto.com/${city.slug}/${localityProjectType}/${locality?.slug}`}
   jsonLd={[localityBreadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },

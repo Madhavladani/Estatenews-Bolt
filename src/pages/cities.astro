@@ -6,8 +6,8 @@ import { buildBreadcrumbSchema } from '../lib/seo';
 import type { City } from '../lib/types';
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
-  { name: 'Cities', url: 'https://propdiscover.com/cities' },
+  { name: 'Home', url: 'https://homenesto.com' },
+  { name: 'Cities', url: 'https://homenesto.com/cities' },
 ]);
 
 // Build-time fetch only; page is prerendered.
@@ -37,7 +37,7 @@ const itemListSchema = {
     '@type': 'ListItem',
     position: index + 1,
     name: city.name,
-    url: `https://propdiscover.com/${city.slug}`,
+    url: `https://homenesto.com/${city.slug}`,
   })),
 };
 
@@ -45,16 +45,16 @@ const webPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: 'All Cities',
-  url: 'https://propdiscover.com/cities',
+  url: 'https://homenesto.com/cities',
   description: 'Browse cities and explore city-wise real estate projects and curated collections.',
 };
 ---
 
 <BaseLayout
-  title={`Real Estate Cities in India - Browse ${cities.length} Top Localities | PropDiscover`}
-  description={`Discover top residential and commercial real estate markets across ${cities.length} Indian cities. Compare projects, prices, and investment trends with PropDiscover's expert data.`}
-  canonical="https://propdiscover.com/cities"
-  keywords="real estate cities India, property markets India, top cities for real estate, residential projects by city, commercial property cities, PropDiscover cities directory"
+  title={`Real Estate Cities in India - Browse ${cities.length} Top Localities | Home Nesto`}
+  description={`Discover top residential and commercial real estate markets across ${cities.length} Indian cities. Compare projects, prices, and investment trends with Home Nesto's expert data.`}
+  canonical="https://homenesto.com/cities"
+  keywords="real estate cities India, property markets India, top cities for real estate, residential projects by city, commercial property cities, Home Nesto cities directory"
   jsonLd={[breadcrumbSchema, itemListSchema, webPageSchema]}
   breadcrumbs={[{ name: 'Cities', url: '/cities' }]}
 >
@@ -95,7 +95,7 @@ const webPageSchema = {
           </div>
           <h2 class="text-sm font-bold tracking-wider text-slate-400 uppercase">Market Intelligence</h2>
           <p class="mt-2 text-slate-600 font-medium">
-            PropDiscover tracks 509,000+ unsold inventory units to help you identify markets with the highest absorption rates.
+            Home Nesto tracks 509,000+ unsold inventory units to help you identify markets with the highest absorption rates.
           </p>
           <div class="mt-4 flex gap-3">
              <span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase">Real-time Data</span>

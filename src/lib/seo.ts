@@ -1,7 +1,7 @@
 import type { City, Project, Collection, Blog } from './types';
 
-const SITE_URL = 'https://propdiscover.com';
-const SITE_NAME = 'PropDiscover';
+const SITE_URL = 'https://homenesto.com';
+const SITE_NAME = 'Home Nesto';
 
 export function buildMetaTags({
   title,
@@ -161,8 +161,8 @@ export function buildBlogArticleSchema(article: Blog) {
       '@type': 'Organization',
       name: SITE_NAME,
       sameAs: [
-        'https://twitter.com/propdiscover',
-        'https://www.linkedin.com/company/propdiscover',
+        'https://twitter.com/homenesto',
+        'https://www.linkedin.com/company/homenesto',
       ],
       logo: {
         '@type': 'ImageObject',

@@ -63,7 +63,7 @@ let articleProps: any = {};
 if (type === 'article' && article) {
   const author = article.author;
   const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
-  const canonicalUrl = `https://propdiscover.com${canonicalPath}`;
+  const canonicalUrl = `https://homenesto.com${canonicalPath}`;
   const ogImage = article.og_image || article.featured_image || undefined;
   const heroImage = article.featured_image || undefined;
 
@@ -76,8 +76,8 @@ if (type === 'article' && article) {
   const keywords = article.meta_keywords ? article.meta_keywords : article.tags?.join(", ") || undefined;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Home", url: "https://propdiscover.com" },
-    { name: "Blog", url: "https://propdiscover.com/blog" },
+    { name: "Home", url: "https://homenesto.com" },
+    { name: "Blog", url: "https://homenesto.com/blog" },
     { name: article.title, url: canonicalUrl },
   ]);
   const articleSchema = buildBlogArticleSchema(article);
@@ -99,7 +99,7 @@ if (type === 'category' && category) {
 
 {type === 'article' && article ? (
   <BaseLayout
-    title={article.meta_title || `${article.title} | PropDiscover`}
+    title={article.meta_title || `${article.title} | Home Nesto`}
     description={article.meta_description || article.excerpt || "Latest real estate blog and updates."}
     canonical={articleProps.canonicalUrl}
     ogImage={articleProps.ogImage}
@@ -174,7 +174,7 @@ if (type === 'category' && category) {
             )}
             {articleProps.heroImage && (
               <figure class="mb-10 rounded-2xl overflow-hidden border border-gray-100 shadow-md">
-                <img src={articleProps.heroImage} alt={`${article.title} — PropDiscover`} class="w-full object-cover" loading="eager" fetchpriority="high" width="1200" height="630" itemprop="image" />
+                <img src={articleProps.heroImage} alt={`${article.title} — Home Nesto`} class="w-full object-cover" loading="eager" fetchpriority="high" width="1200" height="630" itemprop="image" />
                 {article.excerpt && <figcaption class="sr-only">{article.excerpt}</figcaption>}
               </figure>
             )}
@@ -227,7 +227,7 @@ if (type === 'category' && category) {
           <div class="max-w-2xl text-center lg:text-left">
             <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Plan Your Property Purchase Like a Pro</h2>
             <p class="text-lg text-gray-300 mb-8">
-              Use our advanced real estate calculators and tools to estimate EMI, affordability, ROI, and more. Make informed decisions with PropDiscover.
+              Use our advanced real estate calculators and tools to estimate EMI, affordability, ROI, and more. Make informed decisions with Home Nesto.
             </p>
             <div class="flex flex-wrap justify-center lg:justify-start gap-4">
               <a href="/tools" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40">Try Property Tools</a>

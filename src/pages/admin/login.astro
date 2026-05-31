@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const error = Astro.url.searchParams.get('error');
 ---
 
-<BaseLayout title="Admin Login | PropDiscover" description="Login to PropDiscover admin panel" showHeader={false} showFooter={false}>
+<BaseLayout title="Admin Login | Home Nesto" description="Login to Home Nesto admin panel" showHeader={false} showFooter={false}>
   <section class="min-h-[calc(100vh-200px)] flex items-center justify-center py-12">
     <div class="max-w-md w-full mx-auto px-4">
       <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
@@ -15,7 +15,7 @@ const error = Astro.url.searchParams.get('error');
             </svg>
           </div>
           <h1 class="text-2xl font-bold text-gray-900">Admin Login</h1>
-          <p class="text-sm text-gray-500 mt-1">Sign in to manage PropDiscover</p>
+          <p class="text-sm text-gray-500 mt-1">Sign in to manage Home Nesto</p>
         </div>
 
         {error && (
@@ -35,7 +35,7 @@ const error = Astro.url.searchParams.get('error');
               name="email"
               required
               class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-              placeholder="admin@propdiscover.com"
+              placeholder="admin@homenesto.com"
             />
           </div>
           <div>

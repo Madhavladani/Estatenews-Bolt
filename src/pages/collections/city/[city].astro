@@ -59,19 +59,19 @@ const { city, collections, allCities } = Astro.props as Props;
 const cleanedSlug = String(city.slug).trim().toLowerCase();
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: "Home", url: "https://propdiscover.com" },
-  { name: "Collections", url: "https://propdiscover.com/collections" },
+  { name: "Home", url: "https://homenesto.com" },
+  { name: "Collections", url: "https://homenesto.com/collections" },
   {
     name: city.name,
-    url: `https://propdiscover.com/collections/city/${cleanedSlug}`,
+    url: `https://homenesto.com/collections/city/${cleanedSlug}`,
   },
 ]);
 ---
 
 <BaseLayout
-  title={`Best Real Estate Collections in ${city.name} | PropDiscover`}
+  title={`Best Real Estate Collections in ${city.name} | Home Nesto`}
   description={`Explore curated property collections in ${city.name}, ${city.state || ""}. Discover luxury apartments, affordable housing, new launches, and top investment projects.`}
-  canonical={`https://propdiscover.com/collections/city/${cleanedSlug}`}
+  canonical={`https://homenesto.com/collections/city/${cleanedSlug}`}
   jsonLd={breadcrumbSchema}
   breadcrumbs={[
     { name: "Collections", url: "/collections" },

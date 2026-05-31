@@ -36,7 +36,7 @@ const personSchema = {
   jobTitle: author.company_role,
   description: author.short_bio,
   image: author.photo_url,
-  url: `https://propdiscover.com/author/${author.slug}`,
+  url: `https://homenesto.com/author/${author.slug}`,
   sameAs: [
     author.linkedin_profile,
     ...(author.social_links || []).map((l: any) => l.url)
@@ -44,7 +44,7 @@ const personSchema = {
   knowsAbout: author.expertise_areas || [],
   worksFor: {
     '@type': 'Organization',
-    name: 'PropDiscover'
+    name: 'Home Nesto'
   }
 };
 
@@ -52,9 +52,9 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://propdiscover.com' },
-    { '@type': 'ListItem', position: 2, name: 'Authors', item: 'https://propdiscover.com/blog' },
-    { '@type': 'ListItem', position: 3, name: author.full_name, item: `https://propdiscover.com/author/${author.slug}` }
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://homenesto.com' },
+    { '@type': 'ListItem', position: 2, name: 'Authors', item: 'https://homenesto.com/blog' },
+    { '@type': 'ListItem', position: 3, name: author.full_name, item: `https://homenesto.com/author/${author.slug}` }
   ]
 };
 
@@ -62,8 +62,8 @@ const schemas = [personSchema, breadcrumbSchema];
 ---
 
 <BaseLayout
-  title={author.full_name ? `${author.full_name} | Expert Real Estate Author at PropDiscover` : 'Author Profile | PropDiscover'}
-  description={author.short_bio || `Read articles and insights from ${author.full_name}, ${author.company_role} at PropDiscover.`}
+  title={author.full_name ? `${author.full_name} | Expert Real Estate Author at Home Nesto` : 'Author Profile | Home Nesto'}
+  description={author.short_bio || `Read articles and insights from ${author.full_name}, ${author.company_role} at Home Nesto.`}
   ogImage={author.photo_url}
   jsonLd={schemas}
 >

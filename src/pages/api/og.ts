@@ -1,6 +1,6 @@
 export const prerender = false;
 
-const SITE = 'PropDiscover';
+const SITE = 'Home Nesto';
 
 function escapeHtml(text: string) {
   return text
@@ -29,7 +29,7 @@ export async function GET({ url }: { url: URL }) {
   <text x="70" y="110" fill="#67e8f9" font-family="Arial, sans-serif" font-size="34" font-weight="700">${SITE}</text>
   <text x="70" y="270" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="700">${escapeHtml(title)}</text>
   <text x="70" y="340" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="34" font-weight="400">${escapeHtml(subtitle)}</text>
-  <text x="70" y="560" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="28">propdiscover.com</text>
+  <text x="70" y="560" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="28">homenesto.com</text>
 </svg>`;
 
   return new Response(svg, {

@@ -19,17 +19,17 @@ const cities: Pick<City, 'id' | 'name' | 'slug'>[] = (citiesRes.data as any) || 
 const faqs: (Faq & { city?: Pick<City, 'id' | 'name' | 'slug'> | null })[] = (faqsRes.data as any) || [];
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
-  { name: 'FAQs', url: 'https://propdiscover.com/faq' },
+  { name: 'Home', url: 'https://homenesto.com' },
+  { name: 'FAQs', url: 'https://homenesto.com/faq' },
 ]);
 
 const faqSchema = buildFAQSchema(faqs.map((f) => ({ question: f.question, answer: f.answer })));
 ---
 
 <BaseLayout
-  title="FAQs | PropDiscover"
-  description="Frequently asked questions about PropDiscover, real estate projects, and city-wise property information."
-  canonical="https://propdiscover.com/faq"
+  title="FAQs | HomeNesto"
+  description="Frequently asked questions about HomeNesto, real estate projects, and city-wise property information."
+  canonical="https://homenesto.com/faq"
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[{ name: 'FAQs', url: '/faq' }]}
 >

@@ -166,19 +166,19 @@ const { data: relatedData } = await supabase
   typeLabel = formatProjectType(project.project_type);
 
 breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Home", url: "https://propdiscover.com" },
-    { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+    { name: "Home", url: "https://homenesto.com" },
+    { name: city.name, url: `https://homenesto.com/${city.slug}` },
     {
       name: typeLabel,
-      url: `https://propdiscover.com/${city.slug}/${project.project_type}`,
+      url: `https://homenesto.com/${city.slug}/${project.project_type}`,
     },
     {
       name: locality.name,
-      url: `https://propdiscover.com/${city.slug}/${project.project_type}/${locality.slug}`,
+      url: `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}`,
     },
     {
       name: project.title,
-      url: `https://propdiscover.com/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}`,
+      url: `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}`,
     },
   ]);
 projectSchema = buildProjectSchema(project, city);

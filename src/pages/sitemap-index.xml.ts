@@ -1,6 +1,6 @@
 export const prerender = true;
 
-const SITE_URL = 'https://propdiscover.com';
+const SITE_URL = 'https://homenesto.com';
 const paths = [
   '/sitemap-cities.xml',
   '/sitemap-projects.xml',

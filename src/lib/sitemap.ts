@@ -1,4 +1,4 @@
-const SITE_URL = 'https://propdiscover.com';
+const SITE_URL = 'https://homenesto.com';
 
 export function xmlEscape(value: string) {
   return value

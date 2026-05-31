@@ -80,9 +80,9 @@ const faqs = [
 ];
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://propdiscover.com' },
-  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
-  { name: typeLabel, url: `https://propdiscover.com/${city.slug}/${projectType}` },
+  { name: 'Home', url: 'https://homenesto.com' },
+  { name: city.name, url: `https://homenesto.com/${city.slug}` },
+  { name: typeLabel, url: `https://homenesto.com/${city.slug}/${projectType}` },
 ]);
 const faqSchema = buildFAQSchema(faqs);
 ---
@@ -90,7 +90,7 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={`${typeLabel} Projects in ${city.name} | Top Properties & Prices`}
   description={`Explore the best ${typeLabel.toLowerCase()} projects in ${city.name}, ${city.state}. Find new launches, under-construction, and ready-to-move properties with premium amenities and prime locations.`}
-  canonical={`https://propdiscover.com/${city.slug}/${projectType}`}
+  canonical={`https://homenesto.com/${city.slug}/${projectType}`}
   nextUrl={totalPages > 1 ? `/${city.slug}/${projectType}/page/2` : undefined}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[

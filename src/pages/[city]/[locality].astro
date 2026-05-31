@@ -124,11 +124,11 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
 	otherLocalities = otherLocalitiesData || [];
 	
 	breadcrumbSchema = buildBreadcrumbSchema([
-	  { name: 'Home', url: 'https://propdiscover.com' },
-	  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+	  { name: 'Home', url: 'https://homenesto.com' },
+	  { name: city.name, url: `https://homenesto.com/${city.slug}` },
 	  {
 	    name: locality.name,
-    url: `https://propdiscover.com/${city.slug}/${locality.slug}`,
+    url: `https://homenesto.com/${city.slug}/${locality.slug}`,
   },
 ]);
 
@@ -176,7 +176,7 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
 	<BaseLayout
 	  title={metaTitle}
 	  description={metaDescription}
-	  canonical={`https://propdiscover.com/${city.slug}/${locality.slug}`}
+	  canonical={`https://homenesto.com/${city.slug}/${locality.slug}`}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: city.name, url: `/${city.slug}` },

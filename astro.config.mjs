@@ -6,7 +6,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
 
-  site: 'https://propdiscover.com',
+  site: 'https://homenesto.com',
 
   integrations: [
     tailwind(),

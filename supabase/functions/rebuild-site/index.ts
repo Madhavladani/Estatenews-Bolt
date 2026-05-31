@@ -32,7 +32,7 @@ Deno.serve(async (req: Request) => {
       "Authorization": `Bearer ${GITHUB_TOKEN}`,
       "Accept": "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "PropDiscover-Rebuild",
+      "User-Agent": "Home Nesto-Rebuild",
     };
 
     // Create an empty commit on main to trigger Cloudflare Pages rebuild

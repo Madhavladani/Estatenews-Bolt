@@ -66,8 +66,8 @@ const commercialProjects = projects.filter((p) => p.project_type === 'commercial
 const faqsFromDb = (faqsRes.data || []).map((f: any) => ({ question: f.question, answer: f.answer }));
 const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
 	const breadcrumbSchema = buildBreadcrumbSchema([
-	  { name: 'Home', url: 'https://propdiscover.com' },
-	  { name: city.name, url: `https://propdiscover.com/${city.slug}` },
+	  { name: 'Home', url: 'https://homenesto.com' },
+	  { name: city.name, url: `https://homenesto.com/${city.slug}` },
 	]);
 	const citySchema = hasDbCity ? buildCitySchema(city) : null;
 	const faqSchema = buildFAQSchema(faqs);
