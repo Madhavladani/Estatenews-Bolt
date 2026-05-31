@@ -23,7 +23,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .from('collection_projects')
       .select('project_id')
       .eq('collection_id', collection.id);
-    const projectIds = (cp || []).map((c) => c.project_id);
+    const projectIds = (cp || []).map((c: any) => c.project_id);
     let projects: Project[] = [];
     if (projectIds.length > 0) {
       const { data: pData } = await supabase
@@ -102,6 +102,7 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={collection.meta_title || `${collection.title} | Best Properties & Projects`}
   description={collection.meta_description || collection.intro_content}
+  canonical={`https://homenesto.com/collections/${collection.slug}`}
   jsonLd={[breadcrumbSchema, collectionSchema, faqSchema]}
   breadcrumbs={[{ name: 'Collections', url: '/collections' }, { name: collection.title, url: `/collections/${collection.slug}` }]}
 >

@@ -21,8 +21,13 @@ export async function getStaticPaths() {
   });
 }
 
-const { author, blogs } = Astro.props;
-const typedBlogs = (blogs || []) as Blog[];
+interface Props {
+  author: Author;
+  blogs: Blog[];
+}
+
+const { author, blogs } = Astro.props as Props;
+const typedBlogs = blogs;
 
 if (!author) {
   return Astro.redirect('/404');
@@ -64,6 +69,7 @@ const schemas = [personSchema, breadcrumbSchema];
 <BaseLayout
   title={author.full_name ? `${author.full_name} | Expert Real Estate Author at Home Nesto` : 'Author Profile | Home Nesto'}
   description={author.short_bio || `Read articles and insights from ${author.full_name}, ${author.company_role} at Home Nesto.`}
+  canonical={`https://homenesto.com/author/${author.slug}`}
   ogImage={author.photo_url}
   jsonLd={schemas}
 >

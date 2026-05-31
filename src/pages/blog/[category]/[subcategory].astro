@@ -35,6 +35,7 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
 <BaseLayout
   title={`${subCategory.meta_title || subCategory.name + ' - Real Estate Insights'}`}
   description={subCategory.meta_description || `Explore the latest ${subCategory.name} articles and insights.`}
+  canonical={`https://homenesto.com/blog/${categorySlug}/${subcategorySlug}`}
 >
   <BlogNavigation />
 

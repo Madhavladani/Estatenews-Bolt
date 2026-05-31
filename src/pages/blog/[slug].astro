@@ -244,6 +244,7 @@ if (type === 'category' && category) {
   <BaseLayout
     title={`${category?.meta_title || category?.name + ' - Real Estate Insights'}`}
     description={category?.meta_description || `Explore the latest ${category?.name} articles and news.`}
+    canonical={`https://homenesto.com/blog/${slug}`}
   >
     <BlogNavigation />
     <main class="bg-gray-50 pb-20">
