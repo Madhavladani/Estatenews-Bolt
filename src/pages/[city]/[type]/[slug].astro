@@ -68,7 +68,7 @@ if (projectData) {
     projectLocality = (byName as any) || null;
   }
 
-  if (projectLocality?.slug) {
+  if (projectLocality?.slug && citySlug && projectType && slug) {
     return new Response(null, {
       status: 301,
       headers: {
@@ -163,14 +163,14 @@ if (props.kind === "project") {
 
   breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", url: "https://homenesto.com" },
-    { name: city.name, url: `https://homenesto.com/${city.slug}` },
+    { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
     {
       name: typeLabel,
-      url: `https://homenesto.com/${city.slug}/${project.project_type}`,
+      url: (city.slug && project.project_type) ? `https://homenesto.com/${city.slug}/${project.project_type}` : 'https://homenesto.com',
     },
     {
       name: project.title,
-      url: `https://homenesto.com/${city.slug}/${project.project_type}/${project.slug}`,
+      url: (city.slug && project.project_type && project.slug) ? `https://homenesto.com/${city.slug}/${project.project_type}/${project.slug}` : 'https://homenesto.com',
     },
   ]);
   projectSchema = buildProjectSchema(project, city);
@@ -192,14 +192,14 @@ if (props.kind === "project") {
 
   localityBreadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", url: "https://homenesto.com" },
-    { name: city.name, url: `https://homenesto.com/${city.slug}` },
+    { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
     {
       name: typeLabel,
-      url: `https://homenesto.com/${city.slug}/${projectType}`,
+      url: (city.slug && projectType) ? `https://homenesto.com/${city.slug}/${projectType}` : 'https://homenesto.com',
     },
     {
       name: locality.name,
-      url: `https://homenesto.com/${city.slug}/${projectType}/${locality.slug}`,
+      url: (city.slug && projectType && locality.slug) ? `https://homenesto.com/${city.slug}/${projectType}/${locality.slug}` : 'https://homenesto.com',
     },
   ]);
 
@@ -230,11 +230,11 @@ if (props.kind === "project") {
   ogImage={featuredImage || undefined}
   jsonLd={[breadcrumbSchema, projectSchema, faqSchema]}
   breadcrumbs={[
-    { name: city.name, url: `/${city.slug}` },
-    { name: typeLabel, url: `/${city.slug}/${project.project_type}` },
+    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
+    { name: typeLabel, url: (city.slug && project.project_type) ? `/${city.slug}/${project.project_type}` : '#' },
     {
       name: project.title,
-      url: `/${city.slug}/${project.project_type}/${project.slug}`,
+      url: (city.slug && project.project_type && project.slug) ? `/${city.slug}/${project.project_type}/${project.slug}` : '#',
     },
   ]}
 >
@@ -358,18 +358,18 @@ if (props.kind === "project") {
                     clip-rule="evenodd"></path>
                 </svg>
                <a
-  href={`/${city.slug}/${project.project_type}/${project.location
+  href={(city.slug && project.project_type && project.location) ? `/${city.slug}/${project.project_type}/${project.location
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")}`}
+    .replace(/\s+/g, "-")}` : '#'}
   class="inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
 >
   {project.location}
 </a>,
 
 <a
-  href={`/${city.slug}`}
+  href={city.slug ? `/${city.slug}` : '#'}
   class="class=inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
 >
   {city.name}
@@ -726,11 +726,11 @@ if (props.kind === "project") {
         </p>
 
         <a
-  href={`/${city.slug}/${project.project_type}/${project.location
+  href={(city.slug && project.project_type && project.location) ? `/${city.slug}/${project.project_type}/${project.location
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")}`}
+    .replace(/\s+/g, "-")}` : '#'}
   class="inline-flex items-center gap-1 font-semibold text-primary-700 hover:text-accent-600 transition-colors mt-1"
 >
   {project.location}
@@ -912,12 +912,12 @@ if (props.kind === "project") {
       <h2 class="text-lg font-bold mb-4">Explore More</h2>
       <div class="flex flex-wrap gap-3">
         <a
-          href={`/${city.slug}/${project.project_type}`}
+          href={(city.slug && project.project_type) ? `/${city.slug}/${project.project_type}` : '#'}
           class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
           >More {typeLabel} in {city.name}</a
         >
         <a
-          href={`/${city.slug}`}
+          href={city.slug ? `/${city.slug}` : '#'}
           class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
           >All Projects in {city.name}</a
         >
@@ -934,12 +934,12 @@ if (props.kind === "project") {
 <BaseLayout
   title={`${typeLabel} Projects in ${locality?.name}, ${city.name} | Properties & Prices`}
   description={`Explore ${typeLabel.toLowerCase()} projects in ${locality?.name}, ${city.name}. Compare prices, amenities, and project status.`}
-  canonical={`https://homenesto.com/${city.slug}/${localityProjectType}/${locality?.slug}`}
+  canonical={(city.slug && localityProjectType && locality?.slug) ? `https://homenesto.com/${city.slug}/${localityProjectType}/${locality?.slug}` : 'https://homenesto.com'}
   jsonLd={[localityBreadcrumbSchema, faqSchema]}
   breadcrumbs={[
-    { name: city.name, url: `/${city.slug}` },
-    { name: typeLabel, url: `/${city.slug}/${localityProjectType}` },
-    { name: locality?.name || 'Locality', url: `/${city.slug}/${localityProjectType}/${locality?.slug}` },
+    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
+    { name: typeLabel, url: (city.slug && localityProjectType) ? `/${city.slug}/${localityProjectType}` : '#' },
+    { name: locality?.name || 'Locality', url: (city.slug && localityProjectType && locality?.slug) ? `/${city.slug}/${localityProjectType}/${locality?.slug}` : '#' },
   ]}
 >
   <section class="bg-primary-800 text-white py-12">
@@ -951,10 +951,10 @@ if (props.kind === "project") {
         {localityProjects.length} projects in this locality
       </p>
       <div class="mt-5 flex flex-wrap gap-3">
-        <a href={`/${city.slug}/${localityProjectType}`} class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
+        <a href={(city.slug && localityProjectType) ? `/${city.slug}/${localityProjectType}` : '#'} class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
           All {typeLabel} in {city.name}
         </a>
-        <a href={`/${city.slug}/${locality?.slug}`} class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
+        <a href={(city.slug && locality?.slug) ? `/${city.slug}/${locality?.slug}` : '#'} class="px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
           All Properties in {locality?.name}
         </a>
       </div>
@@ -974,7 +974,7 @@ if (props.kind === "project") {
           <p class="text-gray-500 text-lg">
             No {typeLabel.toLowerCase()} projects found in {locality?.name}, {city.name}.
           </p>
-          <a href={`/${city.slug}/${localityProjectType}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
+          <a href={(city.slug && localityProjectType) ? `/${city.slug}/${localityProjectType}` : '#'} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
             Explore {typeLabel} in {city.name}
           </a>
         </div>

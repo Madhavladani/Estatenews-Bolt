@@ -46,7 +46,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={`/${city.slug}`}
+                  href={city.slug ? `/${city.slug}` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Properties
@@ -63,7 +63,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={`/${city.slug}/residential`}
+                  href={city.slug ? `/${city.slug}/residential` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Residential
@@ -75,7 +75,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={`/${city.slug}/commercial`}
+                  href={city.slug ? `/${city.slug}/commercial` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Commercial
@@ -92,7 +92,7 @@ const collections = [
             collections.map((col) => (
               <li>
                 <a
-                  href={`/collections/${col.slug}`}
+                  href={col.slug ? `/collections/${col.slug}` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {col.title}

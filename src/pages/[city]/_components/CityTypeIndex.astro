@@ -88,8 +88,8 @@ const faqs = [
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://homenesto.com' },
-  { name: city.name, url: `https://homenesto.com/${city.slug}` },
-  { name: typeLabel, url: `https://homenesto.com/${city.slug}/${projectType}` },
+  { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
+  { name: typeLabel, url: (city.slug && projectType) ? `https://homenesto.com/${city.slug}/${projectType}` : 'https://homenesto.com' },
 ]);
 const faqSchema = buildFAQSchema(faqs);
 ---
@@ -97,12 +97,12 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={`${typeLabel} Projects in ${city.name} | Top Properties & Prices`}
   description={`Explore the best ${typeLabel.toLowerCase()} projects in ${city.name}, ${city.state}. Find new launches, under-construction, and ready-to-move properties with premium amenities and prime locations.`}
-  canonical={`https://homenesto.com/${city.slug}/${projectType}`}
-  nextUrl={totalPages > 1 ? `/${city.slug}/${projectType}/page/2` : undefined}
+  canonical={city.slug ? `https://homenesto.com/${city.slug}/${projectType}` : `https://homenesto.com/${projectType}`}
+  nextUrl={totalPages > 1 ? (city.slug ? `/${city.slug}/${projectType}/page/2` : `/${projectType}/page/2`) : undefined}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
-    { name: city.name, url: `/${city.slug}` },
-    { name: typeLabel, url: `/${city.slug}/${projectType}` },
+    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
+    { name: typeLabel, url: (city.slug && projectType) ? `/${city.slug}/${projectType}` : '#' },
   ]}
 >
   <!-- Category Hero -->
@@ -126,7 +126,7 @@ const faqSchema = buildFAQSchema(faqs);
             locations={locations}
             amenities={amenities}
             statuses={statuses}
-            baseUrl={`/${city.slug}/${projectType}`}
+            baseUrl={(city.slug && projectType) ? `/${city.slug}/${projectType}` : '#'}
           />
         </div>
         <div class="lg:col-span-3">
@@ -140,14 +140,14 @@ const faqSchema = buildFAQSchema(faqs);
           {projects.length === 0 && (
             <div class="text-center py-16">
               <p class="text-gray-500 text-lg">No {typeLabel.toLowerCase()} projects found in {city.name}.</p>
-              <a href={`/${city.slug}/${otherType}`} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
+              <a href={city.slug ? `/${city.slug}/${otherType}` : '#'} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
                 Explore {otherType === 'residential' ? 'Residential' : 'Commercial'} Projects instead
               </a>
             </div>
           )}
           {totalPages > 1 && (
             <div class="mt-8 flex justify-center">
-              <a href={`/${city.slug}/${projectType}/page/2`} class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-medium transition-colors">
+              <a href={city.slug ? `/${city.slug}/${projectType}/page/2` : '#'} class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-medium transition-colors">
                 Next Page
                 <span aria-hidden="true">&rarr;</span>
               </a>
@@ -168,7 +168,7 @@ const faqSchema = buildFAQSchema(faqs);
             <p class="text-sm text-gray-600 mt-1">Handpicked picks based on latest updates in {city.name}.</p>
           </div>
           {totalPages > 1 && (
-            <a href={`/${city.slug}/${projectType}/page/2`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
+            <a href={city.slug ? `/${city.slug}/${projectType}/page/2` : '#'} class="text-sm font-medium text-primary-700 hover:text-primary-800">
               View more
             </a>
           )}
@@ -191,14 +191,14 @@ const faqSchema = buildFAQSchema(faqs);
             <h2 class="text-2xl font-bold text-gray-900">Other Localities in {city.name}</h2>
             <p class="text-sm text-gray-600 mt-1">Explore locality-wise pages for {typeLabel.toLowerCase()} options.</p>
           </div>
-          <a href={`/${city.slug}`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
+          <a href={city.slug ? `/${city.slug}` : '#'} class="text-sm font-medium text-primary-700 hover:text-primary-800">
             City overview
           </a>
         </div>
         <div class="flex flex-wrap gap-2">
           {otherLocalities.map((l) => (
             <a
-              href={`/${city.slug}/${l.slug}`}
+              href={(city.slug && l.slug) ? `/${city.slug}/${l.slug}` : '#'}
               class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors"
             >
               {l.name}
@@ -248,10 +248,10 @@ const faqSchema = buildFAQSchema(faqs);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Explore More in {city.name}</h2>
       <div class="flex flex-wrap gap-3">
-        <a href={`/${city.slug}/${otherType}`} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+        <a href={city.slug ? `/${city.slug}/${otherType}` : '#'} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
           {otherType === 'residential' ? 'Residential' : 'Commercial'} Projects
         </a>
-        <a href={`/${city.slug}`} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+        <a href={city.slug ? `/${city.slug}` : '#'} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
           All Projects in {city.name}
         </a>
       </div>

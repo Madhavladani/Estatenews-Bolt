@@ -67,23 +67,23 @@ const paginatedProjects = projects.slice(start, start + ITEMS_PER_PAGE);
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://homenesto.com' },
-  { name: city.name, url: `https://homenesto.com/${city.slug}` },
-  { name: typeLabel, url: `https://homenesto.com/${city.slug}/${projectType}` },
-  { name: `Page ${currentPage}`, url: `https://homenesto.com/${city.slug}/${projectType}/page/${currentPage}` },
+  { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
+  { name: typeLabel, url: (city.slug && projectType) ? `https://homenesto.com/${city.slug}/${projectType}` : 'https://homenesto.com' },
+  { name: `Page ${currentPage}`, url: (city.slug && projectType) ? `https://homenesto.com/${city.slug}/${projectType}/page/${currentPage}` : 'https://homenesto.com' },
 ]);
 ---
 
 <BaseLayout
   title={`${typeLabel} Projects in ${city.name} - Page ${currentPage} | Home Nesto`}
   description={`Browse page ${currentPage} of ${typeLabel.toLowerCase()} projects in ${city.name}.`}
-  canonical={`https://homenesto.com/${city.slug}/${projectType}/page/${currentPage}`}
-  prevUrl={currentPage === 2 ? `/${city.slug}/${projectType}` : `/${city.slug}/${projectType}/page/${currentPage - 1}`}
-  nextUrl={currentPage < totalPages ? `/${city.slug}/${projectType}/page/${currentPage + 1}` : undefined}
+  canonical={city.slug ? `https://homenesto.com/${city.slug}/${projectType}/page/${currentPage}` : `https://homenesto.com/${projectType}/page/${currentPage}`}
+  prevUrl={currentPage === 2 ? (city.slug ? `/${city.slug}/${projectType}` : `/${projectType}`) : (city.slug ? `/${city.slug}/${projectType}/page/${currentPage - 1}` : `/${projectType}/page/${currentPage - 1}`)}
+  nextUrl={currentPage < totalPages ? (city.slug ? `/${city.slug}/${projectType}/page/${currentPage + 1}` : `/${projectType}/page/${currentPage + 1}`) : undefined}
   jsonLd={breadcrumbSchema}
   breadcrumbs={[
-    { name: city.name, url: `/${city.slug}` },
-    { name: typeLabel, url: `/${city.slug}/${projectType}` },
-    { name: `Page ${currentPage}`, url: `/${city.slug}/${projectType}/page/${currentPage}` },
+    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
+    { name: typeLabel, url: (city.slug && projectType) ? `/${city.slug}/${projectType}` : '#' },
+    { name: `Page ${currentPage}`, url: (city.slug && projectType) ? `/${city.slug}/${projectType}/page/${currentPage}` : '#' },
   ]}
 >
   <section class="bg-primary-800 text-white py-12">
@@ -104,13 +104,13 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 
       <div class="mt-8 flex justify-between items-center">
         {currentPage > 1 ? (
-          <a href={currentPage === 2 ? `/${city.slug}/${projectType}` : `/${city.slug}/${projectType}/page/${currentPage - 1}`} class="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
+          <a href={currentPage === 2 ? (city.slug ? `/${city.slug}/${projectType}` : `/${projectType}`) : (city.slug ? `/${city.slug}/${projectType}/page/${currentPage - 1}` : `/${projectType}/page/${currentPage - 1}`)} class="px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
             Previous
           </a>
         ) : <span></span>}
         <p class="text-sm text-gray-500">Page {currentPage} of {totalPages}</p>
         {currentPage < totalPages ? (
-          <a href={`/${city.slug}/${projectType}/page/${currentPage + 1}`} class="px-4 py-2 rounded-lg bg-primary-700 text-white text-sm hover:bg-primary-800">
+          <a href={city.slug ? `/${city.slug}/${projectType}/page/${currentPage + 1}` : `/${projectType}/page/${currentPage + 1}`} class="px-4 py-2 rounded-lg bg-primary-700 text-white text-sm hover:bg-primary-800">
             Next
           </a>
         ) : <span></span>}

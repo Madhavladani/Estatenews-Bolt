@@ -16,7 +16,7 @@ const statusColor: Record<string, string> = {
 };
 const typeColor = project.project_type === 'residential' ? 'bg-primary-100 text-primary-800' : 'bg-accent-100 text-accent-800';
 const localitySlug = (project as any)?.locality?.slug as string | undefined;
-const projectUrl = city
+const projectUrl = (city?.slug && project?.project_type && project?.slug)
   ? localitySlug
     ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}`
     : `/${city.slug}/${project.project_type}/${project.slug}`

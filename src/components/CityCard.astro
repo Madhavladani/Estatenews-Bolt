@@ -9,7 +9,7 @@ interface Props {
 const { city, projectCount } = Astro.props;
 ---
 
-<a href={`/${city.slug}`} class="group block relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
+<a href={city.slug ? `/${city.slug}` : '#'} class="group block relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
   <div class="aspect-[16/9] overflow-hidden">
     <img
       src={city.hero_image}

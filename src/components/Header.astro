@@ -72,7 +72,7 @@ const topCities: Partial<City>[] = citiesData || [];
               {
                 topCities.map((city) => (
                   <a
-                    href={`/${city.slug}`}
+                    href={city.slug ? `/${city.slug}` : '#'}
                     class="block px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1e3a5f] hover:text-white rounded-xl transition-all duration-200"
                   >
                     {city.name}
@@ -162,7 +162,7 @@ const topCities: Partial<City>[] = citiesData || [];
           {
             topCities.map((city) => (
               <a
-                href={`/${city.slug}`}
+                href={city.slug ? `/${city.slug}` : '#'}
                 class="block px-3 py-2 text-sm text-gray-300 bg-[#1e3a5f]/40 border border-white/5 rounded-xl hover:text-white hover:bg-[#1e3a5f]"
               >
                 {city.name}

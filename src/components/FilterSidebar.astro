@@ -25,10 +25,10 @@ const otherType = projectType === 'residential' ? 'commercial' : 'residential';
     <div class="mb-5">
       <label class="block text-sm font-medium text-gray-700 mb-2">Project Type</label>
       <div class="flex gap-2">
-        <a href={`/${citySlug}/${projectType}`} class="flex-1 text-center text-xs font-medium px-3 py-2 rounded-lg bg-primary-700 text-white">
+        <a href={citySlug ? `/${citySlug}/${projectType}` : '#'} class="flex-1 text-center text-xs font-medium px-3 py-2 rounded-lg bg-primary-700 text-white">
           {projectType === 'residential' ? 'Residential' : 'Commercial'}
         </a>
-        <a href={`/${citySlug}/${otherType}`} class="flex-1 text-center text-xs font-medium px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+        <a href={citySlug ? `/${citySlug}/${otherType}` : '#'} class="flex-1 text-center text-xs font-medium px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
           {otherType === 'residential' ? 'Residential' : 'Commercial'}
         </a>
       </div>

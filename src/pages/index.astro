@@ -160,7 +160,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
             const imageUrl = city.city_image || city.hero_image || '';
             return (
               <a
-                href={`/${city.slug}`}
+                href={city.slug ? `/${city.slug}` : '#'}
                 class="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gray-200"
               >
                 <div class="aspect-[4/3] sm:aspect-[16/10] overflow-hidden">
@@ -406,8 +406,8 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           <div>
             <h3 class="font-semibold text-accent-400 mb-2">{city.name}</h3>
             <ul class="space-y-1">
-              <li><a href={`/${city.slug}/residential`} class="text-sm text-gray-300 hover:text-white transition-colors">Residential Projects</a></li>
-              <li><a href={`/${city.slug}/commercial`} class="text-sm text-gray-300 hover:text-white transition-colors">Commercial Projects</a></li>
+              <li><a href={city.slug ? `/${city.slug}/residential` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Residential Projects</a></li>
+              <li><a href={city.slug ? `/${city.slug}/commercial` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Commercial Projects</a></li>
             </ul>
           </div>
         ))}
@@ -415,7 +415,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           <h3 class="font-semibold text-accent-400 mb-2">Collections</h3>
           <ul class="space-y-1">
             {collections.slice(0, 3).map((col) => (
-              <li><a href={`/collections/${col.slug}`} class="text-sm text-gray-300 hover:text-white transition-colors">{col.title}</a></li>
+              <li><a href={col.slug ? `/collections/${col.slug}` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">{col.title}</a></li>
             ))}
           </ul>
         </div>

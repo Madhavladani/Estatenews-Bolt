@@ -167,18 +167,18 @@ const { data: relatedData } = await supabase
 
 breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", url: "https://homenesto.com" },
-    { name: city.name, url: `https://homenesto.com/${city.slug}` },
+    { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
     {
       name: typeLabel,
-      url: `https://homenesto.com/${city.slug}/${project.project_type}`,
+      url: (city.slug && project.project_type) ? `https://homenesto.com/${city.slug}/${project.project_type}` : 'https://homenesto.com',
     },
     {
       name: locality.name,
-      url: `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}`,
+      url: (city.slug && project.project_type && locality.slug) ? `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}` : 'https://homenesto.com',
     },
     {
       name: project.title,
-      url: `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}`,
+      url: (city.slug && project.project_type && locality.slug && project.slug) ? `https://homenesto.com/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}` : 'https://homenesto.com',
     },
   ]);
 projectSchema = buildProjectSchema(project, city);
@@ -192,12 +192,12 @@ faqSchema = buildFAQSchema(faqs);
   ogImage={featuredImage || undefined}
   jsonLd={[breadcrumbSchema, projectSchema, faqSchema]}
   breadcrumbs={[
-    { name: city.name, url: `/${city.slug}` },
-    { name: typeLabel, url: `/${city.slug}/${project.project_type}` },
-    { name: locality.name, url: `/${city.slug}/${project.project_type}/${locality.slug}` },
+    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
+    { name: typeLabel, url: (city.slug && project.project_type) ? `/${city.slug}/${project.project_type}` : '#' },
+    { name: locality.name, url: (city.slug && project.project_type && locality.slug) ? `/${city.slug}/${project.project_type}/${locality.slug}` : '#' },
     {
       name: project.title,
-      url: `/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}`,
+      url: (city.slug && project.project_type && locality.slug && project.slug) ? `/${city.slug}/${project.project_type}/${locality.slug}/${project.slug}` : '#',
     },
   ]}
 >
@@ -321,18 +321,18 @@ faqSchema = buildFAQSchema(faqs);
                     clip-rule="evenodd"></path>
                 </svg>
                <a
-  href={`/${city.slug}/${project.project_type}/${project.location
+  href={(city.slug && project.project_type && project.location) ? `/${city.slug}/${project.project_type}/${project.location
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")}`}
+    .replace(/\s+/g, "-")}` : '#'}
   class="inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
 >
   {project.location}
 </a>,
 
 <a
-  href={`/${city.slug}`}
+  href={city.slug ? `/${city.slug}` : '#'}
   class="class=inline-flex items-center gap-1 text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 font-semibold transition-all"
 >
   {city.name}
@@ -689,11 +689,11 @@ faqSchema = buildFAQSchema(faqs);
         </p>
 
         <a
-  href={`/${city.slug}/${project.project_type}/${project.location
+  href={(city.slug && project.project_type && project.location) ? `/${city.slug}/${project.project_type}/${project.location
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")}`}
+    .replace(/\s+/g, "-")}` : '#'}
   class="inline-flex items-center gap-1 font-semibold text-primary-700 hover:text-accent-600 transition-colors mt-1"
 >
   {project.location}
@@ -875,12 +875,12 @@ faqSchema = buildFAQSchema(faqs);
       <h2 class="text-lg font-bold mb-4">Explore More</h2>
       <div class="flex flex-wrap gap-3">
         <a
-          href={`/${city.slug}/${project.project_type}`}
+          href={(city.slug && project.project_type) ? `/${city.slug}/${project.project_type}` : '#'}
           class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
           >More {typeLabel} in {city.name}</a
         >
         <a
-          href={`/${city.slug}`}
+          href={city.slug ? `/${city.slug}` : '#'}
           class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
           >All Projects in {city.name}</a
         >
