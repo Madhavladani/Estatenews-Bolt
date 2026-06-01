@@ -8,12 +8,12 @@ interface Props {
 const { title, href, viewAllText = "View All Articles" } = Astro.props;
 ---
 
-<div class="flex items-center justify-between mb-8 border-l-4 border-red-600 pl-4 py-1">
+<div class="flex items-center justify-between mb-8 border-l-4 border-[#f97316] pl-4 py-1">
   <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
     {title}
   </h2>
   {href && (
-    <a href={href} class="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors uppercase tracking-wider">
+    <a href={href} class="text-sm font-semibold text-gray-500 hover:text-[#f97316] transition-colors uppercase tracking-wider">
       {viewAllText} →
     </a>
   )}

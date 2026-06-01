@@ -132,6 +132,7 @@ export interface BlogSubCategory {
   name: string;
   slug: string;
   image_url: string;
+  show_in_scroller?: boolean;
   meta_title: string;
   meta_description: string;
   created_at: string;

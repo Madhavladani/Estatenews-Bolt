@@ -42,11 +42,11 @@ const formattedDate = new Date(article.published_at).toLocaleDateString('en-IN',
   </div>
 
   <div class="p-5 flex flex-col flex-1">
-    <div class="text-[10px] uppercase font-bold text-red-600 mb-2 tracking-wider">
+    <div class="text-[10px] uppercase font-bold text-[#f97316] mb-2 tracking-wider">
       {article.sub_category || article.category || article.tags?.[0] || 'Real Estate'}
     </div>
 
-    <h3 class="text-lg font-bold text-gray-900 group-hover:text-red-700 transition-colors line-clamp-2 leading-tight mb-3">
+    <h3 class="text-lg font-bold text-gray-900 group-hover:text-orange-700 transition-colors line-clamp-2 leading-tight mb-3">
       {article.title}
     </h3>
 

@@ -64,6 +64,16 @@ const pageTitle = subCategory ? 'Edit Sub-category' : 'Add Sub-category';
         </div>
       </div>
 
+      <div class="flex items-center gap-2">
+        <input 
+          type="checkbox" 
+          id="s-show-in-scroller" 
+          checked={subCategory?.show_in_scroller} 
+          class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" 
+        />
+        <label for="s-show-in-scroller" class="text-sm font-medium text-gray-700">Show in Scroller (Blog Page)</label>
+      </div>
+
       <div class="pt-4 border-t border-gray-100">
         <h2 class="text-sm font-semibold text-gray-900 mb-4">SEO Metadata</h2>
         <div class="space-y-4">
@@ -146,6 +156,7 @@ const pageTitle = subCategory ? 'Edit Sub-category' : 'Add Sub-category';
       name: nameInput.value,
       slug: slugInput.value,
       image_url: imageInput.value,
+      show_in_scroller: (document.getElementById('s-show-in-scroller') as HTMLInputElement).checked,
       meta_title: (document.getElementById('s-meta-title') as HTMLInputElement).value,
       meta_description: (document.getElementById('s-meta-desc') as HTMLTextAreaElement).value,
     };

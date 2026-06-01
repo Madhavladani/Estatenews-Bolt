@@ -12,7 +12,7 @@ import BlogCard from "../../components/BlogCard.astro";
 import BlogSectionHeader from "../../components/BlogSectionHeader.astro";
 import BlogHubHeader from "../../components/BlogHubHeader.astro";
 import { supabase } from "../../lib/supabase";
-import type { Blog, City } from "../../lib/types";
+import type { Blog, City, BlogCategory, BlogSubCategory } from "../../lib/types";
 
 // Fetch all published articles
 const { data: articlesData } = await supabase
@@ -37,14 +37,14 @@ const { data: dbCategories } = await supabase
 const { data: dbSubCategories } = await supabase
   .from("blog_sub_categories")
   .select("*");
-const categories = dbCategories || [];
-const subCategories = dbSubCategories || [];
+const categories = (dbCategories || []) as BlogCategory[];
+const subCategories = (dbSubCategories || []) as BlogSubCategory[];
 
 // Helper to filter articles by category name or ID
 const filterByCategory = (catName: string) => {
-  const cat = categories.find((c) => c.name === catName);
+  const cat = categories.find((c: BlogCategory) => c.name === catName);
   return articles.filter(
-    (a) => a.category_id === cat?.id || a.category === catName,
+    (a: Blog) => a.category_id === cat?.id || a.category === catName,
   );
 };
 
@@ -62,13 +62,14 @@ const heroSideArticles = articles.slice(1, 4);
 
 // Highlights / Main Categories (Dynamic from Sub-categories)
 const mainCategories = subCategories
-  .map((s) => {
-    const cat = categories.find((c) => c.id === s.category_id);
+  .filter((s: BlogSubCategory) => s.show_in_scroller)
+  .map((s: BlogSubCategory) => {
+    const cat = categories.find((c: BlogCategory) => c.id === s.category_id);
     if (!cat) return null;
     return {
       name: s.name,
       count: articles.filter(
-        (a) => a.sub_category_id === s.id || a.sub_category === s.name,
+        (a: Blog) => a.sub_category_id === s.id || a.sub_category === s.name,
       ).length,
       image:
         s.image_url ||
@@ -76,8 +77,7 @@ const mainCategories = subCategories
       href: `/blog/${cat.slug}/${s.slug}`,
     };
   })
-  .filter((c): c is NonNullable<typeof c> => c !== null)
-  .slice(0, 7);
+  .filter((c): c is NonNullable<typeof c> => c !== null);
 ---
 
 <BaseLayout
@@ -102,7 +102,7 @@ const mainCategories = subCategories
             )
           }
           <div class="space-y-6">
-            <h3 class="text-xl font-bold border-l-4 border-red-600 pl-3 mb-6">
+            <h3 class="text-xl font-bold border-l-4 border-[#f97316] pl-3 mb-6">
               Trending Stories
             </h3>
             {
@@ -120,10 +120,10 @@ const mainCategories = subCategories
                     />
                   </div>
                   <div class="flex-1">
-                    <span class="text-[10px] uppercase font-bold text-red-600 tracking-wider inline-block mb-1">
+                    <span class="text-[10px] uppercase font-bold text-[#f97316] tracking-wider inline-block mb-1">
                       {article.sub_category || article.category}
                     </span>
-                    <h4 class="text-sm font-bold text-gray-900 group-hover:text-red-700 transition-colors line-clamp-2 leading-tight">
+                    <h4 class="text-sm font-bold text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-2 leading-tight">
                       {article.title}
                     </h4>
                     <div class="mt-2 text-[10px] text-gray-400 font-medium whitespace-nowrap">
@@ -147,7 +147,7 @@ const mainCategories = subCategories
         <div
           class="flex items-center gap-6 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
         >
-          {mainCategories.map((cat) => <CategoryCard {...cat} />)}
+          {mainCategories.map((cat: any) => <CategoryCard {...cat} />)}
           <div class="flex-none pr-4 sm:pr-0"></div>
         </div>
       </div>
@@ -196,12 +196,12 @@ const mainCategories = subCategories
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                 <div class="absolute bottom-0 p-6 w-full">
-                  <span class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2 inline-block">
+                  <span class="text-xs font-bold text-orange-400 uppercase tracking-widest mb-2 inline-block">
                     Experts Choice
                   </span>
                   <h3
                     class:list={[
-                      "font-extrabold text-white group-hover:text-red-400 transition-colors leading-tight",
+                      "font-extrabold text-white group-hover:text-orange-300 transition-colors leading-tight",
                       i === 0 ? "text-2xl md:text-3xl" : "text-lg",
                     ]}
                   >
@@ -244,12 +244,12 @@ const mainCategories = subCategories
                       />
                     </a>
                     <div class="flex-1 flex flex-col justify-center">
-                      <span class="text-[10px] uppercase font-bold text-red-600 tracking-wider mb-2">
+                      <span class="text-[10px] uppercase font-bold text-[#f97316] tracking-wider mb-2">
                         Policy Update
                       </span>
                       <a
                         href={`/blog/${article.slug}`}
-                        class="group-hover:text-red-700 transition-colors"
+                        class="group-hover:text-orange-600 transition-colors"
                       >
                         <h3 class="text-xl font-extrabold text-gray-900 leading-tight mb-3">
                           {article.title}
@@ -275,20 +275,20 @@ const mainCategories = subCategories
           <div
             class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
           >
-            <h3 class="text-lg font-bold border-l-4 border-red-600 pl-3 mb-6">
+            <h3 class="text-lg font-bold border-l-4 border-[#f97316] pl-3 mb-6">
               Popular in Policies
             </h3>
             <div class="space-y-6">
               {
                 policiesArticles.map((article, i) => (
                   <div class="flex gap-4 group">
-                    <span class="text-3xl font-black text-gray-100 group-hover:text-red-500/10 transition-colors">
+                    <span class="text-3xl font-black text-gray-100 group-hover:text-orange-500/10 transition-colors">
                       0{i + 1}
                     </span>
                     <div class="flex-1">
                       <a
                         href={`/blog/${article.slug}`}
-                        class="text-sm font-bold text-gray-900 group-hover:text-red-700 line-clamp-2 leading-snug"
+                        class="text-sm font-bold text-gray-900 group-hover:text-orange-600 line-clamp-2 leading-snug"
                       >
                         {article.title}
                       </a>
@@ -309,21 +309,21 @@ const mainCategories = subCategories
     <section class="py-12 bg-gray-900 text-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          class="flex items-center justify-between mb-10 border-l-4 border-red-600 pl-4 py-1"
+          class="flex items-center justify-between mb-10 border-l-4 border-[#f97316] pl-4 py-1"
         >
           <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">
             Interior Tips from Experts
           </h2>
           <a
             href="/blog"
-            class="text-sm font-semibold text-gray-400 hover:text-red-500 uppercase tracking-widest"
+            class="text-sm font-semibold text-gray-400 hover:text-orange-500 uppercase tracking-widest"
             >Explore More →</a
           >
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {
             articles.slice(10, 14).map((article) => (
-              <div class="group">
+              <a href={`/blog/${article.slug}`} class="group">
                 <div class="relative aspect-video rounded-xl overflow-hidden mb-4 shadow-2xl">
                   <img
                     src={article.featured_image}
@@ -336,7 +336,7 @@ const mainCategories = subCategories
                   />
                   <div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
                   <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                    <span class="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
+                    <span class="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-orange-500">
                       <svg
                         class="w-3 h-3"
                         fill="currentColor"
@@ -348,14 +348,14 @@ const mainCategories = subCategories
                     </span>
                   </div>
                 </div>
-                <h4 class="text-base font-bold group-hover:text-red-500 transition-colors line-clamp-2 leading-tight">
+                <h4 class="text-base font-bold group-hover:text-orange-500 transition-colors line-clamp-2 leading-tight">
                   {article.title}
                 </h4>
                 <div class="mt-3 text-[11px] text-gray-500 font-medium uppercase tracking-wider">
                   {article.author?.full_name || article.author_name} •{" "}
                   {new Date(article.published_at).getFullYear()}
                 </div>
-              </div>
+              </a>
             ))
           }
         </div>
@@ -376,7 +376,7 @@ const mainCategories = subCategories
           <div class="lg:col-span-2 space-y-6">
             {
               financeArticles.slice(1).map((article) => (
-                <div class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+                <a href={`/blog/${article.slug}`} class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
                   <div class="w-40 h-24 flex-none overflow-hidden rounded-lg">
                     <img
                       src={article.featured_image}
@@ -389,17 +389,17 @@ const mainCategories = subCategories
                     />
                   </div>
                   <div class="flex-1">
-                    <span class="text-[9px] uppercase font-bold text-red-600 mb-1 block">
+                    <span class="text-[9px] uppercase font-bold text-[#f97316] mb-1 block">
                       Legal Update
                     </span>
-                    <h4 class="text-base font-bold text-gray-900 group-hover:text-red-700 transition-colors line-clamp-2 leading-tight">
+                    <h4 class="text-base font-bold text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-2 leading-tight">
                       {article.title}
                     </h4>
                     <p class="text-xs text-gray-500 mt-2 line-clamp-1">
                       {article.excerpt}
                     </p>
                   </div>
-                </div>
+                </a>
               ))
             }
           </div>
@@ -414,13 +414,13 @@ const mainCategories = subCategories
           class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6"
         >
           <h2
-            class="text-2xl md:text-3xl font-extrabold border-l-4 border-red-600 pl-4 py-1"
+            class="text-2xl md:text-3xl font-extrabold border-l-4 border-[#f97316] pl-4 py-1"
           >
             What's New in
           </h2>
           <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
             <button
-              class="city-tab-btn active px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white shadow-lg transition-all"
+              class="city-tab-btn active px-4 py-2 rounded-full text-xs font-bold bg-[#f97316] text-white shadow-lg transition-all"
               data-city="all">All Gujarat</button
             >
             {
@@ -439,7 +439,8 @@ const mainCategories = subCategories
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {
             articles.slice(0, 6).map((article) => (
-              <div
+              <a
+                href={`/blog/${article.slug}`}
                 class="city-article group"
                 data-city-id={article.city_id || "all"}
               >
@@ -457,13 +458,13 @@ const mainCategories = subCategories
                 <span class="text-[10px] uppercase font-bold text-gray-400 mb-2 block">
                   {article.category}
                 </span>
-                <h4 class="text-lg font-extrabold text-gray-900 group-hover:text-red-700 transition-colors leading-tight mb-2">
+                <h4 class="text-lg font-extrabold text-gray-900 group-hover:text-orange-600 transition-colors leading-tight mb-2">
                   {article.title}
                 </h4>
                 <p class="text-[13px] text-gray-500 line-clamp-2">
                   {article.excerpt}
                 </p>
-              </div>
+              </a>
             ))
           }
         </div>
@@ -490,7 +491,7 @@ const mainCategories = subCategories
             <div class="flex flex-wrap justify-center lg:justify-start gap-4">
               <a
                 href="/tools"
-                class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40"
+                class="px-8 py-4 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-orange-900/40"
                 >Try Property Tools</a
               >
               <a
@@ -501,7 +502,7 @@ const mainCategories = subCategories
             </div>
           </div>
           <div
-            class="hidden lg:block w-72 h-72 bg-gradient-to-br from-red-500/20 to-transparent rounded-full blur-3xl"
+            class="hidden lg:block w-72 h-72 bg-gradient-to-br from-orange-500/20 to-transparent rounded-full blur-3xl"
           >
           </div>
         </div>
@@ -530,10 +531,10 @@ const mainCategories = subCategories
 
       // Active state
       tabBtns.forEach((b) => {
-        b.classList.remove("active", "bg-red-600", "text-white", "shadow-lg");
+        b.classList.remove("active", "bg-[#f97316]", "text-white", "shadow-lg");
         b.classList.add("text-gray-500", "bg-gray-100");
       });
-      btn.classList.add("active", "bg-red-600", "text-white", "shadow-lg");
+      btn.classList.add("active", "bg-[#f97316]", "text-white", "shadow-lg");
       btn.classList.remove("text-gray-500", "bg-gray-100");
 
       // Filter
