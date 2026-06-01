@@ -161,8 +161,10 @@ export function buildBlogArticleSchema(article: Blog) {
       '@type': 'Organization',
       name: SITE_NAME,
       sameAs: [
-        'https://twitter.com/homenesto',
-        'https://www.linkedin.com/company/homenesto',
+        'https://www.facebook.com/homenesto',
+        'https://www.linkedin.com/company/home-nesto/',
+        'https://x.com/homenesto',
+        'https://www.instagram.com/home_nesto',
       ],
       logo: {
         '@type': 'ImageObject',
