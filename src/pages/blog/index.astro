@@ -12,7 +12,12 @@ import BlogCard from "../../components/BlogCard.astro";
 import BlogSectionHeader from "../../components/BlogSectionHeader.astro";
 import BlogHubHeader from "../../components/BlogHubHeader.astro";
 import { supabase } from "../../lib/supabase";
-import type { Blog, City, BlogCategory, BlogSubCategory } from "../../lib/types";
+import type {
+  Blog,
+  City,
+  BlogCategory,
+  BlogSubCategory,
+} from "../../lib/types";
 
 // Fetch all published articles
 const { data: articlesData } = await supabase
@@ -219,7 +224,7 @@ const mainCategories = subCategories
       </div>
     </section>
 
-    <!-- ── Updates in Policies ── -->
+    <!-- ── Updates in Policie
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BlogSectionHeader title="Updates in Policies" href="/blog/policies" />
@@ -304,6 +309,7 @@ const mainCategories = subCategories
         </div>
       </div>
     </section>
+  -->
 
     <!-- ── Real Estate Tips (Video/Standard Cards) ── -->
     <section class="py-12 bg-gray-900 text-white">
@@ -362,7 +368,7 @@ const mainCategories = subCategories
       </div>
     </section>
 
-    <!-- ── Finance & Legal ── -->
+    <!-- ── Finance & Legal ── 
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BlogSectionHeader
@@ -376,7 +382,10 @@ const mainCategories = subCategories
           <div class="lg:col-span-2 space-y-6">
             {
               financeArticles.slice(1).map((article) => (
-                <a href={`/blog/${article.slug}`} class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+                <a
+                  href={`/blog/${article.slug}`}
+                  class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
+                >
                   <div class="w-40 h-24 flex-none overflow-hidden rounded-lg">
                     <img
                       src={article.featured_image}
@@ -406,7 +415,7 @@ const mainCategories = subCategories
         </div>
       </div>
     </section>
-
+  -->
     <!-- ── Town Tabs (City News) ── -->
     <section class="py-12 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

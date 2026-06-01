@@ -124,7 +124,7 @@ export function buildBlogArticleSchema(article: Blog) {
     : article.tags?.join(', ') || undefined;
   return {
     '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
+    '@type': 'BlogPosting',
     headline: article.meta_title || article.title,
     name: article.title,
     description: article.meta_description || article.excerpt,
@@ -138,15 +138,15 @@ export function buildBlogArticleSchema(article: Blog) {
     dateModified: article.updated_at || article.published_at,
     author: article.author
       ? {
-          '@type': 'Person',
-          name: article.author.full_name,
-          url: `${SITE_URL}/author/${article.author.slug}`,
-          image: article.author.photo_url,
-          jobTitle: article.author.company_role,
-        }
+        '@type': 'Person',
+        name: article.author.full_name,
+        url: `${SITE_URL}/author/${article.author.slug}`,
+        image: article.author.photo_url,
+        jobTitle: article.author.company_role,
+      }
       : article.author_name
-      ? { '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }
-      : undefined,
+        ? { '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }
+        : undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': url,
