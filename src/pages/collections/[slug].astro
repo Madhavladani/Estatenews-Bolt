@@ -109,7 +109,7 @@ const faqSchema = buildFAQSchema(faqs);
   <!-- Collection Hero -->
   <section class="relative bg-primary-800 text-white overflow-hidden">
     <div class="absolute inset-0 opacity-10">
-      <img src={city?.hero_image || 'https://images.pexels.com/photos/1474115/pexels-photo-1474115.jpeg?auto=compress&cs=tinysrgb&w=1920'} alt="" class="w-full h-full object-cover" loading="eager" width="1920" height="1080" />
+      <img src={city?.hero_image || 'https://images.pexels.com/photos/1474115/pexels-photo-1474115.jpeg?auto=compress&cs=tinysrgb&w=1920'} alt={city ? `Real estate projects in ${city.name}, ${city.state}` : 'Real estate projects in Gujarat'} class="w-full h-full object-cover" loading="eager" width="1920" height="1080" />
     </div>
     <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">

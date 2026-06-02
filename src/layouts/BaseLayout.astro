@@ -8,6 +8,7 @@ interface Props {
   description: string;
   canonical?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   jsonLd?: object | object[];
   breadcrumbs?: { name: string; url: string }[];
   noindex?: boolean;
@@ -26,7 +27,7 @@ interface Props {
 }
 
 const {
-  title, description, canonical, ogImage, jsonLd, breadcrumbs,
+  title, description, canonical, ogImage, ogImageAlt, jsonLd, breadcrumbs,
   noindex = false, prevUrl, nextUrl,
   hreflangs = { 'en-IN': '/', 'x-default': '/' },
   showHeader = true, showFooter = true,
@@ -34,6 +35,7 @@ const {
   ogType = 'website',
   articlePublishedTime, articleModifiedTime, articleTags = [],
 } = Astro.props;
+const ogAlt = ogImageAlt || title;
 const siteUrl = 'https://homenesto.com';
 const rawPath = Astro.url.pathname;
 // Ensure no trailing slash for canonical unless it's the root
@@ -63,8 +65,10 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     <meta property="og:description" content={description} />
     <meta property="og:url" content={pageUrl} />
     <meta property="og:image" content={og} />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:site_name" content="Home Nesto" />
     <meta property="og:type" content={ogType} />
     {ogType === 'article' && articlePublishedTime && (

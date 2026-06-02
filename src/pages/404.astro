@@ -68,9 +68,11 @@ const displayCities = cities.length > 0 ? cities : fallbackCities;
                 {city.hero_image ? (
                   <img 
                     src={city.hero_image} 
-                    alt={city.name} 
+                    alt={`Real estate projects in ${city.name}${city.state ? `, ${city.state}` : ''}`}
                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
+                    width="400"
+                    height="500"
                   />
                 ) : (
                   <div class="w-full h-full bg-gradient-to-br from-primary-800 to-primary-600 flex items-center justify-center">

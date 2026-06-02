@@ -103,6 +103,7 @@ if (type === 'category' && category) {
     description={article.meta_description || article.excerpt || "Latest real estate blog and updates."}
     canonical={articleProps.canonicalUrl}
     ogImage={articleProps.ogImage}
+    ogImageAlt={`${article.title} — Home Nesto`}
     noindex={article.noindex}
     jsonLd={articleProps.schemas}
     breadcrumbs={[
