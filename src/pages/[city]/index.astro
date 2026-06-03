@@ -1,104 +1,168 @@
 ---
 export const prerender = false;
-import BaseLayout from '../../layouts/BaseLayout.astro';
-	import ProjectCard from '../../components/ProjectCard.astro';
-	import CollectionCard from '../../components/CollectionCard.astro';
-	import FAQSection from '../../components/FAQSection.astro';
-	import { supabase } from '../../lib/supabase';
-	import { normalizeCitySlug, fallbackCityFromStatic } from '../../lib/city-slug';
-	import { buildBreadcrumbSchema, buildCitySchema, generateCityFAQs, buildFAQSchema } from '../../lib/seo';
-	import type { City, Project, Collection, Locality } from '../../lib/types';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import CollectionCard from "../../components/CollectionCard.astro";
+import FAQSection from "../../components/FAQSection.astro";
+import { supabase } from "../../lib/supabase";
+import { normalizeCitySlug, fallbackCityFromStatic } from "../../lib/city-slug";
+import {
+  buildBreadcrumbSchema,
+  buildCitySchema,
+  generateCityFAQs,
+  buildFAQSchema,
+} from "../../lib/seo";
+import type { City, Project, Collection, Locality } from "../../lib/types";
 
-	const { city: rawCitySlug } = Astro.params;
-	const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
+const { city: rawCitySlug } = Astro.params;
+const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
 
-	if (rawCitySlug && citySlug !== rawCitySlug) {
-	  return Astro.redirect(`/${citySlug}`, 301);
-	}
+if (rawCitySlug && citySlug !== rawCitySlug) {
+  return Astro.redirect(`/${citySlug}`, 301);
+}
 
-	const { data: cityData } = await supabase
-	  .from('cities')
-	  .select('*')
-	  .eq('slug', citySlug)
-	  .single();
+const { data: cityData } = await supabase
+  .from("cities")
+  .select("*")
+  .eq("slug", citySlug)
+  .single();
 
-	const city: City | null = (cityData as City) || fallbackCityFromStatic(citySlug);
-	const hasDbCity = Boolean(cityData);
+const city: City | null =
+  (cityData as City) || fallbackCityFromStatic(citySlug);
+const hasDbCity = Boolean(cityData);
 
-	if (!city) return new Response(null, { status: 404 });
+if (!city) return new Response(null, { status: 404 });
 
-	Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, s-maxage=3600, stale-while-revalidate=86400",
+);
 
-	const [projectsRes, collectionsRes, localitiesRes, faqsRes] = hasDbCity
-	  ? await Promise.all([
-	      supabase.from('projects').select('*').eq('city_id', city.id).order('published_at', { ascending: false }),
-	      supabase.from('collections').select('*').eq('city_id', city.id).order('created_at', { ascending: false }),
-	      supabase.from('localities').select('*').eq('city_id', city.id).order('name'),
-	      supabase
-	        .from('faqs')
-	        .select('question,answer,city_id,sort_order,created_at')
-	        .eq('is_active', true)
-	        .or(`city_id.eq.${city.id},city_id.is.null`)
-	        .order('sort_order', { ascending: true })
-	        .order('created_at', { ascending: false }),
-	    ])
-	  : [
-	      { data: [] as any[] } as any,
-	      { data: [] as any[] } as any,
-	      { data: [] as any[] } as any,
-	      { data: [] as any[] } as any,
-	    ];
+const [projectsRes, collectionsRes, localitiesRes, faqsRes] = hasDbCity
+  ? await Promise.all([
+      supabase
+        .from("projects")
+        .select("*")
+        .eq("city_id", city.id)
+        .order("published_at", { ascending: false }),
+      supabase
+        .from("collections")
+        .select("*")
+        .eq("city_id", city.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("localities")
+        .select("*")
+        .eq("city_id", city.id)
+        .order("name"),
+      supabase
+        .from("faqs")
+        .select("question,answer,city_id,sort_order,created_at")
+        .eq("is_active", true)
+        .or(`city_id.eq.${city.id},city_id.is.null`)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false }),
+    ])
+  : [
+      { data: [] as any[] } as any,
+      { data: [] as any[] } as any,
+      { data: [] as any[] } as any,
+      { data: [] as any[] } as any,
+    ];
 
 const localities: Locality[] = localitiesRes.data || [];
 const localityById = new Map(localities.map((l) => [l.id, l]));
-const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
+const localityByName = new Map(
+  localities.map((l) => [l.name.toLowerCase(), l]),
+);
 
-const projects: (Project & { locality?: { slug: string; name: string } })[] = (projectsRes.data || []).map((p: any) => {
+const projects: (Project & { locality?: { slug: string; name: string } })[] = (
+  projectsRes.data || []
+).map((p: any) => {
   const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
-  const byName = !byId && typeof p.location === 'string' ? localityByName.get(p.location.trim().toLowerCase()) : undefined;
+  const byName =
+    !byId && typeof p.location === "string"
+      ? localityByName.get(p.location.trim().toLowerCase())
+      : undefined;
   const loc = byId || byName;
-  return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+  return loc
+    ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any)
+    : (p as any);
 });
 const collections: Collection[] = collectionsRes.data || [];
-const residentialProjects = projects.filter((p) => p.project_type === 'residential');
-const commercialProjects = projects.filter((p) => p.project_type === 'commercial');
+const residentialProjects = projects.filter(
+  (p) => p.project_type === "residential",
+);
+const commercialProjects = projects.filter(
+  (p) => p.project_type === "commercial",
+);
 
-const faqsFromDb = (faqsRes.data || []).map((f: any) => ({ question: f.question, answer: f.answer }));
+const faqsFromDb = (faqsRes.data || []).map((f: any) => ({
+  question: f.question,
+  answer: f.answer,
+}));
 const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
-	const breadcrumbSchema = buildBreadcrumbSchema([
-	  { name: 'Home', url: 'https://homenesto.com' },
-	  { name: city.name, url: `https://homenesto.com/${city.slug}` },
-	]);
-	const citySchema = hasDbCity ? buildCitySchema(city) : null;
-	const faqSchema = buildFAQSchema(faqs);
-	---
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://homenesto.com" },
+  { name: city.name, url: `https://homenesto.com/${city.slug}` },
+]);
+const citySchema = hasDbCity ? buildCitySchema(city) : null;
+const faqSchema = buildFAQSchema(faqs);
+---
 
-	<BaseLayout
-	  title={city.meta_title || `${city.name} Real Estate | Top Residential & Commercial Projects`}
-	  description={city.meta_description || `Discover the best residential and commercial real estate projects in ${city.name}, ${city.state}. Explore new launches, luxury apartments, villas, and office spaces.`}
-	  jsonLd={[breadcrumbSchema, ...(citySchema ? [citySchema] : []), faqSchema]}
-	  breadcrumbs={[{ name: city.name, url: `/${city.slug}` }]}
-	>
-	  <!-- City Hero -->
-	  <section class="relative bg-primary-800 text-white overflow-hidden">
-	    {city.hero_image && (
-	      <div class="absolute inset-0 opacity-20">
-	        <img src={city.hero_image} alt={`Luxury real estate and new projects in ${city.name}`} class="w-full h-full object-cover" loading="eager" fetchpriority="high" width="1920" height="1080" />
-	      </div>
-	    )}
-	    <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
-	    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+<BaseLayout
+  title={city.meta_title ||
+    `${city.name} Real Estate | Top Residential & Commercial Projects`}
+  description={city.meta_description ||
+    `Discover the best residential and commercial real estate projects in ${city.name}, ${city.state}. Explore new launches, luxury apartments, villas, and office spaces.`}
+  jsonLd={[breadcrumbSchema, ...(citySchema ? [citySchema] : []), faqSchema]}
+  breadcrumbs={[{ name: city.name, url: `/${city.slug}` }]}
+>
+  <!-- City Hero -->
+  <section class="relative bg-primary-800 text-white overflow-hidden">
+    {
+      city.hero_image && (
+        <div class="absolute inset-0 opacity-20">
+          <img
+            src={city.hero_image}
+            alt={`Luxury real estate and new projects in ${city.name}`}
+            class="w-full h-full object-cover"
+            loading="eager"
+            fetchpriority="high"
+            width="1920"
+            height="1080"
+          />
+        </div>
+      )
+    }
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"
+    >
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <div class="max-w-3xl">
-        <p class="text-accent-400 font-medium text-sm mb-3 uppercase tracking-wider">{city.state}</p>
+        <p
+          class="text-accent-400 font-medium text-sm mb-3 uppercase tracking-wider"
+        >
+          {city.state}
+        </p>
         <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
           Real Estate in <span class="text-accent-400">{city.name}</span>
         </h1>
-        <p class="text-lg text-gray-300 leading-relaxed mb-8">{city.overview}</p>
+        <p class="text-lg text-gray-300 leading-relaxed mb-8">
+          {city.overview}
+        </p>
         <div class="flex flex-wrap gap-4">
-          <a href={`/${city.slug}/residential`} class="px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm">
+          <a
+            href={`/${city.slug}/residential`}
+            class="px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-lg transition-colors text-sm"
+          >
             Residential Projects ({residentialProjects.length})
           </a>
-          <a href={`/${city.slug}/commercial`} class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm">
+          <a
+            href={`/${city.slug}/commercial`}
+            class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg border border-white/20 transition-colors text-sm"
+          >
             Commercial Projects ({commercialProjects.length})
           </a>
         </div>
@@ -107,118 +171,356 @@ const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
   </section>
 
   <!-- City Overview -->
-  <section class="py-12">
+  <section class="py-12 bg-slate-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
-          <p class="text-3xl font-bold text-primary-700">{projects.length}</p>
-          <p class="text-sm text-gray-500 mt-1">Total Projects</p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+        <!-- Total Projects -->
+        <div
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#f97316] p-4 md:p-6 text-white shadow-xl"
+        >
+          <div
+            class="absolute -right-8 -top-8 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/10"
+          >
+          </div>
+          <div
+            class="absolute -right-4 bottom-0 w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/5"
+          >
+          </div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-white/70 text-xs md:text-sm font-medium">
+                  Total Projects
+                </p>
+                <h3 class="text-2xl md:text-4xl font-bold mt-1 md:mt-2">
+                  {projects.length}
+                </h3>
+              </div>
+
+              <div
+                class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/15 flex items-center justify-center"
+              >
+                <svg
+                  class="w-5 h-5 md:w-7 md:h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 21h18M5 21V9l4-3v15M11 21V4l8 3v14M8 12h.01M8 15h.01M8 18h.01M14 9h.01M14 12h.01M14 15h.01M17 9h.01M17 12h.01M17 15h.01"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
-          <p class="text-3xl font-bold text-primary-700">{residentialProjects.length}</p>
-          <p class="text-sm text-gray-500 mt-1">Residential</p>
+
+        <!-- Residential -->
+        <div
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#f97316] p-4 md:p-6 text-white shadow-xl"
+        >
+          <div
+            class="absolute -right-8 -top-8 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/10"
+          >
+          </div>
+          <div
+            class="absolute -right-4 bottom-0 w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/5"
+          >
+          </div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-white/70 text-xs md:text-sm font-medium">
+                  Residential
+                </p>
+                <h3 class="text-2xl md:text-4xl font-bold mt-1 md:mt-2">
+                  {residentialProjects.length}
+                </h3>
+              </div>
+
+              <div
+                class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/15 flex items-center justify-center"
+              >
+                <svg
+                  class="w-5 h-5 md:w-7 md:h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 11.5L12 4l9 7.5M5 10v10h14V10M10 20v-5h4v5"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
-          <p class="text-3xl font-bold text-primary-700">{commercialProjects.length}</p>
-          <p class="text-sm text-gray-500 mt-1">Commercial</p>
+
+        <!-- Commercial -->
+        <div
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#f97316] p-4 md:p-6 text-white shadow-xl"
+        >
+          <div
+            class="absolute -right-8 -top-8 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/10"
+          >
+          </div>
+          <div
+            class="absolute -right-4 bottom-0 w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/5"
+          >
+          </div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-white/70 text-xs md:text-sm font-medium">
+                  Commercial
+                </p>
+                <h3 class="text-2xl md:text-4xl font-bold mt-1 md:mt-2">
+                  {commercialProjects.length}
+                </h3>
+              </div>
+
+              <div
+                class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/15 flex items-center justify-center"
+              >
+                <svg
+                  class="w-5 h-5 md:w-7 md:h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 21h16M7 21V4h10v17M10 8h1M13 8h1M10 12h1M13 12h1M10 16h1M13 16h1"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
-          <p class="text-3xl font-bold text-primary-700">{localities.length}</p>
-          <p class="text-sm text-gray-500 mt-1">Localities</p>
+
+        <!-- Localities -->
+        <div
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#f97316] p-4 md:p-6 text-white shadow-xl"
+        >
+          <div
+            class="absolute -right-8 -top-8 w-24 h-24 md:w-32 md:h-32 rounded-full bg-white/10"
+          >
+          </div>
+          <div
+            class="absolute -right-4 bottom-0 w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/5"
+          >
+          </div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-white/70 text-xs md:text-sm font-medium">
+                  Localities
+                </p>
+                <h3 class="text-2xl md:text-4xl font-bold mt-1 md:mt-2">
+                  {localities.length}
+                </h3>
+              </div>
+
+              <div
+                class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/15 flex items-center justify-center"
+              >
+                <svg
+                  class="w-5 h-5 md:w-7 md:h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"
+                  ></path>
+                  <circle cx="12" cy="10" r="2.5" stroke-width="2"></circle>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Residential Projects -->
-  {residentialProjects.length > 0 && (
-    <section class="py-12 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-gray-900">Residential Projects in {city.name}</h2>
-          <a href={`/${city.slug}/residential`} class="text-sm font-medium text-accent-600 hover:text-accent-700 flex items-center gap-1">
-            View All
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </a>
+  {
+    residentialProjects.length > 0 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">
+              Residential Projects in {city.name}
+            </h2>
+            <a
+              href={`/${city.slug}/residential`}
+              class="text-sm font-medium text-accent-600 hover:text-accent-700 flex items-center gap-1"
+            >
+              View All
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {residentialProjects.slice(0, 6).map((project) => (
+              <ProjectCard project={{ ...project, city }} />
+            ))}
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {residentialProjects.slice(0, 6).map((project) => (
-            <ProjectCard project={{ ...project, city }} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Commercial Projects -->
-  {commercialProjects.length > 0 && (
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-gray-900">Commercial Projects in {city.name}</h2>
-          <a href={`/${city.slug}/commercial`} class="text-sm font-medium text-accent-600 hover:text-accent-700 flex items-center gap-1">
-            View All
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </a>
+  {
+    commercialProjects.length > 0 && (
+      <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">
+              Commercial Projects in {city.name}
+            </h2>
+            <a
+              href={`/${city.slug}/commercial`}
+              class="text-sm font-medium text-accent-600 hover:text-accent-700 flex items-center gap-1"
+            >
+              View All
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {commercialProjects.slice(0, 6).map((project) => (
+              <ProjectCard project={{ ...project, city }} />
+            ))}
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {commercialProjects.slice(0, 6).map((project) => (
-            <ProjectCard project={{ ...project, city }} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Top Localities -->
-  {localities.length > 0 && (
-    <section class="py-12 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Top Localities in {city.name}</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {localities.map((loc) => (
-            <a href={`/${city.slug}/${loc.slug}`} class="bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
-              {loc.name}
-            </a>
-          ))}
+  {
+    localities.length > 0 && (
+      <section class="py-12" style="background:#0a1929;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold mb-6" style="color:#ffffff;">
+            Top Localities in {city.name}
+          </h2>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {localities.map((loc) => (
+              <a
+                href={`/${city.slug}/${loc.slug}`}
+                class="rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200"
+                style="
+                background:#1e3a5f;
+                border:1px solid rgba(255,255,255,0.12);
+                color:#ffffff;
+              "
+              >
+                {loc.name}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Collections -->
-  {collections.length > 0 && (
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Curated Collections for {city.name}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {collections.map((col) => (
-            <CollectionCard collection={col} />
-          ))}
+  {
+    collections.length > 0 && (
+      <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Popular Property Searches in {city.name}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {collections.map((col) => (
+              <CollectionCard collection={col} />
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Market Statistics -->
   <section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">{city.name} Market Statistics</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">
+        {city.name} Market Statistics
+      </h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
           <h3 class="font-semibold text-gray-900 mb-4">Residential Market</h3>
           <div class="space-y-3">
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">New Launch Projects</span>
-              <span class="font-medium text-gray-900">{residentialProjects.filter(p => p.project_status === 'new-launch').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  residentialProjects.filter(
+                    (p) => p.project_status === "new-launch",
+                  ).length
+                }</span
+              >
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">Under Construction</span>
-              <span class="font-medium text-gray-900">{residentialProjects.filter(p => p.project_status === 'under-construction').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  residentialProjects.filter(
+                    (p) => p.project_status === "under-construction",
+                  ).length
+                }</span
+              >
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">Ready to Move</span>
-              <span class="font-medium text-gray-900">{residentialProjects.filter(p => p.project_status === 'ready-to-move').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  residentialProjects.filter(
+                    (p) => p.project_status === "ready-to-move",
+                  ).length
+                }</span
+              >
             </div>
           </div>
         </div>
@@ -227,15 +529,33 @@ const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
           <div class="space-y-3">
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">New Launch Projects</span>
-              <span class="font-medium text-gray-900">{commercialProjects.filter(p => p.project_status === 'new-launch').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  commercialProjects.filter(
+                    (p) => p.project_status === "new-launch",
+                  ).length
+                }</span
+              >
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">Under Construction</span>
-              <span class="font-medium text-gray-900">{commercialProjects.filter(p => p.project_status === 'under-construction').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  commercialProjects.filter(
+                    (p) => p.project_status === "under-construction",
+                  ).length
+                }</span
+              >
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">Ready to Move</span>
-              <span class="font-medium text-gray-900">{commercialProjects.filter(p => p.project_status === 'ready-to-move').length}</span>
+              <span class="font-medium text-gray-900"
+                >{
+                  commercialProjects.filter(
+                    (p) => p.project_status === "ready-to-move",
+                  ).length
+                }</span
+              >
             </div>
           </div>
         </div>
@@ -251,11 +571,26 @@ const faqs = faqsFromDb.length > 0 ? faqsFromDb : generateCityFAQs(city);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-xl font-bold mb-6">Explore More</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <a href={`/${city.slug}/residential`} class="text-sm text-gray-300 hover:text-white transition-colors">Residential Projects in {city.name}</a>
-        <a href={`/${city.slug}/commercial`} class="text-sm text-gray-300 hover:text-white transition-colors">Commercial Projects in {city.name}</a>
-        {collections.map((col) => (
-          <a href={`/collections/${col.slug}`} class="text-sm text-gray-300 hover:text-white transition-colors">{col.title}</a>
-        ))}
+        <a
+          href={`/${city.slug}/residential`}
+          class="text-sm text-gray-300 hover:text-white transition-colors"
+          >Residential Projects in {city.name}</a
+        >
+        <a
+          href={`/${city.slug}/commercial`}
+          class="text-sm text-gray-300 hover:text-white transition-colors"
+          >Commercial Projects in {city.name}</a
+        >
+        {
+          collections.map((col) => (
+            <a
+              href={`/collections/${col.slug}`}
+              class="text-sm text-gray-300 hover:text-white transition-colors"
+            >
+              {col.title}
+            </a>
+          ))
+        }
       </div>
     </div>
   </section>

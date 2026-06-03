@@ -1,75 +1,101 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import ProjectCard from '../../../components/ProjectCard.astro';
-import FilterSidebar from '../../../components/FilterSidebar.astro';
-import FAQSection from '../../../components/FAQSection.astro';
-import { supabase } from '../../../lib/supabase';
-import { fallbackCityFromStatic } from '../../../lib/city-slug';
-import { buildBreadcrumbSchema, buildFAQSchema, formatProjectType, ITEMS_PER_PAGE } from '../../../lib/seo';
-import type { City, Project, Locality } from '../../../lib/types';
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectCard from "../../../components/ProjectCard.astro";
+import FilterSidebar from "../../../components/FilterSidebar.astro";
+import FAQSection from "../../../components/FAQSection.astro";
+import { supabase } from "../../../lib/supabase";
+import { fallbackCityFromStatic } from "../../../lib/city-slug";
+import {
+  buildBreadcrumbSchema,
+  buildFAQSchema,
+  formatProjectType,
+  ITEMS_PER_PAGE,
+} from "../../../lib/seo";
+import type { City, Project, Locality } from "../../../lib/types";
 
 type Props = {
   citySlug: string;
-  projectType: 'residential' | 'commercial';
+  projectType: "residential" | "commercial";
 };
 
 const { citySlug, projectType } = Astro.props as Props;
 
 const { data: cityData } = await supabase
-  .from('cities')
-  .select('*')
-  .eq('slug', citySlug)
+  .from("cities")
+  .select("*")
+  .eq("slug", citySlug)
   .single();
 
-const city: City | null = (cityData as City) || fallbackCityFromStatic(citySlug);
+const city: City | null =
+  (cityData as City) || fallbackCityFromStatic(citySlug);
 const hasDbCity = Boolean(cityData);
 
 if (!city) return new Response(null, { status: 404 });
 
-Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, s-maxage=3600, stale-while-revalidate=86400",
+);
 
 const { data: projectsData } = hasDbCity
   ? await supabase
-      .from('projects')
-      .select('*')
-      .eq('city_id', city.id)
-      .eq('project_type', projectType)
-      .order('published_at', { ascending: false })
+      .from("projects")
+      .select("*")
+      .eq("city_id", city.id)
+      .eq("project_type", projectType)
+      .order("published_at", { ascending: false })
   : { data: [] as any[] };
 
 const { data: localitiesData } = hasDbCity
-  ? await supabase.from('localities').select('*').eq('city_id', city.id)
+  ? await supabase.from("localities").select("*").eq("city_id", city.id)
   : { data: [] as any[] };
 const localities: Locality[] = localitiesData || [];
 const localityById = new Map(localities.map((l) => [l.id, l]));
-const localityByName = new Map(localities.map((l) => [l.name.toLowerCase(), l]));
+const localityByName = new Map(
+  localities.map((l) => [l.name.toLowerCase(), l]),
+);
 
-const projects: (Project & { locality?: { slug: string; name: string } })[] = (projectsData || []).map((p: any) => {
+const projects: (Project & { locality?: { slug: string; name: string } })[] = (
+  projectsData || []
+).map((p: any) => {
   const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
-  const byName = !byId && typeof p.location === 'string' ? localityByName.get(p.location.trim().toLowerCase()) : undefined;
+  const byName =
+    !byId && typeof p.location === "string"
+      ? localityByName.get(p.location.trim().toLowerCase())
+      : undefined;
   const loc = byId || byName;
-  return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+  return loc
+    ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any)
+    : (p as any);
 });
 const totalPages = Math.max(1, Math.ceil(projects.length / ITEMS_PER_PAGE));
 const paginatedProjects = projects.slice(0, ITEMS_PER_PAGE);
 const suggestedProjects =
-  projects.length > ITEMS_PER_PAGE ? projects.slice(ITEMS_PER_PAGE, ITEMS_PER_PAGE + 6) : projects.slice(0, 6);
+  projects.length > ITEMS_PER_PAGE
+    ? projects.slice(ITEMS_PER_PAGE, ITEMS_PER_PAGE + 6)
+    : projects.slice(0, 6);
 const locations = [...new Set(projects.map((p) => p.location).filter(Boolean))];
-const amenities = [...new Set(projects.flatMap((p) => p.amenities).filter(Boolean))].sort();
-const statuses = [...new Set(projects.map((p) => p.project_status).filter(Boolean))];
-const otherLocalities = [...localities].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 24);
+const amenities = [
+  ...new Set(projects.flatMap((p) => p.amenities).filter(Boolean)),
+].sort();
+const statuses = [
+  ...new Set(projects.map((p) => p.project_status).filter(Boolean)),
+];
+const otherLocalities = [...localities]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .slice(0, 24);
 
 const tools = [
-  { title: 'Loan EMI Calculator', href: '/loan-emi-calculator' },
-  { title: 'Home Loan EMI Calculator', href: '/home-loan-emi-calculator' },
-  { title: 'Down Payment Calculator', href: '/down-payment-calculator' },
-  { title: 'Rent vs Buy Calculator', href: '/rent-vs-buy-calculator' },
-  { title: 'ROI Calculator', href: '/properties-roi-calculator' },
-  { title: 'All Tools', href: '/tools' },
+  { title: "Loan EMI Calculator", href: "/loan-emi-calculator" },
+  { title: "Home Loan EMI Calculator", href: "/home-loan-emi-calculator" },
+  { title: "Down Payment Calculator", href: "/down-payment-calculator" },
+  { title: "Rent vs Buy Calculator", href: "/rent-vs-buy-calculator" },
+  { title: "ROI Calculator", href: "/properties-roi-calculator" },
+  { title: "All Tools", href: "/tools" },
 ];
 
 const typeLabel = formatProjectType(projectType);
-const otherType = projectType === 'residential' ? 'commercial' : 'residential';
+const otherType = projectType === "residential" ? "commercial" : "residential";
 
 const faqs = [
   {
@@ -82,14 +108,25 @@ const faqs = [
   },
   {
     question: `Which localities in ${city.name} are best for ${typeLabel.toLowerCase()} investment?`,
-    answer: `Top localities for ${typeLabel.toLowerCase()} investment in ${city.name} include ${locations.slice(0, 3).join(', ')}. These areas offer excellent infrastructure and connectivity.`,
+    answer: `Top localities for ${typeLabel.toLowerCase()} investment in ${city.name} include ${locations.slice(0, 3).join(", ")}. These areas offer excellent infrastructure and connectivity.`,
   },
 ];
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://homenesto.com' },
-  { name: city.name, url: city.slug ? `https://homenesto.com/${city.slug}` : 'https://homenesto.com' },
-  { name: typeLabel, url: (city.slug && projectType) ? `https://homenesto.com/${city.slug}/${projectType}` : 'https://homenesto.com' },
+  { name: "Home", url: "https://homenesto.com" },
+  {
+    name: city.name,
+    url: city.slug
+      ? `https://homenesto.com/${city.slug}`
+      : "https://homenesto.com",
+  },
+  {
+    name: typeLabel,
+    url:
+      city.slug && projectType
+        ? `https://homenesto.com/${city.slug}/${projectType}`
+        : "https://homenesto.com",
+  },
 ]);
 const faqSchema = buildFAQSchema(faqs);
 ---
@@ -97,12 +134,21 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={`${typeLabel} Projects in ${city.name} | Top Properties & Prices`}
   description={`Explore the best ${typeLabel.toLowerCase()} projects in ${city.name}, ${city.state}. Find new launches, under-construction, and ready-to-move properties with premium amenities and prime locations.`}
-  canonical={city.slug ? `https://homenesto.com/${city.slug}/${projectType}` : `https://homenesto.com/${projectType}`}
-  nextUrl={totalPages > 1 ? (city.slug ? `/${city.slug}/${projectType}/page/2` : `/${projectType}/page/2`) : undefined}
+  canonical={city.slug
+    ? `https://homenesto.com/${city.slug}/${projectType}`
+    : `https://homenesto.com/${projectType}`}
+  nextUrl={totalPages > 1
+    ? city.slug
+      ? `/${city.slug}/${projectType}/page/2`
+      : `/${projectType}/page/2`
+    : undefined}
   jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
-    { name: city.name, url: city.slug ? `/${city.slug}` : '#' },
-    { name: typeLabel, url: (city.slug && projectType) ? `/${city.slug}/${projectType}` : '#' },
+    { name: city.name, url: city.slug ? `/${city.slug}` : "#" },
+    {
+      name: typeLabel,
+      url: city.slug && projectType ? `/${city.slug}/${projectType}` : "#",
+    },
   ]}
 >
   <!-- Category Hero -->
@@ -112,7 +158,8 @@ const faqSchema = buildFAQSchema(faqs);
         {typeLabel} Projects in {city.name}
       </h1>
       <p class="text-gray-300 text-lg">
-        Browse {typeLabel.toLowerCase()} projects across {city.name}. Filter by location, amenities, and status to find the right match.
+        Browse {typeLabel.toLowerCase()} projects across {city.name}. Filter by
+        location, amenities, and status to find the right match.
       </p>
     </div>
   </section>
@@ -126,132 +173,261 @@ const faqSchema = buildFAQSchema(faqs);
             locations={locations}
             amenities={amenities}
             statuses={statuses}
-            baseUrl={(city.slug && projectType) ? `/${city.slug}/${projectType}` : '#'}
+            baseUrl={city.slug && projectType
+              ? `/${city.slug}/${projectType}`
+              : "#"}
           />
         </div>
         <div class="lg:col-span-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedProjects.map((project) => (
-              <div class="project-item" data-location={project.location} data-status={project.project_status} data-amenities={project.amenities.join(',')}>
-                <ProjectCard project={{ ...project, city }} />
-              </div>
-            ))}
+            {
+              paginatedProjects.map((project) => (
+                <div
+                  class="project-item"
+                  data-location={project.location}
+                  data-status={project.project_status}
+                  data-amenities={project.amenities.join(",")}
+                >
+                  <ProjectCard project={{ ...project, city }} />
+                </div>
+              ))
+            }
           </div>
-          {projects.length === 0 && (
-            <div class="text-center py-16">
-              <p class="text-gray-500 text-lg">No {typeLabel.toLowerCase()} projects found in {city.name}.</p>
-              <a href={city.slug ? `/${city.slug}/${otherType}` : '#'} class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm">
-                Explore {otherType === 'residential' ? 'Residential' : 'Commercial'} Projects instead
-              </a>
-            </div>
-          )}
-          {totalPages > 1 && (
-            <div class="mt-8 flex justify-center">
-              <a href={city.slug ? `/${city.slug}/${projectType}/page/2` : '#'} class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-medium transition-colors">
-                Next Page
-                <span aria-hidden="true">&rarr;</span>
-              </a>
-            </div>
-          )}
+          {
+            projects.length === 0 && (
+              <div class="text-center py-16">
+                <p class="text-gray-500 text-lg">
+                  No {typeLabel.toLowerCase()} projects found in {city.name}.
+                </p>
+                <a
+                  href={city.slug ? `/${city.slug}/${otherType}` : "#"}
+                  class="mt-4 inline-block text-accent-600 hover:text-accent-700 font-medium text-sm"
+                >
+                  Explore{" "}
+                  {otherType === "residential" ? "Residential" : "Commercial"}{" "}
+                  Projects instead
+                </a>
+              </div>
+            )
+          }
+          {
+            totalPages > 1 && (
+              <div class="mt-8 flex justify-center">
+                <a
+                  href={city.slug ? `/${city.slug}/${projectType}/page/2` : "#"}
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Next Page
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            )
+          }
         </div>
       </div>
     </div>
   </section>
 
   <!-- Suggested Projects -->
-  {suggestedProjects.length > 0 && (
-    <section class="py-12 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between gap-6 mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Suggested {typeLabel} Projects in {city.name}</h2>
-            <p class="text-sm text-gray-600 mt-1">Handpicked picks based on latest updates in {city.name}.</p>
+  {
+    suggestedProjects.length > 0 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-end justify-between gap-6 mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">
+                Suggested {typeLabel} Projects in {city.name}
+              </h2>
+              <p class="text-sm text-gray-600 mt-1">
+                Handpicked picks based on latest updates in {city.name}.
+              </p>
+            </div>
+            {totalPages > 1 && (
+              <a
+                href={city.slug ? `/${city.slug}/${projectType}/page/2` : "#"}
+                class="text-sm font-medium text-primary-700 hover:text-primary-800"
+              >
+                View more
+              </a>
+            )}
           </div>
-          {totalPages > 1 && (
-            <a href={city.slug ? `/${city.slug}/${projectType}/page/2` : '#'} class="text-sm font-medium text-primary-700 hover:text-primary-800">
-              View more
-            </a>
-          )}
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {suggestedProjects.map((project) => (
+              <ProjectCard project={{ ...project, city }} />
+            ))}
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {suggestedProjects.map((project) => (
-            <ProjectCard project={{ ...project, city }} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Other Localities -->
-  {otherLocalities.length > 0 && (
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between gap-6 mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Other Localities in {city.name}</h2>
-            <p class="text-sm text-gray-600 mt-1">Explore locality-wise pages for {typeLabel.toLowerCase()} options.</p>
-          </div>
-          <a href={city.slug ? `/${city.slug}` : '#'} class="text-sm font-medium text-primary-700 hover:text-primary-800">
-            City overview
-          </a>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          {otherLocalities.map((l) => (
-            <a
-              href={(city.slug && l.slug) ? `/${city.slug}/${l.slug}` : '#'}
-              class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors"
-            >
-              {l.name}
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+  {
+    otherLocalities.length > 0 && (
+      <section class="py-12" style="background:#0a1929;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-end justify-between gap-6 mb-6">
+            <div>
+              <h2 class="text-2xl font-bold text-white">
+                Other Localities in {city.name}
+              </h2>
 
-  <!-- Tools -->
-  <section class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Tools</h2>
-      <p class="text-sm text-gray-600 mb-6">Plan budgets, compare options, and estimate EMIs.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map((t) => (
-          <a href={t.href} class="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-sm transition-all">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-gray-900">{t.title}</span>
-              <span class="text-gray-400" aria-hidden="true">&rarr;</span>
+              <p class="text-sm mt-1" style="color:#cbd5e1;">
+                Explore locality-wise pages for {typeLabel.toLowerCase()}{" "}
+                options.
+              </p>
             </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
+
+            <a
+              href={city.slug ? `/${city.slug}` : "#"}
+              class="text-sm font-medium transition-colors"
+              style="color:#f97316;"
+            >
+              City Overview →
+            </a>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            {otherLocalities.map((l) => (
+              <a
+                href={city.slug && l.slug ? `/${city.slug}/${l.slug}` : "#"}
+                class="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
+                style="
+              background:rgba(255,255,255,0.08);
+              border-color:rgba(255,255,255,0.15);
+              color:#ffffff;
+              backdrop-filter:blur(8px);
+            "
+              >
+                {l.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <!-- SEO Intro -->
-  <section class="py-12 bg-gray-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">{typeLabel} Real Estate in {city.name}</h2>
-      <p class="text-gray-600 leading-relaxed mb-4">
-        {city.name} {typeLabel.toLowerCase()} real estate market offers a wide range of options for homebuyers and investors. From affordable housing to luxury apartments, the city has projects across every budget segment. Key localities like {locations.slice(0, 3).join(', ')} are witnessing significant development with new project launches.
-      </p>
-      <p class="text-gray-600 leading-relaxed">
-        With improving infrastructure, expanding metro connectivity, and growing commercial activity, {city.name} continues to be one of the most promising real estate destinations in {city.state}. Whether you are looking for a dream home or a smart investment, explore our comprehensive listing of {typeLabel.toLowerCase()} projects above.
-      </p>
+  <!-- SEO Intro -->
+  <section class="pt-12 pb-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-start">
+        <!-- Left Content -->
+        <div class="max-w-xl">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">
+            {typeLabel} Real Estate in {city.name}
+          </h2>
+
+          <p class="text-gray-600 leading-relaxed mb-6">
+            {city.name}
+            {typeLabel.toLowerCase()} real estate market offers a wide range of options
+            for homebuyers and investors. From affordable housing to luxury apartments,
+            the city has projects across every budget segment. Key localities like
+            {locations.slice(0, 3).join(", ")} are witnessing significant development
+            with new project launches.
+          </p>
+
+          <p class="text-gray-600 leading-relaxed">
+            With improving infrastructure, expanding metro connectivity, and
+            growing commercial activity, {city.name} continues to be one of the most
+            promising real estate destinations in {city.state}. Whether you are
+            looking for a dream home or a smart investment, explore our
+            comprehensive listing of {typeLabel.toLowerCase()} projects above.
+          </p>
+        </div>
+
+        <!-- Right Image Stack -->
+        {
+          projects.length > 0 && (
+            <div class="relative h-[520px] hidden lg:flex justify-center">
+              {[...projects]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 6)
+                .map((project, index) => (
+                  <img
+                    src={
+                      project.images?.[0] ||
+                      project.featured_image ||
+                      "/images/property-placeholder.webp"
+                    }
+                    alt={project.project_name}
+                    loading="lazy"
+                    class="absolute w-64 h-44 object-cover rounded-2xl shadow-xl border-4 border-white transition-all duration-300 hover:z-50 hover:scale-105"
+                    style={`
+                    top:${index * 55}px;
+                    left:${(index % 2) * 140}px;
+                    transform:rotate(${(Math.random() * 16 - 8).toFixed(2)}deg);
+                  `}
+                  />
+                ))}
+            </div>
+          )
+        }
+      </div>
     </div>
   </section>
 
   <!-- FAQs -->
   <FAQSection faqs={faqs} />
-
-  <!-- Related Collections -->
+  <!-- Tools -->
   <section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">Explore More in {city.name}</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Tools</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        Plan budgets, compare options, and estimate EMIs.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {
+          tools.map((t) => (
+            <a
+              href={t.href}
+              class="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary-300 hover:shadow-sm transition-all"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-900">
+                  {t.title}
+                </span>
+                <span class="text-gray-400" aria-hidden="true">
+                  &rarr;
+                </span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Collections -->
+  <section class="py-12" style="background:#f97316;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-xl font-bold text-white mb-4">
+        Explore More in {city.name}
+      </h2>
+
       <div class="flex flex-wrap gap-3">
-        <a href={city.slug ? `/${city.slug}/${otherType}` : '#'} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
-          {otherType === 'residential' ? 'Residential' : 'Commercial'} Projects
+        <a
+          href={city.slug ? `/${city.slug}/${otherType}` : "#"}
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style="
+          background:#ffffff;
+          color:#0a1929;
+          border:1px solid rgba(255,255,255,0.2);
+        "
+        >
+          {otherType === "residential" ? "Residential" : "Commercial"} Projects
         </a>
-        <a href={city.slug ? `/${city.slug}` : '#'} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+
+        <a
+          href={city.slug ? `/${city.slug}` : "#"}
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style="
+          background:#0a1929;
+          color:#ffffff;
+          border:1px solid #0a1929;
+        "
+        >
           All Projects in {city.name}
         </a>
       </div>
@@ -260,33 +436,39 @@ const faqSchema = buildFAQSchema(faqs);
 </BaseLayout>
 
 <script>
-  const locationFilter = document.getElementById('filter-location') as HTMLSelectElement;
-  const statusFilter = document.getElementById('filter-status') as HTMLSelectElement;
-  const amenityFilter = document.getElementById('filter-amenity') as HTMLSelectElement;
-  const clearBtn = document.getElementById('clear-filters');
-  const items = document.querySelectorAll('.project-item');
+  const locationFilter = document.getElementById(
+    "filter-location",
+  ) as HTMLSelectElement;
+  const statusFilter = document.getElementById(
+    "filter-status",
+  ) as HTMLSelectElement;
+  const amenityFilter = document.getElementById(
+    "filter-amenity",
+  ) as HTMLSelectElement;
+  const clearBtn = document.getElementById("clear-filters");
+  const items = document.querySelectorAll(".project-item");
 
   function applyFilters() {
-    const loc = locationFilter?.value || '';
-    const status = statusFilter?.value || '';
-    const amenity = amenityFilter?.value || '';
+    const loc = locationFilter?.value || "";
+    const status = statusFilter?.value || "";
+    const amenity = amenityFilter?.value || "";
     items.forEach((item) => {
       const el = item as HTMLElement;
       const matchLoc = !loc || el.dataset.location === loc;
       const matchStatus = !status || el.dataset.status === status;
       const matchAmenity = !amenity || el.dataset.amenities?.includes(amenity);
-      el.style.display = matchLoc && matchStatus && matchAmenity ? '' : 'none';
+      el.style.display = matchLoc && matchStatus && matchAmenity ? "" : "none";
     });
   }
 
-  locationFilter?.addEventListener('change', applyFilters);
-  statusFilter?.addEventListener('change', applyFilters);
-  amenityFilter?.addEventListener('change', applyFilters);
+  locationFilter?.addEventListener("change", applyFilters);
+  statusFilter?.addEventListener("change", applyFilters);
+  amenityFilter?.addEventListener("change", applyFilters);
 
-  clearBtn?.addEventListener('click', () => {
-    if (locationFilter) locationFilter.value = '';
-    if (statusFilter) statusFilter.value = '';
-    if (amenityFilter) amenityFilter.value = '';
+  clearBtn?.addEventListener("click", () => {
+    if (locationFilter) locationFilter.value = "";
+    if (statusFilter) statusFilter.value = "";
+    if (amenityFilter) amenityFilter.value = "";
     applyFilters();
   });
 </script>
