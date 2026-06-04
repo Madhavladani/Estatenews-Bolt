@@ -38,7 +38,7 @@ Astro.response.headers.set(
   "public, s-maxage=3600, stale-while-revalidate=86400",
 );
 
-const [projectsRes, collectionsRes, localitiesRes, faqsRes] = hasDbCity
+const [projectsRes, collectionsRes, localitiesRes, faqsRes, landmarksRes] = hasDbCity
   ? await Promise.all([
       supabase
         .from("projects")
@@ -62,14 +62,23 @@ const [projectsRes, collectionsRes, localitiesRes, faqsRes] = hasDbCity
         .or(`city_id.eq.${city.id},city_id.is.null`)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false }),
+      supabase
+        .from("landmarks")
+        .select("name,slug,image")
+        .eq("city_id", city.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(6),
     ])
   : [
       { data: [] as any[] } as any,
       { data: [] as any[] } as any,
       { data: [] as any[] } as any,
       { data: [] as any[] } as any,
+      { data: [] as any[] } as any,
     ];
 
+const landmarks = landmarksRes?.data || [];
 const localities: Locality[] = localitiesRes.data || [];
 const localityById = new Map(localities.map((l) => [l.id, l]));
 const localityByName = new Map(
@@ -456,6 +465,44 @@ const faqSchema = buildFAQSchema(faqs);
               "
               >
                 {loc.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Popular Landmarks -->
+  {
+    landmarks.length > 0 && (
+      <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Popular Landmarks in {city.name}
+          </h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {landmarks.map((landmark: any) => (
+              <a
+                href={`/${city.slug}/${landmark.slug}`}
+                class="group flex items-center gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all"
+              >
+                {landmark.image ? (
+                  <div class="w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                    <img src={landmark.image} alt={landmark.name} class="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                  </div>
+                ) : (
+                  <div class="w-16 h-16 shrink-0 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                  </div>
+                )}
+                <div>
+                  <h3 class="font-bold text-gray-900 group-hover:text-primary-700 transition-colors">Properties Near {landmark.name}</h3>
+                  <p class="text-sm text-gray-500 mt-0.5">Explore properties</p>
+                </div>
               </a>
             ))}
           </div>

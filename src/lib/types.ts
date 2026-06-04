@@ -85,6 +85,30 @@ export interface Locality {
   city?: City;
 }
 
+export interface Landmark {
+  id: string;
+  city_id: string;
+  name: string;
+  slug: string;
+  image?: string;
+  description?: string;
+  website?: string;
+  contact_number?: string;
+  latitude: number;
+  longitude: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  city?: City;
+  nearby_localities?: Locality[];
+}
+
+export interface LandmarkLocality {
+  id: string;
+  landmark_id: string;
+  locality_id: string;
+}
+
 export interface Blog {
   id: string;
   title: string;
@@ -189,6 +213,16 @@ export interface Database {
         Row: Collection;
         Insert: Omit<Collection, 'id' | 'created_at' | 'last_modify'>;
         Update: Partial<Omit<Collection, 'id' | 'created_at' | 'last_modify'>>;
+      };
+      landmarks: {
+        Row: Landmark;
+        Insert: Omit<Landmark, 'id' | 'created_at' | 'updated_at' | 'city' | 'nearby_localities'>;
+        Update: Partial<Omit<Landmark, 'id' | 'created_at' | 'updated_at' | 'city' | 'nearby_localities'>>;
+      };
+      landmark_localities: {
+        Row: LandmarkLocality;
+        Insert: Omit<LandmarkLocality, 'id'>;
+        Update: Partial<Omit<LandmarkLocality, 'id'>>;
       };
       news: {
         Row: Blog;

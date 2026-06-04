@@ -1,0 +1,104 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import type { City, Landmark } from '../../../lib/types';
+import { supabase } from '../../../lib/supabase';
+
+const url = new URL(Astro.request.url);
+const selectedCity = url.searchParams.get('city') || '';
+
+const client = Astro.locals.supabase ?? supabase;
+const { data: citiesRes } = await client.from('cities').select('*').order('name');
+const cities: City[] = citiesRes || [];
+
+let query = client
+  .from('landmarks')
+  .select('*, city:cities(name, slug)')
+  .order('name');
+
+if (selectedCity) query = query.eq('city_id', selectedCity);
+
+const { data: landmarksRes } = await query;
+const landmarks: any[] = landmarksRes || [];
+---
+
+<AdminLayout title="Landmarks" activeTab="landmarks">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <h1 class="text-2xl font-bold text-gray-900">Landmarks</h1>
+
+    <div class="flex items-center gap-3">
+      <select id="city-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500 min-w-[220px]">
+        <option value="">All Cities</option>
+        {cities.map((c) => (
+          <option value={c.id} selected={c.id === selectedCity}>{c.name}</option>
+        ))}
+      </select>
+      <a href="/admin/landmarks/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Landmark
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50 border-b border-gray-100">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Image</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Name</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Slug</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">City</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50" id="landmarks-table-body">
+        {(landmarks || []).map((landmark: Landmark & { city?: { name: string } }) => (
+          <tr class="hover:bg-gray-50" data-id={landmark.id}>
+            <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                {landmark.image ? (
+                    <img src={landmark.image} alt={landmark.name} class="w-10 h-10 rounded-md object-cover" />
+                ) : (
+                    <div class="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs">No img</div>
+                )}
+            </td>
+            <td class="px-4 py-3 text-sm font-medium text-gray-900">{landmark.name}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{landmark.slug}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">{(landmark as any).city?.name || '-'}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">
+                <span class={`px-2 py-1 text-xs font-semibold rounded-full ${landmark.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {landmark.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <a href={`/admin/landmarks/add?id=${landmark.id}`} class="edit-btn px-3 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded-md transition-colors inline-block">Edit</a>
+              <button class="delete-btn px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors ml-2" data-id={landmark.id} data-name={landmark.name}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {(!landmarks || landmarks.length === 0) && (
+      <div class="text-center py-12 text-gray-500 text-sm">No landmarks found.</div>
+    )}
+  </div>
+</AdminLayout>
+
+<script>
+  const cityFilter = document.getElementById('city-filter') as HTMLSelectElement;
+  cityFilter?.addEventListener('change', () => {
+    const selected = cityFilter.value;
+    const url = new URL(window.location.href);
+    if (selected) url.searchParams.set('city', selected);
+    else url.searchParams.delete('city');
+    window.location.href = url.toString();
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Delete ${(btn as HTMLElement).dataset.name}?`)) return;
+      const res = await fetch(`/admin/api/landmarks?id=${(btn as HTMLElement).dataset.id}`, { method: 'DELETE' });
+      if (res.ok) window.location.reload();
+      else alert('Failed to delete');
+    });
+  });
+</script>

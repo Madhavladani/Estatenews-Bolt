@@ -1,0 +1,335 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import type { City, Landmark, Locality } from '../../../lib/types';
+import { supabase } from '../../../lib/supabase';
+
+const client = Astro.locals.supabase ?? supabase;
+const { data: citiesRes } = await client.from('cities').select('*').order('name');
+const cities: City[] = citiesRes || [];
+
+// Fetch localities specifically to populate the multi-select
+const { data: allLocalitiesRes } = await client.from('localities').select('id, name, city_id').order('name');
+const allLocalities = allLocalitiesRes || [];
+
+const landmarkId = Astro.url.searchParams.get('id');
+let landmarkToEdit: any = null;
+let currentLocalityIds: string[] = [];
+
+if (landmarkId) {
+  const { data: landmarkData } = await client.from('landmarks').select('*').eq('id', landmarkId).single();
+  landmarkToEdit = landmarkData;
+
+  if (landmarkToEdit) {
+    const { data: llData } = await client.from('landmark_localities').select('locality_id').eq('landmark_id', landmarkId);
+    currentLocalityIds = (llData || []).map((ll) => ll.locality_id);
+  }
+}
+
+const pageTitle = landmarkToEdit ? 'Edit Landmark' : 'Add Landmark';
+const editLoadError =
+  landmarkId && !landmarkToEdit ? 'Unable to load landmark for editing. Please go back and try again.' : '';
+---
+
+<AdminLayout title={pageTitle} activeTab="landmarks">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/landmarks" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+    </div>
+  </div>
+
+  {editLoadError && (
+    <div class="mb-4 bg-red-50 border border-red-100 text-red-700 rounded-xl px-4 py-3 text-sm">
+      {editLoadError}
+    </div>
+  )}
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-3xl">
+    <form id="landmark-form" class="space-y-4">
+      <input type="hidden" id="lm-id" value={landmarkToEdit?.id || ''} />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+            <select id="lm-city" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+              <option value="">Select City</option>
+              {cities.map((c) => <option value={c.id} selected={c.id === landmarkToEdit?.city_id}>{c.name}</option>)}
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select id="lm-active" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow">
+              <option value="true" selected={landmarkToEdit?.is_active !== false}>Active</option>
+              <option value="false" selected={landmarkToEdit?.is_active === false}>Inactive</option>
+            </select>
+          </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Landmark Name *</label>
+            <input type="text" id="lm-name" required value={landmarkToEdit?.name || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+            <input type="text" id="lm-slug" required value={landmarkToEdit?.slug || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+          </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
+            <input type="number" step="any" id="lm-lat" required value={landmarkToEdit?.latitude || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. 22.3039" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
+            <input type="number" step="any" id="lm-lng" required value={landmarkToEdit?.longitude || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="e.g. 70.8022" />
+          </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <textarea id="lm-description" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="Short description of the landmark">{landmarkToEdit?.description || ''}</textarea>
+      </div>
+      
+      <div>
+        <label for="lm-image" class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+        <input type="text" id="lm-image" value={landmarkToEdit?.image || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+        <div class="mt-2 flex items-center gap-3">
+          <input type="file" id="lm-image-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+        </div>
+        <p id="lm-image-upload-status" class="mt-2 text-xs text-gray-500"></p>
+        <img id="lm-image-preview" alt="Landmark image preview" class="hidden mt-3 w-full h-44 object-cover rounded-lg border border-gray-200" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+            <input type="text" id="lm-website" value={landmarkToEdit?.website || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://..." />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+            <input type="text" id="lm-contact" value={landmarkToEdit?.contact_number || ''} class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="+91..." />
+          </div>
+      </div>
+      
+      <div class="pt-2 border-t border-gray-100">
+        <label class="block text-sm font-semibold text-gray-900 mb-2">Nearby Localities</label>
+        <p class="text-xs text-gray-500 mb-3">Select localities that are physically close or related to this landmark. Will be filtered by selected City on the client-side.</p>
+        
+        <script define:vars={{ allLocalities, currentLocalityIds }}>
+          window.ALL_LOCALITIES = allLocalities;
+          window.CURRENT_LOCALITY_IDS = currentLocalityIds;
+        </script>
+        
+        <div id="localities-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-3 border border-gray-200 rounded-lg bg-gray-50">
+           <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
+        <a href="/admin/landmarks" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
+        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm">Save Landmark</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<script>
+  const form = document.getElementById('landmark-form');
+  const nameInput = document.getElementById('lm-name') as HTMLInputElement;
+  const slugInput = document.getElementById('lm-slug') as HTMLInputElement;
+  const citySelect = document.getElementById('lm-city') as HTMLSelectElement;
+  const localitiesContainer = document.getElementById('localities-container');
+  
+  const imageInput = document.getElementById('lm-image') as HTMLInputElement;
+  const imageFileInput = document.getElementById('lm-image-file') as HTMLInputElement;
+  const imageUploadStatus = document.getElementById('lm-image-upload-status');
+  const imagePreview = document.getElementById('lm-image-preview') as HTMLImageElement;
+
+  function updateImagePreview(url: string) {
+    if (!imagePreview) return;
+    if (!url) {
+      imagePreview.classList.add('hidden');
+      imagePreview.removeAttribute('src');
+      return;
+    }
+    imagePreview.src = url;
+    imagePreview.classList.remove('hidden');
+  }
+
+  updateImagePreview(imageInput?.value || '');
+  imageInput?.addEventListener('input', (e) => updateImagePreview((e.target as HTMLInputElement).value));
+
+  imageFileInput?.addEventListener('change', async () => {
+    const file = imageFileInput.files?.[0];
+    const id = (document.getElementById('lm-id') as HTMLInputElement)?.value;
+
+    if (!file) {
+      if (imageUploadStatus) imageUploadStatus.textContent = '';
+      return;
+    }
+    const localPreview = URL.createObjectURL(file);
+    updateImagePreview(localPreview);
+    if (imageUploadStatus) imageUploadStatus.textContent = 'Uploading image...';
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'landmarks');
+
+      const res = await fetch('/admin/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        if (imageUploadStatus) imageUploadStatus.textContent = data.error || 'Upload failed.';
+        return;
+      }
+
+      if (imageInput) imageInput.value = data.url;
+      updateImagePreview(data.url);
+
+      if (id) {
+        const saveRes = await fetch(`/admin/api/landmarks?id=${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: data.url }),
+        });
+        if (!saveRes.ok) {
+          if (imageUploadStatus) imageUploadStatus.textContent = 'Image uploaded, but database update failed.';
+          return;
+        }
+      }
+      if (imageUploadStatus) {
+        imageUploadStatus.textContent = id
+          ? 'Image uploaded and URL updated in database.'
+          : 'Image uploaded. Click Save Landmark to store full record.';
+      }
+    } catch (error) {
+      console.error(error);
+      if (imageUploadStatus) imageUploadStatus.textContent = 'Upload failed.';
+    }
+  });
+  
+  const allLocalities = window.ALL_LOCALITIES || [];
+  const currentLocalityIds = window.CURRENT_LOCALITY_IDS || [];
+
+  function renderLocalities(cityId: string) {
+      if (!localitiesContainer) return;
+      localitiesContainer.innerHTML = '';
+      
+      const filtered = allLocalities.filter((l: any) => l.city_id === cityId);
+      
+      if (filtered.length === 0) {
+          localitiesContainer.innerHTML = '<div class="col-span-full text-sm text-gray-500 py-2">Select a city first, or no localities exist for this city.</div>';
+          return;
+      }
+      
+      filtered.forEach((loc: any) => {
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-2 bg-white p-2 border border-gray-100 rounded-md';
+          
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.name = 'locality_ids';
+          input.value = loc.id;
+          input.id = `loc_${loc.id}`;
+          input.className = 'w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500 form-checkbox';
+          if (currentLocalityIds.includes(loc.id)) {
+              input.checked = true;
+          }
+          
+          const label = document.createElement('label');
+          label.htmlFor = `loc_${loc.id}`;
+          label.className = 'text-sm text-gray-700 flex-1 cursor-pointer truncate';
+          label.textContent = loc.name;
+          
+          div.appendChild(input);
+          div.appendChild(label);
+          localitiesContainer.appendChild(div);
+      });
+  }
+
+  // Auto-generate slug
+  nameInput?.addEventListener('input', (e) => {
+    const value = (e?.target as HTMLInputElement)?.value || '';
+    const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (slugInput && !window.location.search.includes('id=')) slugInput.value = slug;
+  });
+
+  citySelect?.addEventListener('change', (e) => {
+      renderLocalities((e.target as HTMLSelectElement).value);
+  });
+  
+  // Initial render
+  if (citySelect?.value) {
+      renderLocalities(citySelect.value);
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitBtn.textContent || '';
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+
+    try {
+      const id = (document.getElementById('lm-id') as HTMLInputElement)?.value || '';
+      const checkboxes = document.querySelectorAll('input[name="locality_ids"]:checked');
+      const locality_ids = Array.from(checkboxes).map(cb => (cb as HTMLInputElement).value);
+
+      const body = {
+        city_id: citySelect.value,
+        name: nameInput.value,
+        slug: slugInput.value,
+        latitude: parseFloat((document.getElementById('lm-lat') as HTMLInputElement).value),
+        longitude: parseFloat((document.getElementById('lm-lng') as HTMLInputElement).value),
+        description: (document.getElementById('lm-description') as HTMLTextAreaElement).value,
+        image: (document.getElementById('lm-image') as HTMLInputElement).value,
+        website: (document.getElementById('lm-website') as HTMLInputElement).value,
+        contact_number: (document.getElementById('lm-contact') as HTMLInputElement).value,
+        is_active: (document.getElementById('lm-active') as HTMLSelectElement).value === 'true',
+        locality_ids
+      };
+
+      const url = id ? `/admin/api/landmarks?id=${encodeURIComponent(id)}` : '/admin/api/landmarks';
+      const res = await fetch(url, {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        window.location.href = '/admin/landmarks';
+      } else {
+        let message = 'Failed to save';
+        try {
+          const d = await res.json();
+          message = d?.error || message;
+        } catch {
+          try {
+            message = await res.text();
+          } catch {}
+        }
+        alert(message);
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An external error occurred.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>

@@ -10,6 +10,7 @@ const paths = [
   '/sitemap-localities.xml',
   '/sitemap-guides.xml',
   '/sitemap-blog-categories.xml',
+  '/sitemap-landmarks.xml',
 ];
 
 export async function GET() {

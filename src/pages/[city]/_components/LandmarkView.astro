@@ -1,0 +1,205 @@
+---
+export const prerender = false;
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import { supabase } from '../../../lib/supabase';
+import { buildBreadcrumbSchema } from '../../../lib/seo';
+import type { City, Landmark, Project, Locality } from '../../../lib/types';
+
+interface Props {
+  city: City;
+  landmark: Landmark;
+}
+const { city, landmark } = Astro.props;
+
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+
+// Fetch localities associated with this landmark
+const { data: landmarkLocalitiesData } = await supabase
+  .from('landmark_localities')
+  .select('locality_id')
+  .eq('landmark_id', landmark.id);
+
+const localityIds = (landmarkLocalitiesData || []).map((ll: any) => ll.locality_id);
+const { data: localitiesData } = await supabase
+  .from('localities')
+  .select('*')
+  .in('id', localityIds);
+const nearbyLocalities = localitiesData || [];
+
+// Fetch all projects for the city
+const { data: allCityProjects } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('city_id', city.id)
+  .order('published_at', { ascending: false });
+
+const projects = allCityProjects || [];
+
+// Haversine distance formula (in km)
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  return R * c;
+}
+
+const RADIUS = 3; // 3 KM default
+
+// Property Matching Logic
+const matchedProjects = projects.filter((project: any) => {
+  // 1. Project locality belongs to landmark_localities
+  if (project.locality_id && localityIds.includes(project.locality_id)) {
+    return true;
+  }
+  // 2. Project coordinates are within configurable radius
+  if (project.latitude && project.longitude) {
+    const dist = getDistanceFromLatLonInKm(landmark.latitude, landmark.longitude, project.latitude, project.longitude);
+    if (dist <= RADIUS) {
+      return true;
+    }
+  }
+  return false;
+});
+
+const residentialProjects = matchedProjects.filter((p: any) => p.project_type === 'residential');
+const commercialProjects = matchedProjects.filter((p: any) => p.project_type === 'commercial');
+
+const metaTitle = `Properties Near ${landmark.name} ${city.name}`;
+const metaDescription = `Browse residential and commercial properties near ${landmark.name} in ${city.name}. Explore apartments, houses, offices, shops and investment opportunities.`;
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: 'Home', url: 'https://homenesto.com' },
+  { name: city.name, url: `https://homenesto.com/${city.slug}` },
+  { name: landmark.name, url: `https://homenesto.com/${city.slug}/${landmark.slug}` },
+]);
+---
+
+<BaseLayout
+  title={metaTitle}
+  description={metaDescription}
+  canonical={`https://homenesto.com/${city.slug}/${landmark.slug}`}
+  jsonLd={[breadcrumbSchema]}
+  breadcrumbs={[
+    { name: city.name, url: `/${city.slug}` },
+    { name: landmark.name, url: `/${city.slug}/${landmark.slug}` },
+  ]}
+>
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white pt-16 pb-20 overflow-hidden border-b border-primary-700">
+    <div class="absolute inset-0 bg-[url('/pattern-grid.svg')] opacity-10"></div>
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-accent-500/10 blur-3xl"></div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm text-primary-100 mb-4 backdrop-blur-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+          </svg>
+          {city.name} Landmark
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 leading-tight">
+          Properties Near <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-accent-200">{landmark.name}</span>
+        </h1>
+        {landmark.description && (
+          <p class="text-primary-100 text-lg md:text-xl font-light">
+            {landmark.description}
+          </p>
+        )}
+      </div>
+      
+      {landmark.image && (
+          <div class="w-full md:w-1/3 shrink-0 rounded-2xl overflow-hidden border border-white/20 object-cover mt-6 md:mt-0 shadow-2xl">
+              <img src={landmark.image} alt={landmark.name} class="w-full h-48 md:h-64 object-cover" />
+          </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Information Section -->
+  <section class="py-10 bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap gap-6 items-center">
+        {landmark.website && (
+            <a href={landmark.website} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-primary-700 font-semibold hover:text-primary-800">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                Visit Website
+            </a>
+        )}
+        {landmark.contact_number && (
+            <div class="inline-flex items-center gap-2 text-gray-700 font-medium">
+                <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                {landmark.contact_number}
+            </div>
+        )}
+        {nearbyLocalities.length > 0 && (
+            <div class="inline-flex items-center gap-2 text-gray-700 font-medium">
+                <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                Nearby Localities: {nearbyLocalities.map((l: any) => l.name).join(', ')}
+            </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Listings -->
+  <section class="py-12 bg-gray-50 min-h-[50vh]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {matchedProjects.length > 0 ? (
+        <div class="space-y-12">
+            
+          {residentialProjects.length > 0 && (
+          <div id="residential">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-gray-200">
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900">
+                  Residential Projects near {landmark.name}
+                </h2>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
+                {residentialProjects.map((project: any) => (
+                  <ProjectCard project={{ ...project, city }} />
+                ))}
+            </div>
+          </div>
+          )}
+
+          {commercialProjects.length > 0 && (
+          <div id="commercial">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-gray-200">
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900">
+                  Commercial Projects near {landmark.name}
+                </h2>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-6">
+                {commercialProjects.map((project: any) => (
+                  <ProjectCard project={{ ...project, city }} />
+                ))}
+            </div>
+          </div>
+          )}
+
+        </div>
+      ) : (
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
+          <div class="w-24 h-24 mb-6 rounded-full bg-primary-50 flex items-center justify-center text-primary-500">
+            <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">No properties currently available near this landmark.</h3>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

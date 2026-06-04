@@ -7,9 +7,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 		import { supabase } from '../../lib/supabase';
 		import { normalizeCitySlug } from '../../lib/city-slug';
 		import { buildBreadcrumbSchema, buildFAQSchema } from '../../lib/seo';
-		import type { City, Locality, Project, Collection } from '../../lib/types';
+		import type { City, Locality, Project, Collection, Landmark } from '../../lib/types';
+        import LandmarkView from './_components/LandmarkView.astro';
 
-		const { city: rawCitySlug, locality: localitySlug } = Astro.params;
+		const { city: rawCitySlug, slug: localitySlug } = Astro.params;
 		const { slug: citySlug } = normalizeCitySlug(rawCitySlug);
 
 		// Fix SSR dynamic-route collision where `/:city/:locality` may receive `residential|commercial`.
@@ -37,6 +38,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 		let faqSchema: any = null;
 		let metaTitle = '';
 		let metaDescription = '';
+        let landmark: Landmark | null = null;
+        let isLandmark = false;
 
 		if (!typeLike) {
 		const { data: cityData } = await supabase
@@ -58,11 +61,23 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 	  .single();
 
 	locality = (localityData as Locality) || null;
-	if (!locality) {
-	  return new Response(null, { status: 404 });
-	}
 
-Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+	if (!locality) {
+      const { data: landmarkData } = await supabase
+        .from('landmarks')
+        .select('*')
+        .eq('city_id', city.id)
+        .eq('slug', localitySlug)
+        .single();
+      landmark = (landmarkData as Landmark) || null;
+      if (!landmark) {
+	    return new Response(null, { status: 404 });
+      }
+      isLandmark = true;
+      Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+	} else {
+
+    Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
 
 // Fetch projects for the current locality
 	const { data: projectsData } = await supabase
@@ -167,12 +182,15 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
 	metaDescription =
 	  String((locality as any)?.meta_description || '').trim() ||
 	  `Explore commercial property (shops, offices, showrooms) and residential projects in ${locality.name}, ${city.name}. Compare new launches, under-construction, and ready-to-move listings with builders, amenities, and locality insights.`;
+    }
 		}
 ---
 
 {typeLike ? (
   <CityTypeIndex citySlug={citySlug} projectType={typeLike} />
-) : (
+) : isLandmark && landmark ? (
+  <LandmarkView city={city} landmark={landmark} />
+) : locality ? (
 	<BaseLayout
 	  title={metaTitle}
 	  description={metaDescription}
@@ -558,4 +576,4 @@ const parseJsonLoose = <T,>(value: any, fallback: T): T => {
     </section>
   )}
 </BaseLayout>
-)}
+) : null}

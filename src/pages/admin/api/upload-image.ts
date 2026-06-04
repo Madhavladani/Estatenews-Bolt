@@ -60,10 +60,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .rotate()
       .resize({ width: 1920, withoutEnlargement: true, fit: 'inside' });
 
-    if (outputExt === 'webp') outputBuffer = await pipeline.webp({ quality: 60 }).toBuffer();
-    else if (outputExt === 'avif') outputBuffer = await pipeline.avif({ quality: 60 }).toBuffer();
+    if (outputExt === 'webp') outputBuffer = await pipeline.webp({ quality: 80 }).toBuffer();
+    else if (outputExt === 'avif') outputBuffer = await pipeline.avif({ quality: 80 }).toBuffer();
     else if (outputExt === 'png') outputBuffer = await pipeline.png({ compressionLevel: 9 }).toBuffer();
-    else outputBuffer = await pipeline.jpeg({ quality: 60 }).toBuffer();
+    else outputBuffer = await pipeline.jpeg({ quality: 80 }).toBuffer();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid image data.' }), { status: 400 });
   }
