@@ -2,4 +2,4 @@
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; img-src 'self' https: data: blob: https://pub-b00078500b644b16838e64dd1c00b7c9.r2.dev; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://upjwyiotetlxctxklyzk.supabase.co; frame-ancestors 'self';
+  Content-Security-Policy: default-src 'self'; img-src 'self' https: data: blob: https://pub-b00078500b644b16838e64dd1c00b7c9.r2.dev; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://upjwyiotetlxctxklyzk.supabase.co https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; frame-ancestors 'self';
