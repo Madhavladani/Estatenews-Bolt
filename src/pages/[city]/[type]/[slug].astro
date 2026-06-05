@@ -104,6 +104,8 @@ if (projectData) {
 }
 
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+Astro.response.headers.set('x-generated-at', Date.now().toString());
+Astro.response.headers.set('x-render-mode', 'astro-ssr');
 
 const city = props.city;
 const localityProjectType =
