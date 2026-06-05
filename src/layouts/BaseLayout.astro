@@ -109,5 +109,29 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
       <slot />
     </main>
     {showFooter && <Footer />}
+
+    <!-- === REMOVE THIS BLOCK AFTER TESTING CLOUDFLARE CACHE === -->
+    <script is:inline>
+      async function logCacheStatus() {
+        try {
+          const res = await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+          const status = res.headers.get('cf-cache-status');
+          if (status) {
+            console.log('%c☁️ Cloudflare Cache Status: ' + status, 'background: #333; color: #fff; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
+          } else {
+            console.log('No cf-cache-status header found (might be local or not via CF).');
+          }
+        } catch(e) {}
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', logCacheStatus);
+      } else {
+        logCacheStatus();
+      }
+      // Re-run for Astro view transitions just in case
+      document.addEventListener('astro:page-load', logCacheStatus);
+    </script>
+    <!-- === END CLOUDFLARE CACHE TESTING BLOCK === -->
+
   </body>
 </html>
