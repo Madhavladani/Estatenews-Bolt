@@ -3,11 +3,21 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { supabase } from '../../../lib/supabase';
 import type { Collection, City, Project } from '../../../lib/types';
 
-const [collRes, citiesRes, projectsRes] = await Promise.all([
-  supabase.from('collections').select('*, city:cities(name)').order('title'),
-  supabase.from('cities').select('*').order('name'),
-  supabase.from('projects').select('id, title, city_id, project_type').order('title'),
+const url = new URL(Astro.request.url);
+const selectedCity = url.searchParams.get('city') || '';
+
+const client = Astro.locals.supabase ?? supabase;
+
+const [citiesRes, projectsRes] = await Promise.all([
+  client.from('cities').select('*').order('name'),
+  client.from('projects').select('id, title, city_id, project_type').order('title'),
 ]);
+
+let collectionsQuery = client.from('collections').select('*, city:cities(name)').order('title');
+
+if (selectedCity) collectionsQuery = collectionsQuery.eq('city_id', selectedCity);
+
+const collRes = await collectionsQuery;
 
 const collections: any[] = collRes.data || [];
 const cities: City[] = citiesRes.data || [];
@@ -15,12 +25,21 @@ const projects: Project[] = projectsRes.data || [];
 ---
 
 <AdminLayout title="Collections" activeTab="collections">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
     <h1 class="text-2xl font-bold text-gray-900">Collections</h1>
-    <a href="/admin/collections/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Add Collection
-    </a>
+
+    <div class="flex items-center gap-3">
+      <select id="city-filter" class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500 min-w-[220px]">
+        <option value="">All Cities</option>
+        {cities.map((c) => (
+          <option value={c.id} selected={c.id === selectedCity}>{c.name}</option>
+        ))}
+      </select>
+      <a href="/admin/collections/add" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Add Collection
+      </a>
+    </div>
   </div>
 
   <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -112,9 +131,18 @@ const projects: Project[] = projectsRes.data || [];
 </AdminLayout>
 
 <script define:vars={{ collections, projects: projects.map(p => ({ id: p.id, title: p.title })) }}>
+  const cityFilter = document.getElementById('city-filter');
   const modal = document.getElementById('coll-modal');
   const modalTitle = document.getElementById('c-modal-title');
   const form = document.getElementById('coll-form');
+
+  cityFilter?.addEventListener('change', () => {
+    const selected = cityFilter.value;
+    const url = new URL(window.location.href);
+    if (selected) url.searchParams.set('city', selected);
+    else url.searchParams.delete('city');
+    window.location.href = url.toString();
+  });
 
   async function loadCollectionProjects(collId) {
     const token = document.cookie.match(/sb-auth-token=([^;]+)/)?.[1];
