@@ -5,6 +5,7 @@ const LEGACY_HOSTNAME = 'estatenews-bolt.pages.dev';
 const CANONICAL_ORIGIN = 'https://www.homenesto.com';
 
 const redirectLegacyHost = defineMiddleware(async ({ url }, next) => {
+  console.log("HOSTNAME:", url.hostname); //after some time disable 
   if (url.hostname !== LEGACY_HOSTNAME) {
     return next();
   }
