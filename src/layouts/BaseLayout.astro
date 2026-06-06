@@ -14,7 +14,6 @@ interface Props {
   noindex?: boolean;
   prevUrl?: string;
   nextUrl?: string;
-  hreflangs?: Record<string, string>;
   showHeader?: boolean;
   showFooter?: boolean;
   // Article / News SEO extras
@@ -29,7 +28,6 @@ interface Props {
 const {
   title, description, canonical, ogImage, ogImageAlt, jsonLd, breadcrumbs,
   noindex = false, prevUrl, nextUrl,
-  hreflangs = { 'en-IN': '/', 'x-default': '/' },
   showHeader = true, showFooter = true,
   keywords, heroImagePreload,
   ogType = 'website',
@@ -58,9 +56,6 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
     {heroImagePreload && <link rel="preload" as="image" href={heroImagePreload} />}
     {prevUrl && <link rel="prev" href={new URL(prevUrl, siteUrl).href} />}
     {nextUrl && <link rel="next" href={new URL(nextUrl, siteUrl).href} />}
-    {Object.entries(hreflangs).map(([lang, path]) => (
-      <link rel="alternate" hreflang={lang} href={new URL(path, siteUrl).href} />
-    ))}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={pageUrl} />
