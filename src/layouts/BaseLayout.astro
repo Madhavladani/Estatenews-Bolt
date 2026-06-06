@@ -2,6 +2,7 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { normalizeSiteUrl, toSiteUrl } from "../lib/site-url";
 
 interface Props {
   title: string;
@@ -46,13 +47,8 @@ const {
   articleTags = [],
 } = Astro.props;
 const ogAlt = ogImageAlt || title;
-const siteUrl = "https://homenesto.com";
-const rawPath = Astro.url.pathname;
-// Ensure no trailing slash for canonical unless it's the root
-const normalizedPath =
-  rawPath.endsWith("/") && rawPath.length > 1 ? rawPath.slice(0, -1) : rawPath;
-const pageUrl = canonical || new URL(normalizedPath, siteUrl).href;
-const og = ogImage || `${siteUrl}/api/og?title=${encodeURIComponent(title)}`;
+const pageUrl = canonical ? normalizeSiteUrl(canonical) : toSiteUrl(Astro.url.pathname);
+const og = ogImage || `https://homenesto.com/api/og?title=${encodeURIComponent(title)}`;
 const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
 ---
 
@@ -76,8 +72,8 @@ const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : jsonLd ? [jsonLd] : [];
         <link rel="preload" as="image" href={heroImagePreload} />
       )
     }
-    {prevUrl && <link rel="prev" href={new URL(prevUrl, siteUrl).href} />}
-    {nextUrl && <link rel="next" href={new URL(nextUrl, siteUrl).href} />}
+    {prevUrl && <link rel="prev" href={toSiteUrl(prevUrl)} />}
+    {nextUrl && <link rel="next" href={toSiteUrl(nextUrl)} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={pageUrl} />

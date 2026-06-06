@@ -1,4 +1,4 @@
-const SITE_URL = 'https://homenesto.com';
+import { toSiteUrl } from './site-url';
 
 export function xmlEscape(value: string) {
   return value
@@ -10,7 +10,7 @@ export function xmlEscape(value: string) {
 }
 
 export function fullUrl(path: string) {
-  return new URL(path, SITE_URL).href;
+  return toSiteUrl(path);
 }
 
 export function formatLastmod(value?: string | null) {

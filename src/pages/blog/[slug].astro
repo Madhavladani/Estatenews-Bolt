@@ -17,6 +17,7 @@ import {
   extractFAQs,
   extractTOC,
 } from "../../lib/seo";
+import { toSiteUrl } from "../../lib/site-url";
 import type { Blog } from "../../lib/types";
 
 const { slug } = Astro.params;
@@ -63,7 +64,7 @@ let articleProps: any = {};
 if (type === 'article' && article) {
   const author = article.author;
   const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
-  const canonicalUrl = `https://homenesto.com${canonicalPath}`;
+  const canonicalUrl = toSiteUrl(canonicalPath);
   const ogImage = article.og_image || article.featured_image || undefined;
   const heroImage = article.featured_image || undefined;
 
@@ -245,7 +246,7 @@ if (type === 'category' && category) {
   <BaseLayout
     title={`${category?.meta_title || category?.name + ' - Real Estate Insights'}`}
     description={category?.meta_description || `Explore the latest ${category?.name} articles and news.`}
-    canonical={`https://homenesto.com/blog/${slug}`}
+    canonical={toSiteUrl(`/blog/${slug}`)}
   >
     <BlogNavigation />
     <main class="bg-gray-50 pb-20">

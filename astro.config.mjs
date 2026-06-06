@@ -7,6 +7,7 @@ export default defineConfig({
   output: 'server',
 
   site: 'https://homenesto.com',
+  trailingSlash: 'never',
 
   integrations: [
     tailwind(),

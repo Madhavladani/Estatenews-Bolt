@@ -1,6 +1,6 @@
 import type { City, Project, Collection, Blog } from './types';
+import { SITE_URL, toSiteUrl } from './site-url';
 
-const SITE_URL = 'https://homenesto.com';
 const SITE_NAME = 'Home Nesto';
 
 export function buildMetaTags({
@@ -14,7 +14,7 @@ export function buildMetaTags({
   path: string;
   image?: string;
 }) {
-  const url = `${SITE_URL}${path}`;
+  const url = toSiteUrl(path);
   const ogImage = image || `${SITE_URL}/og-default.jpg`;
   return {
     title,
@@ -117,7 +117,7 @@ export function buildCollectionSchema(collection: Collection) {
 }
 
 export function buildBlogArticleSchema(article: Blog) {
-  const url = `${SITE_URL}${article.canonical_path || `/blog/${article.slug}`}`;
+  const url = toSiteUrl(article.canonical_path || `/blog/${article.slug}`);
   const image = article.og_image || article.featured_image || `${SITE_URL}/og-default.jpg`;
   const keywords = article.meta_keywords
     ? article.meta_keywords
@@ -140,13 +140,13 @@ export function buildBlogArticleSchema(article: Blog) {
       ? {
         '@type': 'Person',
         name: article.author.full_name,
-        url: `${SITE_URL}/author/${article.author.slug}`,
+        url: toSiteUrl(`/author/${article.author.slug}`),
         image: article.author.photo_url,
         jobTitle: article.author.company_role,
       }
-      : article.author_name
-        ? { '@type': 'Person', name: article.author_name, url: `${SITE_URL}/blog` }
-        : undefined,
+        : article.author_name
+          ? { '@type': 'Person', name: article.author_name, url: toSiteUrl('/blog') }
+          : undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': url,
