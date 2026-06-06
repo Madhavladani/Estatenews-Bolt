@@ -60,7 +60,7 @@ const pageTitle = subCategory ? 'Edit Sub-category' : 'Add Sub-category';
           </button>
         </div>
         <div id="image-preview" class="mt-4 hidden">
-          <img src={subCategory?.image_url || ''} class="w-32 h-32 object-cover rounded-lg border border-gray-100" />
+          <img src={subCategory?.image_url || ''} alt={subCategory?.name ? `${subCategory.name} preview image` : 'Sub-category preview image'} class="w-32 h-32 object-cover rounded-lg border border-gray-100" />
         </div>
       </div>
 
