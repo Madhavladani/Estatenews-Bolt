@@ -111,6 +111,10 @@ const projects: Project[] = projectsRes.data || [];
           <textarea id="c-meta-desc" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
         </div>
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Canonical URL</label>
+          <input type="text" id="c-canonical-url" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="/collections/your-collection-slug" />
+        </div>
+        <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Projects</label>
           <div id="c-projects" class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1">
             {projects.map((p) => (
@@ -135,6 +139,21 @@ const projects: Project[] = projectsRes.data || [];
   const modal = document.getElementById('coll-modal');
   const modalTitle = document.getElementById('c-modal-title');
   const form = document.getElementById('coll-form');
+  const titleInput = document.getElementById('c-title');
+  const slugInput = document.getElementById('c-slug');
+  const canonicalInput = document.getElementById('c-canonical-url');
+
+  const collectionPathFromSlug = (slug) => slug ? `/collections/${slug}` : '';
+
+  function syncCanonicalFromSlug() {
+    const nextCanonical = collectionPathFromSlug(slugInput.value.trim());
+    const currentCanonical = canonicalInput.value.trim();
+    const currentSlugCanonical = canonicalInput.dataset.slugCanonical || '';
+    const shouldAutoFill = !currentCanonical || currentCanonical === currentSlugCanonical;
+
+    canonicalInput.dataset.slugCanonical = nextCanonical;
+    if (shouldAutoFill) canonicalInput.value = nextCanonical;
+  }
 
   cityFilter?.addEventListener('change', () => {
     const selected = cityFilter.value;
@@ -168,12 +187,15 @@ const projects: Project[] = projectsRes.data || [];
       document.getElementById('c-intro').value = c.intro_content || '';
       document.getElementById('c-meta-title').value = c.meta_title || '';
       document.getElementById('c-meta-desc').value = c.meta_description || '';
+      canonicalInput.value = c.canonical_url || collectionPathFromSlug(c.slug || '');
+      canonicalInput.dataset.slugCanonical = collectionPathFromSlug(c.slug || '');
       document.querySelectorAll('.project-check').forEach((cb) => { cb.checked = false; });
       loadCollectionProjects(c.id);
     } else {
       modalTitle.textContent = 'Add Collection';
       form.reset();
       document.getElementById('c-id').value = '';
+      syncCanonicalFromSlug();
       document.querySelectorAll('.project-check').forEach((cb) => { cb.checked = false; });
     }
     modal.classList.remove('hidden');
@@ -199,6 +221,7 @@ const projects: Project[] = projectsRes.data || [];
       intro_content: document.getElementById('c-intro').value,
       meta_title: document.getElementById('c-meta-title').value,
       meta_description: document.getElementById('c-meta-desc').value,
+      canonical_url: document.getElementById('c-canonical-url').value,
       project_ids: projectIds,
     };
 
@@ -223,8 +246,11 @@ const projects: Project[] = projectsRes.data || [];
     });
   });
 
-  document.getElementById('c-title').addEventListener('input', (e) => {
+  titleInput.addEventListener('input', (e) => {
     const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    document.getElementById('c-slug').value = slug;
+    slugInput.value = slug;
+    syncCanonicalFromSlug();
   });
+
+  slugInput.addEventListener('input', syncCanonicalFromSlug);
 </script>

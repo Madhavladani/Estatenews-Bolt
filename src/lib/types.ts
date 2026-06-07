@@ -64,6 +64,7 @@ export interface Collection {
   intro_content: string;
   meta_title: string;
   meta_description: string;
+  canonical_url: string;
   created_at: string;
   last_modify: string;
   city?: City;

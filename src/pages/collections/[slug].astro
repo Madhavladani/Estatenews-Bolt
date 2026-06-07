@@ -5,6 +5,7 @@ import ProjectCard from '../../components/ProjectCard.astro';
 import FAQSection from '../../components/FAQSection.astro';
 import { supabase } from '../../lib/supabase';
 import { buildBreadcrumbSchema, buildCollectionSchema, buildFAQSchema } from '../../lib/seo';
+import { toSiteUrl } from '../../lib/site-url';
 import type { GetStaticPaths } from 'astro';
 import type { City, Project, Collection } from '../../lib/types';
 
@@ -72,6 +73,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { collection, projects, city } = Astro.props as Props;
+const canonicalUrl = collection.canonical_url || toSiteUrl(`/collections/${collection.slug}`);
 
 const faqs = [
   {
@@ -93,7 +95,7 @@ const faqs = [
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: 'Home', url: 'https://homenesto.com' },
   { name: 'Collections', url: 'https://homenesto.com/collections' },
-  { name: collection.title, url: `https://homenesto.com/collections/${collection.slug}` },
+  { name: collection.title, url: canonicalUrl },
 ]);
 const collectionSchema = buildCollectionSchema(collection);
 const faqSchema = buildFAQSchema(faqs);
@@ -102,7 +104,7 @@ const faqSchema = buildFAQSchema(faqs);
 <BaseLayout
   title={collection.meta_title || `${collection.title} | Best Properties & Projects`}
   description={collection.meta_description || collection.intro_content}
-  canonical={`https://homenesto.com/collections/${collection.slug}`}
+  canonical={canonicalUrl}
   jsonLd={[breadcrumbSchema, collectionSchema, faqSchema]}
   breadcrumbs={[{ name: 'Collections', url: '/collections' }, { name: collection.title, url: `/collections/${collection.slug}` }]}
 >

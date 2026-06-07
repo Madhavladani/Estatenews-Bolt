@@ -108,11 +108,13 @@ export function buildCitySchema(city: City) {
 }
 
 export function buildCollectionSchema(collection: Collection) {
+  const url = collection.canonical_url || toSiteUrl(`/collections/${collection.slug}`);
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: collection.title,
     description: collection.intro_content,
+    url,
   };
 }
 
