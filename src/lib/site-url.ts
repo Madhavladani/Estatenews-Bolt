@@ -3,7 +3,15 @@ export const SITE_URL = 'https://homenesto.com';
 export function normalizeSitePath(path: string) {
   if (!path || path === '/') return '/';
 
-  return path.startsWith('/') ? path : `/${path}`;
+  let normalized = path.startsWith('/') ? path : `/${path}`;
+
+  // Ensure trailing slash if it's not a file (doesn't have an extension)
+  const hasExtension = /\.[a-z0-9]+$/i.test(normalized);
+  if (!hasExtension && !normalized.endsWith('/')) {
+    normalized += '/';
+  }
+
+  return normalized;
 }
 
 export function toSiteUrl(path: string) {
