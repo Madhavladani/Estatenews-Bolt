@@ -3,8 +3,7 @@ export const SITE_URL = 'https://homenesto.com';
 export function normalizeSitePath(path: string) {
   if (!path || path === '/') return '/';
 
-  const normalized = path.startsWith('/') ? path : `/${path}`;
-  return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized;
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 export function toSiteUrl(path: string) {
