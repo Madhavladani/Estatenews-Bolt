@@ -10,10 +10,13 @@ export async function GET() {
 
   const authors = (data || []) as Author[];
 
-  const entries = authors.map((a) => ({
-    loc: fullUrl(`/author/${a.slug}`),
-    lastmod: formatLastmod(a.updated_at || a.created_at),
-  }));
+  const entries = authors.map((a) => {
+    const loc = a.canonical_url || fullUrl(`/author/${a.slug}`);
+    return {
+      loc,
+      lastmod: formatLastmod(a.updated_at || a.created_at),
+    };
+  });
 
   return new Response(buildUrlset(entries), {
     headers: { 'Content-Type': 'application/xml; charset=utf-8' },

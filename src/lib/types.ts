@@ -175,6 +175,7 @@ export interface Author {
   expertise_areas: string[];
   linkedin_profile: string;
   social_links: { platform: string; url: string }[];
+  canonical_url?: string;
   created_at: string;
   updated_at: string;
 }

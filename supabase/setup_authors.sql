@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS authors (
     company_role TEXT,
     expertise_areas TEXT[] DEFAULT '{}',
     linkedin_profile TEXT,
+    canonical_url TEXT DEFAULT '',
     social_links JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
