@@ -147,7 +147,7 @@ export function buildBlogArticleSchema(article: Blog) {
         jobTitle: article.author.company_role,
       }
         : article.author_name
-          ? { '@type': 'Person', name: article.author_name, url: toSiteUrl('/blog') }
+          ? { '@type': 'Person', name: article.author_name, url: toSiteUrl('/blog/') }
           : undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',

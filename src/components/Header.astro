@@ -74,7 +74,7 @@ const topCities: Partial<City>[] = citiesData || [];
               {
                 topCities.map((city) => (
                   <a
-                    href={city.slug ? `/${city.slug}` : '#'}
+                    href={city.slug ? `/${city.slug}/` : '#'}
                     class="block px-4 py-2.5 text-sm text-gray-300 hover:bg-[#1e3a5f] hover:text-white rounded-xl transition-all duration-200"
                   >
                     {city.name}
@@ -84,7 +84,7 @@ const topCities: Partial<City>[] = citiesData || [];
             </div>
             <div class="border-t border-white/10 mt-2 pt-2">
               <a
-                href="/cities"
+                href="/cities/"
                 class="block px-4 py-2.5 text-sm font-bold text-[#f97316] hover:bg-[#f97316]/10 rounded-xl transition-colors"
               >
                 View All Cities →
@@ -94,23 +94,23 @@ const topCities: Partial<City>[] = citiesData || [];
         </div>
 
         <a
-          href="/collections"
+          href="/collections/"
           class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5"
           >Collections</a
         >
         <a
-          href="/blog"
+          href="/blog/"
           class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5"
           >Blog</a
         >
         <a
-          href="/compare-properties"
+          href="/compare-properties/"
           class="px-3 py-2 text-gray-300 hover:text-white transition-colors text-sm font-semibold rounded-lg hover:bg-white/5 mr-4"
           >Compare Property</a
         >
 
         <a
-          href="/list-your-project-properties"
+          href="/list-your-project-properties/"
           class="add-properties-cta text-white text-sm font-bold tracking-wide shadow-lg shadow-[#f97316]/20"
         >
           Add Properties
@@ -164,7 +164,7 @@ const topCities: Partial<City>[] = citiesData || [];
           {
             topCities.map((city) => (
               <a
-                href={city.slug ? `/${city.slug}` : '#'}
+                href={city.slug ? `/${city.slug}/` : '#'}
                 class="block px-3 py-2 text-sm text-gray-300 bg-[#1e3a5f]/40 border border-white/5 rounded-xl hover:text-white hover:bg-[#1e3a5f]"
               >
                 {city.name}
@@ -173,7 +173,7 @@ const topCities: Partial<City>[] = citiesData || [];
           }
         </div>
         <a
-          href="/cities"
+          href="/cities/"
           class="block mx-2 px-3 py-2 text-sm font-bold text-[#f97316] bg-[#f97316]/5 border border-[#f97316]/10 text-center rounded-xl"
         >
           View All Cities
@@ -183,24 +183,24 @@ const topCities: Partial<City>[] = citiesData || [];
       <div class="border-t border-white/5 my-2"></div>
 
       <a
-        href="/collections"
+        href="/collections/"
         class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
         >Collections</a
       >
       <a
-        href="/blog"
+        href="/blog/"
         class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
         >Blog</a
       >
       <a
-        href="/compare-properties"
+        href="/compare-properties/"
         class="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl text-base font-medium"
         >Compare Property</a
       >
 
       <div class="pt-4 px-2">
         <a
-          href="/list-your-project-properties"
+          href="/list-your-project-properties/"
           class="add-properties-cta-mobile block py-3 text-base font-bold text-center tracking-wide shadow-lg shadow-[#f97316]/20"
         >
           Add Properties

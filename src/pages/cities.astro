@@ -6,8 +6,8 @@ import { buildBreadcrumbSchema } from '../lib/seo';
 import type { City } from '../lib/types';
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://homenesto.com' },
-  { name: 'Cities', url: 'https://homenesto.com/cities' },
+  { name: 'Home', url: 'https://homenesto.com/' },
+  { name: 'Cities', url: 'https://homenesto.com/cities/' },
 ]);
 
 // Build-time fetch only; page is prerendered.
@@ -37,7 +37,7 @@ const itemListSchema = {
     '@type': 'ListItem',
     position: index + 1,
     name: city.name,
-    url: `https://homenesto.com/${city.slug}`,
+    url: `https://homenesto.com/${city.slug}/`,
   })),
 };
 
@@ -45,7 +45,7 @@ const webPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: 'All Cities',
-  url: 'https://homenesto.com/cities',
+  url: 'https://homenesto.com/cities/',
   description: 'Browse cities and explore city-wise real estate projects and curated collections.',
 };
 ---
@@ -53,10 +53,10 @@ const webPageSchema = {
 <BaseLayout
   title={`Real Estate Cities in India - Browse ${cities.length} Top Localities | Home Nesto`}
   description={`Discover top residential and commercial real estate markets across ${cities.length} Indian cities. Compare projects, prices, and investment trends with Home Nesto's expert data.`}
-  canonical="https://homenesto.com/cities"
+  canonical="https://homenesto.com/cities/"
   keywords="real estate cities India, property markets India, top cities for real estate, residential projects by city, commercial property cities, Home Nesto cities directory"
   jsonLd={[breadcrumbSchema, itemListSchema, webPageSchema]}
-  breadcrumbs={[{ name: 'Cities', url: '/cities' }]}
+  breadcrumbs={[{ name: 'Cities', url: '/cities/' }]}
 >
   <!-- Upgraded Hero Section -->
   <section class="relative overflow-hidden bg-primary-800 pt-32 pb-24 border-b border-white/5">
@@ -161,7 +161,7 @@ const webPageSchema = {
             
           return (
             <a
-              href={`/${city.slug}`}
+              href={`/${city.slug}/`}
               data-state={city.state}
               data-name={city.name}
               data-has-image={hasImage ? '1' : '0'}

@@ -21,10 +21,12 @@ export function toSiteUrl(path: string) {
 export function normalizeSiteUrl(url: string) {
   const parsed = new URL(url, SITE_URL);
 
-  if (parsed.origin !== SITE_URL) {
-    return parsed.href;
+  const isLocal = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+  const isProd = parsed.origin === SITE_URL;
+
+  if (isProd || isLocal) {
+    parsed.pathname = normalizeSitePath(parsed.pathname);
   }
 
-  parsed.pathname = normalizeSitePath(parsed.pathname);
   return parsed.href;
 }

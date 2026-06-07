@@ -59,11 +59,14 @@ if (article) {
   Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 }
 
+
+// Try to find article first
+
 // ── ARTICLE MODE LOGIC ──
 let articleProps: any = {};
 if (type === 'article' && article) {
   const author = article.author;
-  const canonicalPath = article.canonical_path || `/blog/${article.slug}`;
+  const canonicalPath = article.canonical_path ? (article.canonical_path.endsWith('/') ? article.canonical_path : `${article.canonical_path}/`) : `/blog/${article.slug}/`;
   const canonicalUrl = toSiteUrl(canonicalPath);
   const ogImage = article.og_image || article.featured_image || undefined;
   const heroImage = article.featured_image || undefined;
@@ -77,8 +80,8 @@ if (type === 'article' && article) {
   const keywords = article.meta_keywords ? article.meta_keywords : article.tags?.join(", ") || undefined;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
-    { name: "Home", url: "https://homenesto.com" },
-    { name: "Blog", url: "https://homenesto.com/blog" },
+    { name: "Home", url: "https://homenesto.com/" },
+    { name: "Blog", url: "https://homenesto.com/blog/" },
     { name: article.title, url: canonicalUrl },
   ]);
   const articleSchema = buildBlogArticleSchema(article);
@@ -108,8 +111,8 @@ if (type === 'category' && category) {
     noindex={article.noindex}
     jsonLd={articleProps.schemas}
     breadcrumbs={[
-      { name: "Blog", url: "/blog" },
-      { name: article.title, url: `/blog/${article.slug}` },
+      { name: "Blog", url: "/blog/" },
+      { name: article.title, url: `/blog/${article.slug}/` },
     ]}
     keywords={articleProps.keywords}
     heroImagePreload={articleProps.heroImage}
@@ -158,7 +161,7 @@ if (type === 'category' && category) {
                   {articleProps.formattedDate}
                 </time>
                 {article.author_name && (
-                  <a href={articleProps.author ? `/author/${articleProps.author.slug}` : '#'} class="flex items-center gap-1.5 hover:text-primary-700 transition-colors" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                  <a href={articleProps.author ? `/author/${articleProps.author.slug}/` : '#'} class="flex items-center gap-1.5 hover:text-primary-700 transition-colors" itemprop="author" itemscope itemtype="https://schema.org/Person">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
                     <span itemprop="name">{article.author?.full_name || article.author_name}</span>
                   </a>
@@ -185,20 +188,20 @@ if (type === 'category' && category) {
             </div>
             {articleProps.author && (
               <div class="mt-12 p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
-                <a href={`/author/${articleProps.author.slug}`} class="flex-shrink-0">
+                <a href={`/author/${articleProps.author.slug}/`} class="flex-shrink-0">
                   <img src={articleProps.author.photo_url || 'https://via.placeholder.com/80'} alt={articleProps.author.full_name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow" width="96" height="96" />
                 </a>
                 <div class="flex-1">
                   <p class="text-xs font-bold text-primary-700 uppercase tracking-widest mb-1">Written By</p>
                   <h3 class="text-xl font-bold text-gray-900 mb-2">
-                    <a href={`/author/${articleProps.author.slug}`} class="hover:text-primary-700 transition-colors">{articleProps.author.full_name}</a>
+                    <a href={`/author/${articleProps.author.slug}/`} class="hover:text-primary-700 transition-colors">{articleProps.author.full_name}</a>
                   </h3>
                   <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">{articleProps.author.short_bio}</p>
                 </div>
               </div>
             )}
               </div>
-            )}
+            </div>
 
             <!-- Property Tools CTA -->
             <div class="mt-12 p-8 bg-gradient-to-br from-gray-900 to-primary-900 rounded-2xl text-white shadow-xl relative overflow-hidden group">
@@ -208,7 +211,7 @@ if (type === 'category' && category) {
               <div class="relative z-10">
                 <h3 class="text-2xl font-bold mb-3">Planning a Property Purchase?</h3>
                 <p class="text-gray-300 mb-6 max-w-lg">Use our smart calculators to estimate your Home Loan EMI, check Affordability, or calculate Property ROI in seconds.</p>
-                <a href="/tools" class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all">
+                <a href="/tools/" class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all">
                   Explore All Tools
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
@@ -232,8 +235,8 @@ if (type === 'category' && category) {
               Use our advanced real estate calculators and tools to estimate EMI, affordability, ROI, and more. Make informed decisions with Home Nesto.
             </p>
             <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-              <a href="/tools" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40">Try Property Tools</a>
-              <a href="/loan-emi-calculator" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm">EMI Calculator</a>
+              <a href="/tools/" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40">Try Property Tools</a>
+              <a href="/loan-emi-calculator/" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm">EMI Calculator</a>
             </div>
           </div>
           <div class="hidden lg:block w-72 h-72 bg-gradient-to-br from-red-500/20 to-transparent rounded-full blur-3xl"></div>
@@ -246,36 +249,8 @@ if (type === 'category' && category) {
   <BaseLayout
     title={`${category?.meta_title || category?.name + ' - Real Estate Insights'}`}
     description={category?.meta_description || `Explore the latest ${category?.name} articles and news.`}
-    canonical={toSiteUrl(`/blog/${slug}`)}
+    canonical={toSiteUrl(`/blog/${slug}/`)}
   >
-    <BlogNavigation />
-    <main class="bg-gray-50 pb-20">
-      <div class="py-12 bg-white border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">{category?.name}</h1>
-          {category?.meta_description && <p class="text-lg text-gray-600 max-w-2xl mx-auto">{category?.meta_description}</p>}
-        </div>
-      </div>
-
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* ── Sub-category Cards ── */}
-        {category?.sub_categories && category.sub_categories.length > 0 && (
-          <div class="mb-16">
-            <h2 class="text-2xl font-bold text-gray-900 mb-8">Explore Sub-categories</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {category.sub_categories.map((sub: any) => (
-                <CategoryCard
-                  name={sub.name}
-                  count={allArticles.filter((a: any) => a.sub_category_id === sub.id || a.sub_category === sub.name).length}
-                  image={sub.image_url || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400'}
-                  href={`/blog/${category.slug}/${sub.slug}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <h2 class="text-2xl font-bold text-gray-900 mb-8">Latest in {category?.name}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {categoryArticles.map(article => (
             <BlogCard article={article} />

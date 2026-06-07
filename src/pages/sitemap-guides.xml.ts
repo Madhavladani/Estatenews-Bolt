@@ -2,13 +2,13 @@ export const prerender = true;
 import { buildUrlset, formatLastmod, fullUrl } from '../lib/sitemap';
 
 const guidePaths = [
-  '/buying-guide',
-  '/buying-guide/how-to-buy-property',
-  '/buying-guide/home-loan-guide',
-  '/buying-guide/rera-guide',
-  '/buying-guide/stamp-duty-guide',
-  '/buying-guide/property-tax-guide',
-  '/buying-guide/property-documents-checklist',
+  '/buying-guide/',
+  '/buying-guide/how-to-buy-property/',
+  '/buying-guide/home-loan-guide/',
+  '/buying-guide/rera-guide/',
+  '/buying-guide/stamp-duty-guide/',
+  '/buying-guide/property-tax-guide/',
+  '/buying-guide/property-documents-checklist/',
 ];
 
 export async function GET() {

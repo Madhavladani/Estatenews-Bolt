@@ -23,8 +23,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Only protect /admin routes (except /admin/login)
   const isAdmin = url.pathname.startsWith('/admin');
-  const isAdmin404 = url.pathname === '/admin/404';
-  const isAdminLogin = url.pathname === '/admin/login';
+  const isAdmin404 = url.pathname === '/admin/404/';
+  const isAdminLogin = url.pathname === '/admin/login/';
   const isAdminLoginApi = url.pathname === '/admin/api/login';
   const isAdminApi = url.pathname.startsWith('/admin/api/');
 
@@ -44,7 +44,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (isAdmin404) {
       return await next();
     }
-    const res = await context.rewrite('/admin/404');
+    const res = await context.rewrite('/admin/404/');
     return new Response(res.body, {
       status: 404,
       headers: res.headers,
@@ -87,7 +87,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
           headers: { 'content-type': 'application/json' },
         });
       }
-      return redirect('/admin/login?error=session');
+      return redirect('/admin/login/?error=session');
     }
   } catch {
     cookies.delete('sb-auth-token', { path: '/' });
@@ -112,7 +112,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   try {
     const response = await next();
     if (response.status === 404 && isAdmin && !isAdmin404) {
-      const res = await context.rewrite('/admin/404');
+      const res = await context.rewrite('/admin/404/');
       return new Response(res.body, {
         status: 404,
         headers: res.headers,

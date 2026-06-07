@@ -117,7 +117,7 @@ const faqSchema = buildFAQSchema(faqs);
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
       <div class="max-w-3xl">
         {city && (
-          <a href={`/${city.slug}`} class="text-accent-400 text-sm font-medium hover:text-accent-300 transition-colors mb-3 inline-block">
+          <a href={`/${city.slug}/`} class="text-accent-400 text-sm font-medium hover:text-accent-300 transition-colors mb-3 inline-block">
             {city.name} &rarr;
           </a>
         )}
@@ -165,7 +165,7 @@ const faqSchema = buildFAQSchema(faqs);
               {projects.map((p) => (
                 <tr class="hover:bg-gray-50">
                   <td class="px-4 py-3">
-                    <a href={`/${city?.slug || ''}/${p.project_type}/${p.slug}`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
+                    <a href={`/${city?.slug || ''}/${p.project_type}/${p.slug}/`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
                       {p.title}
                     </a>
                   </td>
@@ -197,7 +197,7 @@ const faqSchema = buildFAQSchema(faqs);
         <h2 class="text-2xl font-bold text-gray-900 mb-6">About {city.name}</h2>
         <div class="bg-gray-50 rounded-xl p-6">
           <p class="text-gray-600 leading-relaxed">{city.overview}</p>
-          <a href={`/${city.slug}`} class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-accent-600 hover:text-accent-700">
+          <a href={`/${city.slug}/`} class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-accent-600 hover:text-accent-700">
             Explore all projects in {city.name}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>
@@ -214,11 +214,11 @@ const faqSchema = buildFAQSchema(faqs);
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Explore More Collections</h2>
       <div class="flex flex-wrap gap-3">
-        <a href="/collections" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+        <a href="/collections/" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
           All Collections
         </a>
         {city && (
-          <a href={`/${city.slug}`} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+          <a href={`/${city.slug}/`} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
             {city.name} Properties
           </a>
         )}

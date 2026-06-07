@@ -8,7 +8,7 @@ const { data: categoriesRes } = await supabase
 
 const categories = (categoriesRes || []).map(cat => ({
   name: cat.name,
-  href: `/blog/${cat.slug}`,
+  href: `/blog/${cat.slug}/`,
   sub: (cat.sub_categories || []).map((s: any) => ({ name: s.name, slug: s.slug }))
 }));
 ---
@@ -16,7 +16,7 @@ const categories = (categoriesRes || []).map(cat => ({
 <div class="bg-white border-b border-gray-100 sticky top-16 z-[60]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <nav class="flex flex-wrap items-center space-x-1 py-3">
-      <a href="/blog" class="px-4 py-2 text-sm font-semibold text-gray-900 border-b-2 border-primary-600 whitespace-nowrap">
+      <a href="/blog/" class="px-4 py-2 text-sm font-semibold text-gray-900 border-b-2 border-primary-600 whitespace-nowrap">
         Blog Homepage
       </a>
       
@@ -38,7 +38,7 @@ const categories = (categoriesRes || []).map(cat => ({
             <div class="absolute left-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block animate-in fade-in slide-in-from-top-2 duration-200 z-[70]">
               {cat.sub.map((sub: any) => (
                 <a
-                  href={`${cat.href}/${sub.slug}`}
+                  href={`${cat.href}${sub.slug}/`}
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
                 >
                   {sub.name}

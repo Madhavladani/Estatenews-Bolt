@@ -4,8 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const breadcrumbs = [
   { name: 'Home', url: '/' },
-  { name: 'Buying Guide', url: '/buying-guide' },
-  { name: 'How to buy property', url: '/buying-guide/how-to-buy-property' },
+  { name: 'Buying Guide', url: '/buying-guide/' },
+  { name: 'How to buy property', url: '/buying-guide/how-to-buy-property/' },
 ];
 
 const steps = [
@@ -45,7 +45,7 @@ const steps = [
       "RERA registration details (for applicable projects)."
     ],
     note: "Before paying a booking amount, verify the basics:",
-    link: { text: "Property documents checklist", url: "/buying-guide/property-documents-checklist" }
+    link: { text: "Property documents checklist", url: "/buying-guide/property-documents-checklist/" }
   },
   {
     num: 5,
@@ -54,7 +54,7 @@ const steps = [
       "Compare rates, processing fees, and prepayment rules.",
       "Prefer a sanction letter before committing to large payments."
     ],
-    link: { text: "Home loan guide", url: "/buying-guide/home-loan-guide" }
+    link: { text: "Home loan guide", url: "/buying-guide/home-loan-guide/" }
   },
   {
     num: 6,
@@ -64,7 +64,7 @@ const steps = [
       "Make payments via traceable methods and collect receipts.",
       "Plan stamp duty and registration in advance."
     ],
-    link: { text: "Stamp duty guide", url: "/buying-guide/stamp-duty-guide" }
+    link: { text: "Stamp duty guide", url: "/buying-guide/stamp-duty-guide/" }
   }
 ];
 ---
@@ -104,7 +104,7 @@ const steps = [
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "How to Buy Property (Step-by-step)",
-      "url": "https://homenesto.com/buying-guide/how-to-buy-property",
+      "url": "https://homenesto.com/buying-guide/how-to-buy-property/",
       "isPartOf": {
         "@type": "WebSite",
         "name": "Home Nesto",
@@ -238,14 +238,14 @@ const steps = [
           <h2 class="text-xl font-bold" style="color: #0a1929;">Quick next reads</h2>
         </div>
         <div class="grid sm:grid-cols-2 gap-3">
-          <a href="/buying-guide/rera-guide" class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group" style="background-color: #f8fafc;">
+          <a href="/buying-guide/rera-guide/" class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group" style="background-color: #f8fafc;">
             <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: rgba(30,58,95,0.08);">
               <svg class="w-4 h-4" style="color: #1e3a5f;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </div>
             <span class="text-sm font-semibold flex-1" style="color: #1e3a5f;">RERA guide</span>
             <svg class="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" style="color: #f97316;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </a>
-          <a href="/buying-guide/property-tax-guide" class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group" style="background-color: #f8fafc;">
+          <a href="/buying-guide/property-tax-guide/" class="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-100 hover:shadow-sm transition-all duration-200 group" style="background-color: #f8fafc;">
             <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color: rgba(30,58,95,0.08);">
               <svg class="w-4 h-4" style="color: #1e3a5f;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
             </div>
@@ -260,7 +260,7 @@ const steps = [
         <p class="text-white font-semibold text-base sm:text-lg mb-1">Ready to dive deeper?</p>
         <p class="text-sm mb-4" style="color: rgba(255,255,255,0.7);">Explore our full buying guide for more in-depth resources.</p>
         <a
-          href="/buying-guide"
+          href="/buying-guide/"
           class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-200 hover:shadow-lg"
           style="background-color: #f97316; color: #fff;"
         >

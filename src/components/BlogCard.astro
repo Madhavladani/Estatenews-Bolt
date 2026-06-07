@@ -6,7 +6,7 @@ interface Props {
 }
 
 const { article } = Astro.props;
-const href = article.slug ? `/blog/${article.slug}` : '#';
+const href = article.slug ? `/blog/${article.slug}/` : '#';
 
 // Reading time estimate from excerpt word count (fallback for listing page)
 const text = (article.excerpt || article.meta_description || '').replace(/<[^>]*>/g, '').trim();

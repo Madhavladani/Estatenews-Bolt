@@ -60,7 +60,7 @@ const cleanedSlug = String(city.slug).trim().toLowerCase();
 
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: "Home", url: "https://homenesto.com" },
-  { name: "Collections", url: "https://homenesto.com/collections" },
+  { name: "Collections", url: "https://homenesto.com/collections/" },
   {
     name: city.name,
     url: `https://homenesto.com/collections/city/${cleanedSlug}`,
@@ -71,11 +71,11 @@ const breadcrumbSchema = buildBreadcrumbSchema([
 <BaseLayout
   title={`Best Real Estate Collections in ${city.name} | Home Nesto`}
   description={`Explore curated property collections in ${city.name}, ${city.state || ""}. Discover luxury apartments, affordable housing, new launches, and top investment projects.`}
-  canonical={`https://homenesto.com/collections/city/${cleanedSlug}`}
+  canonical={`https://homenesto.com/collections/city/${cleanedSlug}/`}
   jsonLd={breadcrumbSchema}
   breadcrumbs={[
-    { name: "Collections", url: "/collections" },
-    { name: city.name, url: `/collections/city/${cleanedSlug}` },
+    { name: "Collections", url: "/collections/" },
+    { name: city.name, url: `/collections/city/${cleanedSlug}/` },
   ]}
 >
   {/* Premium Hero Section */}
@@ -144,13 +144,13 @@ const breadcrumbSchema = buildBreadcrumbSchema([
                     id="city-select"
                     class="w-full appearance-none rounded-xl bg-[#0a1929] text-white pl-4 pr-10 py-3.5 text-sm shadow-inner border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition-all cursor-pointer"
                   >
-                    <option value="/collections"
+                    <option value="/collections/"
                       >All Cities (Global View)</option
                     >
                     {
                       allCities.map((c) => (
                         <option
-                          value={`/collections/city/${c.slug}`}
+                          value={`/collections/city/${c.slug}/`}
                           selected={c.slug === cleanedSlug}
                         >
                           {c.name}
@@ -250,7 +250,7 @@ const breadcrumbSchema = buildBreadcrumbSchema([
             </p>
             <div class="mt-6">
               <a
-                href="/collections"
+                href="/collections/"
                 class="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] hover:bg-[#0a1929] text-white px-5 py-3 text-sm font-semibold transition-all duration-200 shadow-sm shadow-[#1e3a5f]/20 hover:shadow-none"
               >
                 Browse Global Architecture

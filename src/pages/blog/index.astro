@@ -79,7 +79,7 @@ const mainCategories = subCategories
       image:
         s.image_url ||
         "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=400",
-      href: `/blog/${cat.slug}/${s.slug}`,
+      href: `/blog/${cat.slug}/${s.slug}/`,
     };
   })
   .filter((c): c is NonNullable<typeof c> => c !== null);
@@ -88,7 +88,7 @@ const mainCategories = subCategories
 <BaseLayout
   title="Real Estate Blog Gujarat - Latest News & Insights | Home Nesto"
   description="Stay updated with the latest real estate news, analysis, and property market trends in Gujarat. Expert insights on RERA, home decor, and financial planning."
-  canonical="https://homenesto.com/blog"
+  canonical="https://homenesto.com/blog/"
 >
   <BlogNavigation />
 
@@ -112,7 +112,7 @@ const mainCategories = subCategories
             </h3>
             {
               heroSideArticles.map((article) => (
-                <a href={`/blog/${article.slug}`} class="flex gap-4 group">
+                <a href={`/blog/${article.slug}/`} class="flex gap-4 group">
                   <div class="w-24 h-24 flex-none rounded-lg overflow-hidden">
                     <img
                       src={article.featured_image}
@@ -163,7 +163,7 @@ const mainCategories = subCategories
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BlogSectionHeader
           title="Make Your House a Home"
-          href="/blog/lifestyle"
+          href="/blog/lifestyle/"
         />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {lifestyleArticles.map((article) => <BlogCard article={article} />)}
@@ -176,7 +176,7 @@ const mainCategories = subCategories
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BlogSectionHeader
           title="Home Improvement Tips from Experts"
-          href="/blog/lifestyle"
+          href="/blog/lifestyle/"
         />
         <div
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 gap-8 h-auto lg:h-[600px]"
@@ -227,7 +227,7 @@ const mainCategories = subCategories
     <!-- ── Updates in Policie
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <BlogSectionHeader title="Updates in Policies" href="/blog/policies" />
+        <BlogSectionHeader title="Updates in Policies" href="/blog/policies/" />
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div class="lg:col-span-2">
             <div class="space-y-10">
@@ -235,7 +235,7 @@ const mainCategories = subCategories
                 policiesArticles.map((article) => (
                   <div class="flex flex-col md:flex-row gap-6 group">
                     <a
-                      href={`/blog/${article.slug}`}
+                      href={`/blog/${article.slug}/`}
                       class="md:w-1/3 aspect-video rounded-xl overflow-hidden shadow-md flex-none"
                     >
                       <img
@@ -253,7 +253,7 @@ const mainCategories = subCategories
                         Policy Update
                       </span>
                       <a
-                        href={`/blog/${article.slug}`}
+                        href={`/blog/${article.slug}/`}
                         class="group-hover:text-orange-600 transition-colors"
                       >
                         <h3 class="text-xl font-extrabold text-gray-900 leading-tight mb-3">
@@ -292,7 +292,7 @@ const mainCategories = subCategories
                     </span>
                     <div class="flex-1">
                       <a
-                        href={`/blog/${article.slug}`}
+                        href={`/blog/${article.slug}/`}
                         class="text-sm font-bold text-gray-900 group-hover:text-orange-600 line-clamp-2 leading-snug"
                       >
                         {article.title}
@@ -321,7 +321,7 @@ const mainCategories = subCategories
             Interior Tips from Experts
           </h2>
           <a
-            href="/blog"
+            href="/blog/"
             class="text-sm font-semibold text-gray-400 hover:text-orange-500 uppercase tracking-widest"
             >Explore More →</a
           >
@@ -329,7 +329,7 @@ const mainCategories = subCategories
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {
             articles.slice(10, 14).map((article) => (
-              <a href={`/blog/${article.slug}`} class="group">
+              <a href={`/blog/${article.slug}/`} class="group">
                 <div class="relative aspect-video rounded-xl overflow-hidden mb-4 shadow-2xl">
                   <img
                     src={article.featured_image}
@@ -373,7 +373,7 @@ const mainCategories = subCategories
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <BlogSectionHeader
           title="Updates in Finance & Legal"
-          href="/blog/finance-legal"
+          href="/blog/finance-legal/"
         />
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div class="lg:col-span-1">
@@ -383,7 +383,7 @@ const mainCategories = subCategories
             {
               financeArticles.slice(1).map((article) => (
                 <a
-                  href={`/blog/${article.slug}`}
+                  href={`/blog/${article.slug}/`}
                   class="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
                 >
                   <div class="w-40 h-24 flex-none overflow-hidden rounded-lg">
@@ -449,7 +449,7 @@ const mainCategories = subCategories
           {
             articles.slice(0, 6).map((article) => (
               <a
-                href={`/blog/${article.slug}`}
+                href={`/blog/${article.slug}/`}
                 class="city-article group"
                 data-city-id={article.city_id || "all"}
               >
@@ -499,12 +499,12 @@ const mainCategories = subCategories
             </p>
             <div class="flex flex-wrap justify-center lg:justify-start gap-4">
               <a
-                href="/tools"
+                href="/tools/"
                 class="px-8 py-4 bg-[#f97316] hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-orange-900/40"
                 >Try Property Tools</a
               >
               <a
-                href="/loan-emi-calculator"
+                href="/loan-emi-calculator/"
                 class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm"
                 >EMI Calculator</a
               >

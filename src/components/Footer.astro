@@ -70,7 +70,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={city.slug ? `/${city.slug}` : '#'}
+                  href={city.slug ? `/${city.slug}/` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Properties
@@ -87,7 +87,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={city.slug ? `/${city.slug}/residential` : '#'}
+                  href={city.slug ? `/${city.slug}/residential/` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Residential
@@ -99,7 +99,7 @@ const collections = [
             cities.map((city) => (
               <li>
                 <a
-                  href={city.slug ? `/${city.slug}/commercial` : '#'}
+                  href={city.slug ? `/${city.slug}/commercial/` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {city.name} Commercial
@@ -116,7 +116,7 @@ const collections = [
             collections.map((col) => (
               <li>
                 <a
-                  href={col.slug ? `/collections/${col.slug}` : '#'}
+                  href={col.slug ? `/collections/${col.slug}/` : '#'}
                   class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
                 >
                   {col.title}
@@ -131,56 +131,56 @@ const collections = [
         <ul class="space-y-2">
           <li>
             <a
-              href="/about-us"
+              href="/about-us/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >About Us</a
             >
           </li>
           <li>
             <a
-              href="/contact-us"
+              href="/contact-us/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Contact Us</a
             >
           </li>
           <li>
             <a
-              href="/buying-guide"
+              href="/buying-guide/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Buying Guide</a
             >
           </li>
           <li>
             <a
-              href="/properties-roi-calculator"
+              href="/properties-roi-calculator/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Properties ROI Calculator</a
             >
           </li>
           <li>
             <a
-              href="/loan-emi-calculator"
+              href="/loan-emi-calculator/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Loan EMI Calculator</a
             >
           </li>
           <li>
             <a
-              href="/list-your-project-properties"
+              href="/list-your-project-properties/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >List Your Project / Properties</a
             >
           </li>
           <li>
             <a
-              href="/advertise-with-us"
+              href="/advertise-with-us/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Advertise With Us</a
             >
           </li>
           <li>
             <a
-              href="/tools"
+              href="/tools/"
               class="text-sm text-gray-400 hover:text-accent-400 transition-colors"
               >Tools</a
             >
@@ -196,32 +196,32 @@ const collections = [
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a
-          href="/disclaimer"
+          href="/disclaimer/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Disclaimer</a
         >
         <a
-          href="/editorial-policy"
+          href="/editorial-policy/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Editorial Policy</a
         >
         <a
-          href="/verification-process"
+          href="/verification-process/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Verification Process</a
         >
         <a
-          href="/privacy-policy"
+          href="/privacy-policy/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Privacy Policy</a
         >
         <a
-          href="/terms-and-conditions"
+          href="/terms-and-conditions/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Terms and Conditions</a
         >
         <a
-          href="/careers"
+          href="/careers/"
           class="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >Careers</a
         >

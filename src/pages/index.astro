@@ -160,7 +160,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
             const imageUrl = city.city_image || city.hero_image || '';
             return (
               <a
-                href={city.slug ? `/${city.slug}` : '#'}
+                href={city.slug ? `/${city.slug}/` : '#'}
                 class="group relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-gray-200"
               >
                 <div class="aspect-[4/3] sm:aspect-[16/10] overflow-hidden">
@@ -192,7 +192,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 
         <div class="flex justify-center mt-10">
           <a
-            href="/cities"
+            href="/cities/"
             class="group inline-flex items-center gap-2 px-7 py-3 bg-primary-700 text-white font-semibold rounded-xl shadow-sm transition-all duration-200 text-sm hover:bg-primary-800 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
           >
             View All Cities
@@ -228,7 +228,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           ))}
         </div>
         <div class="text-center mt-8">
-          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+          <a href="/cities/" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
             View All Residential Projects
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -243,7 +243,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           ))}
         </div>
         <div class="text-center mt-8">
-          <a href="/cities" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+          <a href="/cities/" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
             View All Commercial Projects
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -277,7 +277,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Latest Real Estate Blog</h2>
             <p class="text-gray-600">Fresh updates, launches, and market insights.</p>
           </div>
-          <a href="/blog" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
+          <a href="/blog/" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800">
             View all blog posts
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>
@@ -296,7 +296,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
         )}
 
         <div class="sm:hidden text-center mt-8">
-          <a href="/blog" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
+          <a href="/blog/" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg transition-colors text-sm">
             View all blog posts
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </a>
@@ -316,7 +316,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 	        </div>
 	        <div class="flex lg:justify-end">
 	          <a
-	            href="/list-your-project-properties"
+	            href="/list-your-project-properties/"
 	            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-500 hover:bg-accent-600 text-white font-semibold rounded-xl shadow-lg transition-colors text-sm w-full sm:w-auto"
 	          >
 	            List Your Project
@@ -355,7 +355,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 	          <p class="text-gray-600 mt-2">Step-by-step guides to help you buy property with confidence.</p>
 	        </div>
 	        <a
-	          href="/buying-guide"
+	          href="/buying-guide/"
 	          class="hidden sm:inline-flex items-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
 	        >
 	          View all guides
@@ -363,34 +363,34 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
 	      </div>
 
 	      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-	        <a href="/buying-guide/how-to-buy-property" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/how-to-buy-property/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">How to buy property</h3>
 	          <p class="text-sm text-gray-600 mt-2">A practical checklist: budget, site visit, legal checks, and final registration.</p>
 	        </a>
-	        <a href="/buying-guide/home-loan-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/home-loan-guide/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Home loan guide</h3>
 	          <p class="text-sm text-gray-600 mt-2">Eligibility, documents, interest types, and how to choose the right lender.</p>
 	        </a>
-	        <a href="/buying-guide/rera-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/rera-guide/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">RERA guide</h3>
 	          <p class="text-sm text-gray-600 mt-2">What to check on the RERA portal and how to avoid common project risks.</p>
 	        </a>
-	        <a href="/buying-guide/stamp-duty-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/stamp-duty-guide/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Stamp duty guide</h3>
 	          <p class="text-sm text-gray-600 mt-2">Stamp duty, registration charges, and payment tips for smoother registration.</p>
 	        </a>
-	        <a href="/buying-guide/property-tax-guide" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/property-tax-guide/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property tax guide</h3>
 	          <p class="text-sm text-gray-600 mt-2">How property tax works, due dates, and what to keep for records.</p>
 	        </a>
-	        <a href="/buying-guide/property-documents-checklist" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+	        <a href="/buying-guide/property-documents-checklist/" class="group bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
 	          <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">Property documents checklist</h3>
 	          <p class="text-sm text-gray-600 mt-2">A ready list of documents to verify before you pay any booking amount.</p>
 	        </a>
 	      </div>
 
 	      <div class="sm:hidden mt-6">
-	        <a href="/buying-guide" class="inline-flex items-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors">
+	        <a href="/buying-guide/" class="inline-flex items-center rounded-full bg-white border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100 transition-colors">
 	          View all guides
 	        </a>
 	      </div>
@@ -406,8 +406,8 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           <div>
             <h3 class="font-semibold text-accent-400 mb-2">{city.name}</h3>
             <ul class="space-y-1">
-              <li><a href={city.slug ? `/${city.slug}/residential` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Residential Projects</a></li>
-              <li><a href={city.slug ? `/${city.slug}/commercial` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Commercial Projects</a></li>
+              <li><a href={city.slug ? `/${city.slug}/residential/` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Residential Projects</a></li>
+              <li><a href={city.slug ? `/${city.slug}/commercial/` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">Commercial Projects</a></li>
             </ul>
           </div>
         ))}
@@ -415,7 +415,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
           <h3 class="font-semibold text-accent-400 mb-2">Collections</h3>
           <ul class="space-y-1">
             {collections.slice(0, 3).map((col) => (
-              <li><a href={col.slug ? `/collections/${col.slug}` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">{col.title}</a></li>
+              <li><a href={col.slug ? `/collections/${col.slug}/` : '#'} class="text-sm text-gray-300 hover:text-white transition-colors">{col.title}</a></li>
             ))}
           </ul>
         </div>
@@ -447,7 +447,7 @@ const homepageFaqs = homeFaqs.length > 0 ? homeFaqs : listingFaqs;
   heroSearchBtn?.addEventListener('click', () => {
     const slug = citySelect.value;
     if (slug) {
-      window.location.href = `/${slug}`;
+      window.location.href = `/${slug}/`;
     } else {
       citySelect.focus();
     }

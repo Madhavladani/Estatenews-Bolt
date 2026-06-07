@@ -18,8 +18,8 @@ const typeColor = project.project_type === 'residential' ? 'bg-primary-100 text-
 const localitySlug = (project as any)?.locality?.slug as string | undefined;
 const projectUrl = (city?.slug && project?.project_type && project?.slug)
   ? localitySlug
-    ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}`
-    : `/${city.slug}/${project.project_type}/${project.slug}`
+    ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}/`
+    : `/${city.slug}/${project.project_type}/${project.slug}/`
   : '#';
 ---
 
