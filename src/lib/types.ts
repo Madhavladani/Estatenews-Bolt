@@ -145,6 +145,8 @@ export interface BlogCategory {
   id: string;
   name: string;
   slug: string;
+  h1_title?: string;
+  description?: string;
   meta_title: string;
   meta_description: string;
   created_at: string;
@@ -156,6 +158,8 @@ export interface BlogSubCategory {
   category_id: string;
   name: string;
   slug: string;
+  h1_title?: string;
+  description?: string;
   image_url: string;
   show_in_scroller?: boolean;
   meta_title: string;

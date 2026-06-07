@@ -24,49 +24,56 @@ const { slug } = Astro.params;
 
 // Try to find article first
 const { data: article } = await supabase
-  .from('news')
-  .select('*, author:authors(*)')
-  .eq('slug', slug)
-  .eq('is_published', true)
+  .from("news")
+  .select("*, author:authors(*)")
+  .eq("slug", slug)
+  .eq("is_published", true)
   .maybeSingle();
 
 const { data: allArticles } = await supabase
-  .from('news')
-  .select('*, author:authors(*)')
-  .eq('is_published', true)
-  .order('published_at', { ascending: false });
+  .from("news")
+  .select("*, author:authors(*)")
+  .eq("is_published", true)
+  .order("published_at", { ascending: false });
 
-let type: 'article' | 'category' = 'article';
+let type: "article" | "category" = "article";
 let category: any = null;
 
 if (article) {
-  type = 'article';
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+  type = "article";
+  Astro.response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=86400, stale-while-revalidate=604800",
+  );
 } else {
   // Try to find category
   const { data: categoryData } = await supabase
-    .from('blog_categories')
-    .select('*, sub_categories:blog_sub_categories(*)')
-    .eq('slug', slug)
+    .from("blog_categories")
+    .select("*, sub_categories:blog_sub_categories(*)")
+    .eq("slug", slug)
     .maybeSingle();
 
   if (!categoryData) {
     return new Response(null, { status: 404 });
   }
 
-  type = 'category';
+  type = "category";
   category = categoryData;
-  Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  Astro.response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=3600, stale-while-revalidate=86400",
+  );
 }
-
-
-// Try to find article first
 
 // ── ARTICLE MODE LOGIC ──
 let articleProps: any = {};
-if (type === 'article' && article) {
+if (type === "article" && article) {
   const author = article.author;
-  const canonicalPath = article.canonical_path ? (article.canonical_path.endsWith('/') ? article.canonical_path : `${article.canonical_path}/`) : `/blog/${article.slug}/`;
+  const canonicalPath = article.canonical_path
+    ? article.canonical_path.endsWith("/")
+      ? article.canonical_path
+      : `${article.canonical_path}/`
+    : `/blog/${article.slug}/`;
   const canonicalUrl = toSiteUrl(canonicalPath);
   const ogImage = article.og_image || article.featured_image || undefined;
   const heroImage = article.featured_image || undefined;
@@ -77,7 +84,9 @@ if (type === 'article' && article) {
   const htmlFaqs = extractFAQs(html);
   const faqs = [...(article.faqs || []), ...htmlFaqs];
 
-  const keywords = article.meta_keywords ? article.meta_keywords : article.tags?.join(", ") || undefined;
+  const keywords = article.meta_keywords
+    ? article.meta_keywords
+    : article.tags?.join(", ") || undefined;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", url: "https://homenesto.com/" },
@@ -86,183 +95,604 @@ if (type === 'article' && article) {
   ]);
   const articleSchema = buildBlogArticleSchema(article);
   const faqSchema = faqs.length > 0 ? buildFAQSchema(faqs) : null;
-  const schemas = [breadcrumbSchema, articleSchema, ...(faqSchema ? [faqSchema] : [])];
+  const schemas = [
+    breadcrumbSchema,
+    articleSchema,
+    ...(faqSchema ? [faqSchema] : []),
+  ];
 
   const publishedDate = new Date(article.published_at);
-  const formattedDate = publishedDate.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "2-digit" });
+  const formattedDate = publishedDate.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+  });
 
-  articleProps = { author, canonicalUrl, ogImage, heroImage, html, readingTime, toc, faqs, keywords, schemas, formattedDate };
+  articleProps = {
+    author,
+    canonicalUrl,
+    ogImage,
+    heroImage,
+    html,
+    readingTime,
+    toc,
+    faqs,
+    keywords,
+    schemas,
+    formattedDate,
+  };
 }
 
 // ── CATEGORY MODE LOGIC ──
 let categoryArticles: Blog[] = [];
-if (type === 'category' && category) {
-  categoryArticles = allArticles.filter((a: Blog) => a.category_id === category.id || a.category === category.name);
+if (type === "category" && category) {
+  categoryArticles = allArticles.filter(
+    (a: Blog) => a.category_id === category.id || a.category === category.name,
+  );
 }
+
+// Fetch other categories for internal links
+const { data: allCategories } = await supabase
+  .from("blog_categories")
+  .select("*")
+  .order("name");
+const otherCategories = (allCategories || [])
+  .filter((c) => c.id !== category?.id)
+  .slice(0, 6);
+
+// Fetch some cities and collections for explore section
+const { data: popularCities } = await supabase
+  .from("cities")
+  .select("*")
+  .eq("index_city", true)
+  .limit(6);
+const { data: popularCollections } = await supabase
+  .from("collections")
+  .select("*")
+  .limit(6);
 ---
 
-{type === 'article' && article ? (
-  <BaseLayout
-    title={article.meta_title || `${article.title} | Home Nesto`}
-    description={article.meta_description || article.excerpt || "Latest real estate blog and updates."}
-    canonical={articleProps.canonicalUrl}
-    ogImage={articleProps.ogImage}
-    ogImageAlt={`${article.title} — Home Nesto`}
-    noindex={article.noindex}
-    jsonLd={articleProps.schemas}
-    breadcrumbs={[
-      { name: "Blog", url: "/blog/" },
-      { name: article.title, url: `/blog/${article.slug}/` },
-    ]}
-    keywords={articleProps.keywords}
-    heroImagePreload={articleProps.heroImage}
-    ogType="article"
-    articlePublishedTime={article.published_at}
-    articleModifiedTime={article.updated_at || article.published_at}
-    articleTags={article.tags || []}
-  >
-    <BlogNavigation />
-    <ArticleShareBar
-      title={article.meta_title || article.title}
-      url={articleProps.canonicalUrl}
-    />
-    <article class="py-10 lg:py-14" itemscope itemtype="https://schema.org/BlogPosting">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class:list={[ articleProps.toc.length > 1 ? "lg:grid lg:grid-cols-[220px_1fr] xl:grid-cols-[260px_1fr] lg:gap-10 xl:gap-14 items-start" : "max-w-4xl mx-auto" ]}>
-          {articleProps.toc.length > 1 && (
-            <div class="hidden lg:block self-start">
-              <ArticleTOC toc={articleProps.toc} />
+{
+  type === "article" && article ? (
+    <BaseLayout
+      title={article.meta_title || `${article.title} | Home Nesto`}
+      description={
+        article.meta_description ||
+        article.excerpt ||
+        "Latest real estate blog and updates."
+      }
+      canonical={articleProps.canonicalUrl}
+      ogImage={articleProps.ogImage}
+      ogImageAlt={`${article.title} — Home Nesto`}
+      noindex={article.noindex}
+      jsonLd={articleProps.schemas}
+      breadcrumbs={[
+        { name: "Blog", url: "/blog/" },
+        { name: article.title, url: `/blog/${article.slug}/` },
+      ]}
+      keywords={articleProps.keywords}
+      heroImagePreload={articleProps.heroImage}
+      ogType="article"
+      articlePublishedTime={article.published_at}
+      articleModifiedTime={article.updated_at || article.published_at}
+      articleTags={article.tags || []}
+    >
+      <BlogNavigation />
+      <ArticleShareBar
+        title={article.meta_title || article.title}
+        url={articleProps.canonicalUrl}
+      />
+
+      <article
+        class="py-12 lg:py-20 bg-gray-50/50"
+        itemscope
+        itemtype="https://schema.org/BlogPosting"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div
+            class:list={[
+              articleProps.toc.length > 1
+                ? "lg:grid lg:grid-cols-[240px_1fr] xl:grid-cols-[280px_1fr] lg:gap-12 xl:gap-16 items-start"
+                : "max-w-4xl mx-auto",
+            ]}
+          >
+            {/* Sticky Sidebar TOC */}
+            {articleProps.toc.length > 1 && (
+              <aside class="hidden lg:block sticky top-24 self-start bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <ArticleTOC toc={articleProps.toc} />
+              </aside>
+            )}
+
+            <div class="min-w-0 bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-sm">
+              <header class="mb-10">
+                {article.tags?.length > 0 && (
+                  <div class="flex flex-wrap items-center gap-2 mb-5">
+                    <span class="inline-block text-xs font-bold px-3 py-1.5 rounded-lg bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 uppercase tracking-wider">
+                      {article.sub_category || article.tags?.[0] || "Blog"}
+                    </span>
+                    {article.tags
+                      ?.slice(article.sub_category ? 0 : 1, 4)
+                      .map((tag: any) => (
+                        <span class="inline-block text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-100 text-[#1e3a5f] border border-gray-200/60">
+                          {tag}
+                        </span>
+                      ))}
+                  </div>
+                )}
+
+                <h1
+                  class="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0a1929] leading-tight tracking-tight mb-5"
+                  itemprop="headline"
+                >
+                  {article.title}
+                </h1>
+
+                {(article.excerpt || article.meta_description) && (
+                  <p
+                    class="text-lg text-gray-600 border-l-4 border-[#f97316] pl-4 my-6 italic leading-relaxed"
+                    itemprop="description"
+                  >
+                    {article.excerpt || article.meta_description}
+                  </p>
+                )}
+
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4 border-t border-gray-100 text-sm text-gray-500">
+                  <time
+                    datetime={article.published_at}
+                    itemprop="datePublished"
+                    class="font-semibold text-[#1e3a5f] flex items-center gap-2"
+                  >
+                    <svg
+                      class="w-4 h-4 text-[#f97316]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {articleProps.formattedDate}
+                  </time>
+                  {article.author_name && (
+                    <a
+                      href={
+                        articleProps.author
+                          ? `/author/${articleProps.author.slug}/`
+                          : "#"
+                      }
+                      class="flex items-center gap-2 font-medium text-gray-600 hover:text-[#f97316] transition-colors"
+                      itemprop="author"
+                      itemscope
+                      itemtype="https://schema.org/Person"
+                    >
+                      <svg
+                        class="w-4 h-4 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <span
+                        itemprop="name"
+                        class="underline decoration-dotted decoration-gray-300 hover:decoration-[#f97316]"
+                      >
+                        {article.author?.full_name || article.author_name}
+                      </span>
+                    </a>
+                  )}
+                  <span class="flex items-center gap-2 text-gray-400 font-medium">
+                    <svg
+                      class="w-4 h-4 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {articleProps.readingTime} min read
+                  </span>
+                </div>
+              </header>
+
+              {/* Mobile TOC Context */}
+              {articleProps.toc.length > 1 && (
+                <div class="lg:hidden mb-8 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                  <ArticleTOC toc={articleProps.toc} />
+                </div>
+              )}
+
+              {/* Feature Image */}
+              {articleProps.heroImage && (
+                <figure class="mb-12 rounded-2xl overflow-hidden border border-gray-100 shadow-lg group">
+                  <img
+                    src={articleProps.heroImage}
+                    alt={`${article.title} — Home Nesto`}
+                    class="w-full h-auto max-h-[500px] object-cover transform hover:scale-[1.01] transition-transform duration-500"
+                    loading="eager"
+                    fetchpriority="high"
+                    width="1200"
+                    height="630"
+                    itemprop="image"
+                  />
+                  {article.excerpt && (
+                    <figcaption class="sr-only">{article.excerpt}</figcaption>
+                  )}
+                </figure>
+              )}
+
+              {/* Content Body Layout */}
+              <div
+                class="prose prose-lg max-w-none prose-headings:text-[#0a1929] prose-headings:font-extrabold prose-headings:scroll-mt-24 prose-p:text-gray-600 prose-p:leading-relaxed prose-a:text-[#f97316] prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl prose-img:shadow-md"
+                itemprop="articleBody"
+              >
+                <div set:html={articleProps.html} />
+              </div>
+
+              {/* Author Profile Card */}
+              {articleProps.author && (
+                <div class="mt-16 p-6 md:p-8 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl border-l-4 border-[#f97316] flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                  <a
+                    href={`/author/${articleProps.author.slug}/`}
+                    class="flex-shrink-0 group"
+                  >
+                    <img
+                      src={
+                        articleProps.author.photo_url ||
+                        "https://via.placeholder.com/80"
+                      }
+                      alt={articleProps.author.full_name}
+                      class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-shadow"
+                      width="96"
+                      height="96"
+                    />
+                  </a>
+                  <div class="flex-1">
+                    <p class="text-xs font-bold text-[#f97316] uppercase tracking-widest mb-1">
+                      Written By
+                    </p>
+                    <h3 class="text-xl font-bold text-[#0a1929] mb-2">
+                      <a
+                        href={`/author/${articleProps.author.slug}/`}
+                        class="hover:text-[#1e3a5f] transition-colors"
+                      >
+                        {articleProps.author.full_name}
+                      </a>
+                    </h3>
+                    <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">
+                      {articleProps.author.short_bio}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Inline Property Tools CTA */}
+              <div class="mt-12 p-8 bg-gradient-to-br from-[#0a1929] to-[#1e3a5f] rounded-2xl text-white shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                  <svg
+                    class="w-24 h-24"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c0 1.1.9-2 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h-2V7h4v10z" />
+                  </svg>
+                </div>
+                <div class="relative z-10">
+                  <h3 class="text-2xl font-bold mb-3">
+                    Planning a Property Purchase?
+                  </h3>
+                  <p class="text-gray-300 mb-6 max-w-lg">
+                    Use our smart calculators to estimate your Home Loan EMI,
+                    check Affordability, or calculate Property ROI in seconds.
+                  </p>
+                  <a
+                    href="/tools/"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-[#f97316] hover:bg-[#e06414] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#f97316]/20"
+                  >
+                    Explore All Tools
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              <ArticleFAQ faqs={articleProps.faqs} />
+              <RelatedArticles
+                articles={allArticles}
+                currentSlug={article.slug}
+                currentTags={article.tags || []}
+              />
+            </div>
+          </div>
+        </div>
+      </article>
+
+      {/* Footer Large Property Tools Section */}
+      <section class="py-20 bg-gradient-to-br from-[#0a1929] via-[#1e3a5f] to-[#0a1929] text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:32px_32px] opacity-5" />
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div class="max-w-2xl text-center lg:text-left">
+              <span class="inline-block px-3 py-1 bg-[#f97316]/20 text-[#f97316] text-xs font-bold uppercase tracking-widest rounded-md mb-4">
+                Smart Decision Toolkits
+              </span>
+              <h2 class="text-3xl md:text-4xl font-black mb-4 tracking-tight">
+                Plan Your Property Purchase Like a Pro
+              </h2>
+              <p class="text-lg text-gray-300 mb-8 leading-relaxed">
+                Use our advanced real estate calculators and tools to estimate
+                EMI, affordability, ROI, and more. Make informed decisions with
+                Home Nesto.
+              </p>
+              <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                <a
+                  href="/tools/"
+                  class="px-8 py-4 bg-[#f97316] hover:bg-[#e06414] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#f97316]/30"
+                >
+                  Try Property Tools
+                </a>
+                <a
+                  href="/loan-emi-calculator/"
+                  class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm border border-white/10"
+                >
+                  EMI Calculator
+                </a>
+              </div>
+            </div>
+            <div class="hidden lg:block w-72 h-72 bg-gradient-to-br from-[#f97316]/20 to-transparent rounded-full blur-3xl" />
+          </div>
+        </div>
+      </section>
+    </BaseLayout>
+  ) : (
+    <BaseLayout
+      title={`${category?.meta_title || category?.name + " - Real Estate Insights"}`}
+      description={
+        category?.meta_description ||
+        `Explore the latest ${category?.name} articles and news.`
+      }
+      canonical={toSiteUrl(`/blog/${slug}/`)}
+    >
+      <BlogNavigation />
+
+      <main class="bg-gray-50/50 pb-24">
+        {/* REDESIGNED: Premium Left-Aligned Category Hero Section using Palette Background */}
+        <div class="relative py-20 md:py-26 bg-[#0a1929] overflow-hidden">
+          {/* Abstract design elements using palette colors */}
+          <div class="absolute inset-0 z-0 opacity-10">
+            <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#1e3a5f_1px,transparent_1px)] [background-size:24px_24px]" />
+          </div>
+          <div class="absolute -top-24 -left-24 w-96 h-96 bg-[#f97316]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+            <span class="inline-block px-3 py-1 rounded-md bg-[#f97316]/20 text-[#f97316] text-xs font-bold uppercase tracking-widest mb-4 border border-[#f97316]/30">
+              Blog Category
+            </span>
+            <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight max-w-4xl leading-tight">
+              {category?.h1_title || category?.name}
+            </h1>
+            {category?.description && (
+              <div class="max-w-3xl">
+                <p class="text-base md:text-lg text-gray-300 leading-relaxed font-medium opacity-90">
+                  {category.description}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Structured Category Feed Grid Container */}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categoryArticles.map((article) => (
+              <BlogCard article={article} />
+            ))}
+          </div>
+
+          {categoryArticles.length === 0 && (
+            <div class="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-xl mx-auto">
+              <svg
+                class="w-16 h-16 text-gray-300 mx-auto mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
+                />
+              </svg>
+              <p class="text-gray-500 font-medium">
+                No articles found in this category.
+              </p>
             </div>
           )}
-          <div class="min-w-0">
-            <header class="mb-8">
-              {article.tags?.length > 0 && (
-                <div class="flex flex-wrap items-center gap-2 mb-4">
-                  <span class="inline-block text-xs font-bold px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-100 uppercase tracking-wider">
-                    {article.sub_category || article.tags?.[0] || 'Blog'}
-                  </span>
-                  {article.tags?.slice(article.sub_category ? 0 : 1, 4).map((tag: any) => (
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                      {tag}
-                    </span>
+
+          {/* Internal Links Section */}
+          <div class="mt-24 pt-16 border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 xl:gap-14">
+              {/* Widget Area 1: Other Categories */}
+              <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 class="text-lg font-bold text-[#0a1929] mb-6 flex items-center gap-2 pb-3 border-b border-gray-100">
+                  <svg
+                    class="w-5 h-5 text-[#f97316]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                  Other Categories
+                </h3>
+                <ul class="space-y-3.5">
+                  {otherCategories.map((c) => (
+                    <li>
+                      <a
+                        href={`/blog/${c.slug}/`}
+                        class="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors flex items-center gap-2.5 group text-sm"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-[#f97316] transition-colors" />
+                        {c.name}
+                      </a>
+                    </li>
                   ))}
+                </ul>
+              </div>
+
+              {/* Widget Area 2: Property Tools */}
+              <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 class="text-lg font-bold text-[#0a1929] mb-6 flex items-center gap-2 pb-3 border-b border-gray-100">
+                  <svg
+                    class="w-5 h-5 text-[#f97316]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Property Tools
+                </h3>
+                <ul class="space-y-3.5 text-sm">
+                  <li>
+                    <a
+                      href="/loan-emi-calculator/"
+                      class="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors flex items-center gap-2"
+                    >
+                      Home Loan EMI Calculator
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/properties-roi-calculator/"
+                      class="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors flex items-center gap-2"
+                    >
+                      Property ROI Calculator
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/home-affordability-calculator/"
+                      class="text-gray-600 hover:text-[#1e3a5f] font-medium transition-colors flex items-center gap-2"
+                    >
+                      Affordability Calculator
+                    </a>
+                  </li>
+                  <li class="pt-2">
+                    <a
+                      href="/tools/"
+                      class="text-[#f97316] font-bold hover:text-[#e06414] transition-colors inline-flex items-center gap-1"
+                    >
+                      View All Tools →
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Widget Area 3: Explore Real Estate */}
+              <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <h3 class="text-lg font-bold text-[#0a1929] mb-6 flex items-center gap-2 pb-3 border-b border-gray-100">
+                  <svg
+                    class="w-5 h-5 text-[#f97316]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </>
+                  </svg>
+                  Explore Real Estate
+                </h3>
+                <div class="space-y-5">
+                  <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">
+                      Popular Cities
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      {popularCities?.map((city) => (
+                        <a
+                          href={`/${city.slug}/`}
+                          class="text-xs bg-gray-50 text-gray-700 border border-gray-200/70 px-2.5 py-1.5 rounded-lg hover:border-[#1e3a5f] hover:text-[#1e3a5f] transition-all font-medium"
+                        >
+                          {city.name}
+                        </a>
+                      ))}
+                      <a
+                        href="/cities/"
+                        class="text-xs text-[#f97316] font-bold hover:underline py-1 px-1 ml-0.5"
+                      >
+                        More Cities →
+                      </a>
+                    </div>
+                  </div>
+                  <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">
+                      Collections
+                    </p>
+                    <div class="flex flex-wrap gap-1.5">
+                      {popularCollections?.map((col) => (
+                        <a
+                          href={`/collections/${col.slug}/`}
+                          class="text-xs bg-gray-50 border border-gray-200/70 px-2.5 py-1.5 rounded-lg hover:border-[#1e3a5f] hover:text-[#1e3a5f] transition-all font-medium text-gray-600"
+                        >
+                          {col.title}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              )}
-              <h1 class="text-3xl md:text-4xl lg:text-[2.6rem] font-extrabold text-gray-900 leading-tight tracking-tight" itemprop="headline">
-                {article.title}
-              </h1>
-              {(article.excerpt || article.meta_description) && (
-                <p class="text-lg text-gray-500 mt-4 leading-relaxed" itemprop="description">
-                  {article.excerpt || article.meta_description}
-                </p>
-              )}
-              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5 text-sm text-gray-400">
-                <time datetime={article.published_at} itemprop="datePublished" class="font-medium text-gray-500">
-                  {articleProps.formattedDate}
-                </time>
-                {article.author_name && (
-                  <a href={articleProps.author ? `/author/${articleProps.author.slug}/` : '#'} class="flex items-center gap-1.5 hover:text-primary-700 transition-colors" itemprop="author" itemscope itemtype="https://schema.org/Person">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                    <span itemprop="name">{article.author?.full_name || article.author_name}</span>
-                  </a>
-                )}
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  {articleProps.readingTime} min read
-                </span>
-              </div>
-            </header>
-            {articleProps.toc.length > 1 && (
-              <div class="lg:hidden">
-                <ArticleTOC toc={articleProps.toc} />
-              </div>
-            )}
-            {articleProps.heroImage && (
-              <figure class="mb-10 rounded-2xl overflow-hidden border border-gray-100 shadow-md">
-                <img src={articleProps.heroImage} alt={`${article.title} — Home Nesto`} class="w-full object-cover" loading="eager" fetchpriority="high" width="1200" height="630" itemprop="image" />
-                {article.excerpt && <figcaption class="sr-only">{article.excerpt}</figcaption>}
-              </figure>
-            )}
-            <div class="prose prose-lg max-w-none prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-img:shadow-sm" itemprop="articleBody">
-              <div set:html={articleProps.html} />
-            </div>
-            {articleProps.author && (
-              <div class="mt-12 p-6 md:p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
-                <a href={`/author/${articleProps.author.slug}/`} class="flex-shrink-0">
-                  <img src={articleProps.author.photo_url || 'https://via.placeholder.com/80'} alt={articleProps.author.full_name} class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-white shadow-sm hover:shadow-md transition-shadow" width="96" height="96" />
-                </a>
-                <div class="flex-1">
-                  <p class="text-xs font-bold text-primary-700 uppercase tracking-widest mb-1">Written By</p>
-                  <h3 class="text-xl font-bold text-gray-900 mb-2">
-                    <a href={`/author/${articleProps.author.slug}/`} class="hover:text-primary-700 transition-colors">{articleProps.author.full_name}</a>
-                  </h3>
-                  <p class="text-gray-600 text-sm md:text-base leading-relaxed mb-4 line-clamp-3">{articleProps.author.short_bio}</p>
-                </div>
-              </div>
-            )}
               </div>
             </div>
-
-            <!-- Property Tools CTA -->
-            <div class="mt-12 p-8 bg-gradient-to-br from-gray-900 to-primary-900 rounded-2xl text-white shadow-xl relative overflow-hidden group">
-              <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
-                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c0 1.1.9-2 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h-2V7h4v10z"/></svg>
-              </div>
-              <div class="relative z-10">
-                <h3 class="text-2xl font-bold mb-3">Planning a Property Purchase?</h3>
-                <p class="text-gray-300 mb-6 max-w-lg">Use our smart calculators to estimate your Home Loan EMI, check Affordability, or calculate Property ROI in seconds.</p>
-                <a href="/tools/" class="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all">
-                  Explore All Tools
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                </a>
-              </div>
-            </div>
-
-            <ArticleFAQ faqs={articleProps.faqs} />
-            <RelatedArticles articles={allArticles} currentSlug={article.slug} currentTags={article.tags || []} />
           </div>
         </div>
-      </div>
-    </article>
-
-    <!-- ── Property Tools CTA ── -->
-    <section class="py-16 bg-gradient-to-br from-primary-900 to-header text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col lg:flex-row items-center justify-between gap-10">
-          <div class="max-w-2xl text-center lg:text-left">
-            <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Plan Your Property Purchase Like a Pro</h2>
-            <p class="text-lg text-gray-300 mb-8">
-              Use our advanced real estate calculators and tools to estimate EMI, affordability, ROI, and more. Make informed decisions with Home Nesto.
-            </p>
-            <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-              <a href="/tools/" class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-red-900/40">Try Property Tools</a>
-              <a href="/loan-emi-calculator/" class="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all backdrop-blur-sm">EMI Calculator</a>
-            </div>
-          </div>
-          <div class="hidden lg:block w-72 h-72 bg-gradient-to-br from-red-500/20 to-transparent rounded-full blur-3xl"></div>
-        </div>
-      </div>
-    </section>
-
-  </BaseLayout>
-) : (
-  <BaseLayout
-    title={`${category?.meta_title || category?.name + ' - Real Estate Insights'}`}
-    description={category?.meta_description || `Explore the latest ${category?.name} articles and news.`}
-    canonical={toSiteUrl(`/blog/${slug}/`)}
-  >
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categoryArticles.map(article => (
-            <BlogCard article={article} />
-          ))}
-        </div>
-        
-        {categoryArticles.length === 0 && (
-          <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <p class="text-gray-500">No articles found in this category.</p>
-          </div>
-        )}
-      </div>
-    </main>
-  </BaseLayout>
-)}
+      </main>
+    </BaseLayout>
+  )
+}

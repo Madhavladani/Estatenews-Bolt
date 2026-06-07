@@ -29,6 +29,14 @@ const { data: articlesData } = await supabase
 
 const articles: Blog[] = articlesData || [];
 
+// Fetch other categories for internal links
+const { data: allCategories } = await supabase.from('blog_categories').select('*').order('name');
+const otherCategories = (allCategories || []).filter(c => c.id !== subCategory.category_id).slice(0, 6);
+
+// Fetch some cities and collections for explore section
+const { data: popularCities } = await supabase.from('cities').select('*').eq('index_city', true).limit(6);
+const { data: popularCollections } = await supabase.from('collections').select('*').limit(6);
+
 Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
 ---
 
@@ -51,8 +59,12 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
         <span class="text-sm font-bold text-red-600 uppercase tracking-widest mb-4 inline-block">
           {subCategory.category?.name || 'Blog'}
         </span>
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">{subCategory.name}</h1>
-        {subCategory.meta_description && <p class="text-lg text-gray-600 max-w-2xl mx-auto">{subCategory.meta_description}</p>}
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">{subCategory.h1_title || subCategory.name}</h1>
+        {(subCategory.description || subCategory.meta_description) && (
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            {subCategory.description || subCategory.meta_description}
+          </p>
+        )}
       </div>
     </div>
 
@@ -68,6 +80,70 @@ Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-
           <p class="text-gray-500">No articles found in this sub-category.</p>
         </div>
       )}
+
+      <!-- Internal Links Section -->
+      <div class="mt-20 pt-16 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <!-- Other Categories -->
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              Other Categories
+            </h3>
+            <ul class="space-y-3">
+              {otherCategories.map(c => (
+                <li>
+                  <a href={`/blog/${c.slug}/`} class="text-gray-600 hover:text-primary-600 transition-colors flex items-center gap-2 group">
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-primary-500"></span>
+                    {c.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <!-- Property Tools -->
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              Property Tools
+            </h3>
+            <ul class="space-y-3">
+              <li><a href="/loan-emi-calculator/" class="text-gray-600 hover:text-primary-600 transition-colors">Home Loan EMI Calculator</a></li>
+              <li><a href="/properties-roi-calculator/" class="text-gray-600 hover:text-primary-600 transition-colors">Property ROI Calculator</a></li>
+              <li><a href="/home-affordability-calculator/" class="text-gray-600 hover:text-primary-600 transition-colors">Affordability Calculator</a></li>
+              <li><a href="/tools/" class="text-primary-600 font-semibold hover:underline mt-2 inline-block">View All Tools →</a></li>
+            </ul>
+          </div>
+
+          <!-- Explore Real Estate -->
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              Explore Real Estate
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Popular Cities</p>
+                <div class="flex flex-wrap gap-2">
+                  {popularCities?.map(city => (
+                    <a href={`/${city.slug}/`} class="text-xs bg-white border border-gray-200 px-2.5 py-1 rounded-md hover:border-primary-500 hover:text-primary-600 transition-all">{city.name}</a>
+                  ))}
+                  <a href="/cities/" class="text-xs text-primary-600 font-bold hover:underline py-1">More Cities →</a>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Collections</p>
+                <div class="flex flex-wrap gap-2">
+                  {popularCollections?.map(col => (
+                    <a href={`/collections/${col.slug}/`} class="text-xs bg-white border border-gray-200 px-2.5 py-1 rounded-md hover:border-primary-500 hover:text-primary-600 transition-all font-medium text-gray-600">{col.title}</a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </BaseLayout>
