@@ -1,13 +1,17 @@
 ---
 export const prerender = true;
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import FAQSection from '../../components/FAQSection.astro';
-import { supabase } from '../../lib/supabase';
-import { buildBreadcrumbSchema, buildCollectionSchema, buildFAQSchema } from '../../lib/seo';
-import { toSiteUrl } from '../../lib/site-url';
-import type { GetStaticPaths } from 'astro';
-import type { City, Project, Collection } from '../../lib/types';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import FAQSection from "../../components/FAQSection.astro";
+import { supabase } from "../../lib/supabase";
+import {
+  buildBreadcrumbSchema,
+  buildCollectionSchema,
+  buildFAQSchema,
+} from "../../lib/seo";
+import { toSiteUrl } from "../../lib/site-url";
+import type { GetStaticPaths } from "astro";
+import type { City, Project, Collection } from "../../lib/types";
 
 type Props = {
   collection: Collection;
@@ -16,29 +20,36 @@ type Props = {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const { data: collections } = await supabase.from('collections').select('*');
+  const { data: collections } = await supabase.from("collections").select("*");
   const paths: { params: { slug: string }; props: Props }[] = [];
   for (const collection of collections || []) {
     if (!collection?.slug) continue;
     const { data: cp } = await supabase
-      .from('collection_projects')
-      .select('project_id')
-      .eq('collection_id', collection.id);
+      .from("collection_projects")
+      .select("project_id")
+      .eq("collection_id", collection.id);
     const projectIds = (cp || []).map((c: any) => c.project_id);
     let projects: Project[] = [];
     if (projectIds.length > 0) {
       const { data: pData } = await supabase
-        .from('projects')
-        .select('*')
-        .in('id', projectIds);
+        .from("projects")
+        .select("*")
+        .in("id", projectIds);
       const rawProjects = pData || [];
-      const cityIds = [...new Set(rawProjects.map((p: any) => p.city_id).filter(Boolean))];
-      let localities: { id: string; slug: string; name: string; city_id: string }[] = [];
+      const cityIds = [
+        ...new Set(rawProjects.map((p: any) => p.city_id).filter(Boolean)),
+      ];
+      let localities: {
+        id: string;
+        slug: string;
+        name: string;
+        city_id: string;
+      }[] = [];
       if (cityIds.length > 0) {
         const { data: locData } = await supabase
-          .from('localities')
-          .select('id,slug,name,city_id')
-          .in('city_id', cityIds);
+          .from("localities")
+          .select("id,slug,name,city_id")
+          .in("city_id", cityIds);
         localities = (locData || []) as any;
       }
       const localityById = new Map(localities.map((l) => [l.id, l]));
@@ -46,21 +57,27 @@ export const getStaticPaths: GetStaticPaths = async () => {
         localities.map((l) => [`${l.city_id}::${l.name}`.toLowerCase(), l]),
       );
       projects = rawProjects.map((p: any) => {
-        const byId = p.locality_id ? localityById.get(p.locality_id) : undefined;
+        const byId = p.locality_id
+          ? localityById.get(p.locality_id)
+          : undefined;
         const byName =
           !byId && p.location && p.city_id
-            ? localityByCityAndName.get(`${p.city_id}::${p.location}`.toLowerCase())
+            ? localityByCityAndName.get(
+                `${p.city_id}::${p.location}`.toLowerCase(),
+              )
             : undefined;
         const loc = byId || byName;
-        return loc ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any) : (p as any);
+        return loc
+          ? ({ ...p, locality: { slug: loc.slug, name: loc.name } } as any)
+          : (p as any);
       });
     }
     let city: City | null = null;
     if (collection.city_id) {
       const { data: cityData } = await supabase
-        .from('cities')
-        .select('*')
-        .eq('id', collection.city_id)
+        .from("cities")
+        .select("*")
+        .eq("id", collection.city_id)
         .maybeSingle();
       city = cityData;
     }
@@ -73,7 +90,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 const { collection, projects, city } = Astro.props as Props;
-const canonicalUrl = collection.canonical_url || toSiteUrl(`/collections/${collection.slug}`);
+const canonicalUrl =
+  collection.canonical_url || toSiteUrl(`/collections/${collection.slug}`);
 
 const faqs = [
   {
@@ -85,7 +103,9 @@ const faqs = [
     answer: `This collection features ${projects.length} carefully curated projects selected based on quality, location, amenities, and value for money.`,
   },
   {
-    question: city ? `Are all projects in this collection located in ${city.name}?` : `Which cities are covered in this collection?`,
+    question: city
+      ? `Are all projects in this collection located in ${city.name}?`
+      : `Which cities are covered in this collection?`,
     answer: city
       ? `Yes, all projects in this collection are located in ${city.name}, ${city.state}. Each project has been selected for its prime location and quality construction.`
       : `This collection covers projects across multiple cities in Gujarat. Each project is selected for its quality and investment potential.`,
@@ -93,8 +113,8 @@ const faqs = [
 ];
 
 const breadcrumbSchema = buildBreadcrumbSchema([
-  { name: 'Home', url: 'https://homenesto.com' },
-  { name: 'Collections', url: 'https://homenesto.com/collections' },
+  { name: "Home", url: "https://homenesto.com" },
+  { name: "Collections", url: "https://homenesto.com/collections" },
   { name: collection.title, url: canonicalUrl },
 ]);
 const collectionSchema = buildCollectionSchema(collection);
@@ -102,28 +122,58 @@ const faqSchema = buildFAQSchema(faqs);
 ---
 
 <BaseLayout
-  title={collection.meta_title || `${collection.title} | Best Properties & Projects`}
+  title={collection.meta_title ||
+    `${collection.title} | Best Properties & Projects`}
   description={collection.meta_description || collection.intro_content}
   canonical={canonicalUrl}
   jsonLd={[breadcrumbSchema, collectionSchema, faqSchema]}
-  breadcrumbs={[{ name: 'Collections', url: '/collections' }, { name: collection.title, url: `/collections/${collection.slug}` }]}
+  breadcrumbs={[
+    { name: "Collections", url: "/collections" },
+    { name: collection.title, url: `/collections/${collection.slug}` },
+  ]}
 >
   <!-- Collection Hero -->
   <section class="relative bg-primary-800 text-white overflow-hidden">
     <div class="absolute inset-0 opacity-10">
-      <img src={city?.hero_image || 'https://images.pexels.com/photos/1474115/pexels-photo-1474115.jpeg?auto=compress&cs=tinysrgb&w=1920'} alt={city ? `Real estate projects in ${city.name}, ${city.state}` : 'Real estate projects in Gujarat'} class="w-full h-full object-cover" loading="eager" width="1920" height="1080" />
+      <img
+        src={city?.hero_image ||
+          "https://images.pexels.com/photos/1474115/pexels-photo-1474115.jpeg?auto=compress&cs=tinysrgb&w=1920"}
+        alt={city
+          ? `Real estate projects in ${city.name}, ${city.state}`
+          : "Real estate projects in Gujarat"}
+        class="w-full h-full object-cover"
+        loading="eager"
+        width="1920"
+        height="1080"
+      />
     </div>
-    <div class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-primary-900/95 to-primary-800/70"
+    >
+    </div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
       <div class="max-w-3xl">
-        {city && (
-          <a href={`/${city.slug}/`} class="text-accent-400 text-sm font-medium hover:text-accent-300 transition-colors mb-3 inline-block">
-            {city.name} &rarr;
-          </a>
-        )}
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4">{collection.title}</h1>
-        <p class="text-lg text-gray-300 leading-relaxed">{collection.intro_content}</p>
-        <p class="text-sm text-gray-400 mt-4">{projects.length} projects in this collection</p>
+        {
+          city && (
+            <a
+              href={`/${city.slug}/`}
+              class="text-accent-400 text-sm font-medium hover:text-accent-300 transition-colors mb-3 inline-block"
+            >
+              {city.name} &rarr;
+            </a>
+          )
+        }
+        <h1
+          class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4"
+        >
+          {collection.title}
+        </h1>
+        <p class="text-lg text-gray-300 leading-relaxed">
+          {collection.intro_content}
+        </p>
+        <p class="text-sm text-gray-400 mt-4">
+          {projects.length} projects in this collection
+        </p>
       </div>
     </div>
   </section>
@@ -131,80 +181,134 @@ const faqSchema = buildFAQSchema(faqs);
   <!-- Project Cards -->
   <section class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {projects.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <ProjectCard project={{ ...project, city: city || undefined }} />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center py-16">
-          <p class="text-gray-500 text-lg">No projects in this collection yet.</p>
-        </div>
-      )}
+      {
+        projects.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project) => (
+              <ProjectCard project={{ ...project, city: city || undefined }} />
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-16">
+            <p class="text-gray-500 text-lg">
+              No projects in this collection yet.
+            </p>
+          </div>
+        )
+      }
     </div>
   </section>
 
   <!-- Comparison Section -->
-  {projects.length > 1 && (
-    <section class="py-12 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Quick Comparison</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Project</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Builder</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Locality</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {projects.map((p) => (
-                <tr class="hover:bg-gray-50">
-                  <td class="px-4 py-3">
-                    <a href={`/${city?.slug || ''}/${p.project_type}/${p.slug}/`} class="text-sm font-medium text-primary-700 hover:text-primary-800">
-                      {p.title}
-                    </a>
-                  </td>
-                  <td class="px-4 py-3 text-sm text-gray-600">{p.builder_name}</td>
-                  <td class="px-4 py-3 text-sm text-gray-600">{p.location}</td>
-                  <td class="px-4 py-3 text-sm font-medium text-gray-900">{p.price_range}</td>
-                  <td class="px-4 py-3">
-                    <span class={`text-xs font-medium px-2 py-1 rounded-full ${
-                      p.project_status === 'ready-to-move' ? 'bg-blue-100 text-blue-800' :
-                      p.project_status === 'new-launch' ? 'bg-green-100 text-green-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {p.project_status === 'ready-to-move' ? 'Ready to Move' : p.project_status === 'new-launch' ? 'New Launch' : 'Under Construction'}
-                    </span>
-                  </td>
+  {
+    projects.length > 1 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            Quick Comparison
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="w-full bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    Project
+                  </th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    Builder
+                  </th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    Locality
+                  </th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    Price
+                  </th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    Status
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {projects.map((p) => (
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      <a
+                        href={`/${city?.slug || ""}/${p.project_type}/${p.slug}/`}
+                        class="text-sm font-medium text-primary-700 hover:text-primary-800"
+                      >
+                        {p.title}
+                      </a>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                      {p.builder_name}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                      {p.location}
+                    </td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                      {p.price_range}
+                    </td>
+                    <td class="px-4 py-3">
+                      <span
+                        class={`text-xs font-medium px-2 py-1 rounded-full ${
+                          p.project_status === "ready-to-move"
+                            ? "bg-blue-100 text-blue-800"
+                            : p.project_status === "new-launch"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {p.project_status === "ready-to-move"
+                          ? "Ready to Move"
+                          : p.project_status === "new-launch"
+                            ? "New Launch"
+                            : "Under Construction"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- Locality Highlights -->
-  {city && (
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">About {city.name}</h2>
-        <div class="bg-gray-50 rounded-xl p-6">
-          <p class="text-gray-600 leading-relaxed">{city.overview}</p>
-          <a href={`/${city.slug}/`} class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-accent-600 hover:text-accent-700">
-            Explore all projects in {city.name}
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </a>
+  {
+    city && (
+      <section class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            About {city.name}
+          </h2>
+          <div class="bg-gray-50 rounded-xl p-6">
+            <p class="text-gray-600 leading-relaxed">{city.overview}</p>
+            <a
+              href={`/${city.slug}/`}
+              class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-accent-600 hover:text-accent-700"
+            >
+              Explore all projects in {city.name}
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+      </section>
+    )
+  }
 
   <!-- FAQs -->
   <FAQSection faqs={faqs} />
@@ -212,16 +316,26 @@ const faqSchema = buildFAQSchema(faqs);
   <!-- Suggested Collections -->
   <section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">Explore More Collections</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-4">
+        Explore More Collections
+      </h2>
       <div class="flex flex-wrap gap-3">
-        <a href="/collections/" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
+        <a
+          href="/collections/"
+          class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors"
+        >
           All Collections
         </a>
-        {city && (
-          <a href={`/${city.slug}/`} class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors">
-            {city.name} Properties
-          </a>
-        )}
+        {
+          city && (
+            <a
+              href={`/${city.slug}/`}
+              class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-primary-300 hover:text-primary-700 transition-colors"
+            >
+              {city.name} Properties
+            </a>
+          )
+        }
       </div>
     </div>
   </section>

@@ -3,7 +3,7 @@ export const prerender = true;
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import CollectionCard from "../../../components/CollectionCard.astro";
 import { supabase } from "../../../lib/supabase";
-import { buildBreadcrumbSchema } from "../../../lib/seo";
+import { buildBreadcrumbSchema, buildFAQSchema } from "../../../lib/seo";
 import type { GetStaticPaths } from "astro";
 import type { City, Collection } from "../../../lib/types";
 
@@ -21,8 +21,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const cities = citiesData || [];
 
   const allCities = cities
-    .filter((c) => c.slug && c.name)
-    .map((c) => ({
+    .filter((c: any) => c.slug && c.name)
+    .map((c: any) => ({
       slug: String(c.slug).trim().toLowerCase(),
       name: c.name as string,
     }));
@@ -58,219 +58,380 @@ const { city, collections, allCities } = Astro.props as Props;
 
 const cleanedSlug = String(city.slug).trim().toLowerCase();
 
+// SEO Configurations & Schema Generation
+const pageTitle = `Best Real Estate Collections in ${city.name} | Home Nesto`;
+const pageDescription = `Explore curated property collections in ${city.name}, ${city.state || ""}. Discover luxury apartments, affordable housing, new launches, and top investment projects.`;
+const canonicalUrl = `https://homenesto.com/collections/city/${cleanedSlug}/`;
+
 const breadcrumbSchema = buildBreadcrumbSchema([
   { name: "Home", url: "https://homenesto.com" },
   { name: "Collections", url: "https://homenesto.com/collections/" },
   {
     name: city.name,
-    url: `https://homenesto.com/collections/city/${cleanedSlug}`,
+    url: canonicalUrl,
   },
 ]);
+
+const faqs = [
+  {
+    question: `What are real estate collections in ${city.name}?`,
+    answer:
+      `Collections are curated lists of top residential and commercial projects in ${city.name} grouped by specific themes such as luxury living, affordable homes, new launches, and premium investment options to simplify your property search.`,
+  },
+  {
+    question: `How do I choose the best property in ${city.name}?`,
+    answer:
+      `Browse our curated thematic sets for ${city.name} to find projects that match your budget and lifestyle. You can open any collection card to inspect real-time pricing distributions, completion timelines, and developer track records side-by-side.`,
+  },
+  {
+    question: "Are these collections updated regularly?",
+    answer:
+      "Yes, our local real estate teams update project datasets continuously as new inventory launches, structural milestones are cleared, or pricing matrix updates occur.",
+  },
+  {
+    question: `Can I find ready-to-move projects in ${city.name}?`,
+    answer:
+      `Absolutely. Many of our collections for ${city.name} specifically highlight projects that have cleared structural milestones and are ready for primary or secondary occupation.`,
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
 ---
 
 <BaseLayout
-  title={`Best Real Estate Collections in ${city.name} | Home Nesto`}
-  description={`Explore curated property collections in ${city.name}, ${city.state || ""}. Discover luxury apartments, affordable housing, new launches, and top investment projects.`}
-  canonical={`https://homenesto.com/collections/city/${cleanedSlug}/`}
-  jsonLd={breadcrumbSchema}
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonicalUrl}
+  jsonLd={[breadcrumbSchema, faqSchema]}
   breadcrumbs={[
     { name: "Collections", url: "/collections/" },
     { name: city.name, url: `/collections/city/${cleanedSlug}/` },
   ]}
 >
-  {/* Premium Hero Section */}
-  <section
-    class="relative overflow-hidden bg-[#0a1929] text-white py-16 md:py-24 border-b border-white/5"
+  {/* Hero Section */}
+  <header
+    class="relative overflow-hidden bg-[#0a1929] text-white border-b border-slate-800"
   >
-    {/* Abstract Background Accents */}
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    {/* Sophisticated Abstract Background Vector Geometry */}
+    <div class="absolute inset-0 pointer-events-none opacity-30">
       <div
-        class="absolute -top-40 -right-40 w-96 h-96 bg-[#1e3a5f]/40 blur-[120px] rounded-full"
+        class="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#f97316]/20 to-transparent rounded-full blur-[120px] -mr-32 -mt-32"
       >
       </div>
       <div
-        class="absolute top-1/2 -left-40 w-80 h-80 bg-[#f97316]/10 blur-[100px] rounded-full"
+        class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#1e3a5f]/40 to-transparent rounded-full blur-[100px] -ml-24 -mb-24"
       >
       </div>
     </div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        {/* Main SEO Header content */}
-        <div class="lg:col-span-7 space-y-6">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div class="max-w-3xl">
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20"
+        >
+          {city.name} Local Guides
+        </span>
+        <h1
+          class="mt-4 text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight"
+        >
+          Property Collections <br class="hidden sm:inline" />
           <span
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#f97316]/10 text-[#f97316] border border-[#f97316]/20 uppercase tracking-wider"
+            class="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-[#f97316]"
+            >in {city.name}</span
           >
-            Curated Local Guides
-          </span>
-          <h1
-            class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight"
+        </h1>
+        <p
+          class="mt-6 text-lg md:text-xl text-slate-300 font-normal leading-relaxed"
+        >
+          Skip the endless scrolling. Browse expertly short-listed projects
+          across <strong class="text-white font-semibold">luxury</strong>, <strong
+            class="text-white font-semibold">affordable</strong
+          >, <strong class="text-white font-semibold">new launch</strong>, and
+          high-yield <strong class="text-white font-semibold"
+            >investment</strong
+          > themes throughout {city.name}.
+        </p>
+
+        {/* Dynamic Dropdown Control Filter */}
+        <div
+          class="mt-10 max-w-xl bg-gradient-to-r from-[#1e3a5f] to-[#1e3a5f]/80 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-slate-700/60 transition-all hover:border-slate-600/80"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1">
+              <label
+                for="city-select"
+                class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              >
+                Target Destination Region
+              </label>
+              <div class="relative mt-2">
+                <select
+                  id="city-select"
+                  class="w-full appearance-none rounded-xl bg-[#0a1929] text-white pl-4 pr-10 py-3.5 text-sm font-medium border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition-shadow cursor-pointer"
+                >
+                  <option value="/collections/">All Cities </option>
+                  {
+                    allCities.map((c) => (
+                      <option
+                        value={`/collections/city/${c.slug}/`}
+                        selected={c.slug === cleanedSlug}
+                      >
+                        {c.name}
+                      </option>
+                    ))
+                  }
+                </select>
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2.5"
+                      d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="bg-slate-50 min-h-screen">
+    {/* Grid Main Presentation Section */}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        {/* Left Sidebar Sticky Filter Framework */}
+        <aside class="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
+          <div
+            class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm"
           >
-            Property Collections <br class="hidden sm:inline" />
-            <span
-              class="bg-gradient-to-r from-white via-gray-200 to-[#f97316] bg-clip-text text-transparent"
+            <h2 class="text-xl font-bold text-[#0a1929] tracking-tight">
+              Browse Framework Categories
+            </h2>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Every profile is rigorously analyzed to align precisely with
+              standard domestic and enterprise requirements.
+            </p>
+
+            <nav class="mt-6">
+              <ul class="space-y-2.5">
+                {
+                  [
+                    {
+                      name: "Luxury & Premium Living",
+                      desc: "High-end structural specifications",
+                    },
+                    {
+                      name: "Affordable & Value Homes",
+                      desc: "Optimized budget layouts",
+                    },
+                    {
+                      name: "New Launches & Upcoming",
+                      desc: "Early investment entry options",
+                    },
+                    {
+                      name: "Ready-to-Move Picks",
+                      desc: "Immediate execution timelines",
+                    },
+                    {
+                      name: "Investment-Focused Assets",
+                      desc: "High anticipated compounding returns",
+                    },
+                  ].map((item) => (
+                    <li class="group flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100">
+                      <div class="mt-1 flex-shrink-0 w-2 h-2 rounded-full bg-[#f97316] shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
+                      <div>
+                        <span class="block text-sm font-semibold text-[#1e3a5f] group-hover:text-[#f97316] transition-colors">
+                          {item.name}
+                        </span>
+                        <span class="block text-xs text-slate-500 mt-0.5">
+                          {item.desc}
+                        </span>
+                      </div>
+                    </li>
+                  ))
+                }
+              </ul>
+            </nav>
+
+            <div
+              class="mt-8 pt-6 border-t border-slate-100 bg-gradient-to-br from-slate-50 to-white -mx-6 -mb-6 p-6 rounded-b-2xl"
             >
-              in {city.name}
-            </span>
-          </h1>
-          <p
-            class="text-base md:text-lg text-gray-300 max-w-2xl leading-relaxed"
+              <div class="flex items-center gap-3">
+                <div class="bg-[#1e3a5f]/10 p-2.5 rounded-xl text-[#1e3a5f]">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4
+                    class="text-xs font-bold uppercase tracking-wider text-[#0a1929]"
+                  >
+                    Verified Catalogues
+                  </h4>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    RERA compliance checks cleared.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right Side Dynamic Cards Display Grid */}
+        <div class="lg:col-span-8">
+          <div
+            class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6"
           >
-            Skip the endless scrolling. Browse expertly short-listed projects
-            across <strong class="text-white font-semibold">luxury</strong>, <strong
-              class="text-white font-semibold">affordable</strong
-            >, <strong class="text-white font-semibold">new launch</strong>, and
-            high-yield <strong class="text-white font-semibold"
-              >investment</strong
-            > themes throughout {city.name}.
+            <div>
+              <h2 class="text-2xl font-bold text-[#0a1929] tracking-tight">
+                Catalogues in {city.name}
+              </h2>
+              <p class="text-sm text-slate-500 mt-1">
+                Discovering <span
+                  id="collections-count"
+                  class="font-bold text-[#1e3a5f]">{collections.length}</span
+                > structured directories
+              </p>
+            </div>
+          </div>
+
+          {
+            collections.length === 0 ? (
+              <div class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+                <div class="mx-auto w-12 h-12 text-slate-400 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                    />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">
+                  No collections available for {city.name}
+                </h3>
+                <p class="text-sm text-slate-500 mt-1">
+                  Check back later or try altering your structural filter
+                  indices.
+                </p>
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {collections.map((col) => (
+                  <div class="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md rounded-2xl bg-white border border-slate-200/60 overflow-hidden">
+                    <CollectionCard collection={col} />
+                  </div>
+                ))}
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* Structural FAQ Component Presentation */}
+    <section class="bg-white border-t border-slate-200 py-16 md:py-24">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <span
+            class="text-xs font-bold uppercase tracking-widest text-[#f97316] bg-[#f97316]/10 px-3 py-1 rounded-full"
+            >Support Matrix</span
+          >
+          <h2
+            class="text-3xl font-extrabold text-[#0a1929] tracking-tight mt-3"
+          >
+            Frequently Answered Queries
+          </h2>
+          <p class="text-sm text-slate-600 mt-2">
+            Get structural operational information regarding architecture
+            directories, verification cycles, and location analysis strategies.
           </p>
         </div>
 
-        {/* Interactive Filter/Switch Component */}
-        <div class="lg:col-span-5 w-full">
-          <div
-            class="bg-[#1e3a5f]/40 backdrop-blur-md rounded-2xl p-5 md:p-6 border border-white/10 shadow-2xl shadow-black/40"
-          >
-            <div class="space-y-4">
-              <div>
-                <label
-                  for="city-select"
-                  class="block text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >
-                  Explore Another Region
-                </label>
-                <div class="relative mt-2">
-                  <select
-                    id="city-select"
-                    class="w-full appearance-none rounded-xl bg-[#0a1929] text-white pl-4 pr-10 py-3.5 text-sm shadow-inner border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent transition-all cursor-pointer"
-                  >
-                    <option value="/collections/"
-                      >All Cities (Global View)</option
-                    >
-                    {
-                      allCities.map((c) => (
-                        <option
-                          value={`/collections/city/${c.slug}/`}
-                          selected={c.slug === cleanedSlug}
-                        >
-                          {c.name}
-                        </option>
-                      ))
-                    }
-                  </select>
-                  <div
-                    class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-gray-400"
-                  >
+        <div class="space-y-4">
+          {
+            faqs.map((faq) => (
+              <details class="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all open:ring-1 open:ring-[#1e3a5f]/40 open:shadow-md cursor-pointer">
+                <summary class="list-none font-semibold text-[#0a1929] hover:text-[#1e3a5f] flex items-center justify-between gap-4 transition-colors">
+                  <span class="text-base font-bold tracking-tight pr-2">
+                    {faq.question}
+                  </span>
+                  <span class="text-slate-400 group-open:rotate-180 group-open:text-[#f97316] transition-transform duration-200 transform">
                     <svg
-                      class="w-4 h-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
                       fill="none"
-                      stroke="currentColor"
                       viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"></path>
+                        stroke-width="2.5"
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
-                  </div>
+                  </span>
+                </summary>
+                <div class="mt-3 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                  <p>{faq.answer}</p>
                 </div>
-              </div>
-
-              <div
-                class="flex items-center justify-between pt-2 border-t border-white/5 text-xs"
-              >
-                <span class="text-gray-400">Active Listings</span>
-                <span
-                  class="font-mono bg-[#f97316]/20 text-[#f97316] px-2.5 py-0.5 rounded-md font-bold"
-                >
-                  {collections.length}
-                  {collections.length === 1 ? "Collection" : "Collections"}
-                </span>
-              </div>
-            </div>
-          </div>
+              </details>
+            ))
+          }
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  {/* Content Feed Section */}
-  <section class="py-14 md:py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Dynamic Grid Layout */}
-      {
-        collections.length > 0 ? (
-          <div class="space-y-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
-              <div>
-                <h2 class="text-2xl font-bold text-[#0a1929]">
-                  Featured Handpicks
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">
-                  Verified handpicked developments categorized by tier lifestyle
-                  preferences.
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {collections.map((col) => (
-                <div class="transform hover:-translate-y-1 transition-all duration-300 ease-out">
-                  <CollectionCard collection={col} />
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* Enhanced Empty State Design */
-          <div class="max-w-md mx-auto text-center py-16 px-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <div class="w-16 h-16 bg-[#1e3a5f]/5 rounded-full flex items-center justify-center mx-auto text-[#1e3a5f]">
-              <svg
-                class="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-            </div>
-            <h2 class="mt-5 text-xl font-bold text-[#0a1929]">
-              No Collections Live Yet
-            </h2>
-            <p class="mt-2 text-sm text-gray-600">
-              Our market analysts are building exclusive property portfolios for{" "}
-              <span class="font-semibold text-gray-900">{city.name}</span>.
-              Check back soon.
-            </p>
-            <div class="mt-6">
-              <a
-                href="/collections/"
-                class="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] hover:bg-[#0a1929] text-white px-5 py-3 text-sm font-semibold transition-all duration-200 shadow-sm shadow-[#1e3a5f]/20 hover:shadow-none"
-              >
-                Browse Global Architecture
-              </a>
-            </div>
-          </div>
-        )
+  {/* Clean, scope-isolated JavaScript interaction block */}
+  <script is:inline>
+    (() => {
+      const citySelector = document.getElementById("city-select");
+      if (citySelector) {
+        citySelector.addEventListener("change", (event) => {
+          const destinationUrl = event.target.value;
+          if (destinationUrl) {
+            window.location.href = String(destinationUrl);
+          }
+        });
       }
-    </div>
-  </section>
+    })();
+  </script>
 </BaseLayout>
 
-<script is:inline>
-  document.addEventListener("DOMContentLoaded", () => {
-    const select = document.getElementById("city-select");
-    if (select) {
-      select.addEventListener("change", (e) => {
-        const val = e.target.value;
-        if (val) window.location.href = String(val);
-      });
-    }
-  });
-</script>
+<style>
+  /* Standard modern UI element normalization styles */
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

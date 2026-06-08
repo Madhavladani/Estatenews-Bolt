@@ -15,16 +15,16 @@ const { data: collectionsData } = await supabase
 const collections: (Collection & { city?: any })[] = collectionsData || [];
 
 // Map and extract unique cities safely
-const cities = Array.from(
-  new Map(
-    collections
-      .filter((c) => c.city?.slug && c.city?.name)
-      .map((c) => {
-        const slug = String(c.city.slug).trim().toLowerCase();
-        return [slug, { slug, name: c.city.name as string }];
-      }),
-  ).values(),
-).sort((a, b) => a.name.localeCompare(b.name));
+const { data: citiesData } = await supabase
+  .from("cities")
+  .select("slug,name")
+  .order("name", { ascending: true });
+
+const cities =
+  citiesData?.map((city) => ({
+    slug: String(city.slug).trim().toLowerCase(),
+    name: city.name,
+  })) || [];
 
 // SEO Configurations & Schema Generation
 const pageTitle = "Curated Real Estate Collections | Home Nesto";
