@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS builders (
   phone text DEFAULT '',
   email text DEFAULT '',
   website text DEFAULT '',
+  -- Social media URLs (facebook, instagram, youtube, etc) are stored within this JSONB object:
   social_links jsonb DEFAULT '{}',
   whatsapp text DEFAULT '',
   founder_details text DEFAULT '',
