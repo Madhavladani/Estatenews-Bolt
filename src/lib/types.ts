@@ -13,10 +13,39 @@ export interface City {
   last_modify: string;
 }
 
+export interface Builder {
+  id: string;
+  name: string;
+  slug: string;
+  full_profile: boolean;
+  logo: string;
+  cover_image: string;
+  about_builder: string;
+  year_established?: number;
+  headquarters: string;
+  cities_served: string[];
+  google_reviews_summary?: any;
+  phone: string;
+  email: string;
+  website: string;
+  social_links?: any;
+  whatsapp: string;
+  founder_details: string;
+  awards: string[];
+  videos: string[];
+  press_coverage: string[];
+  testimonials?: any;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Project {
   id: string;
   city_id: string;
   locality_id?: string | null;
+  builder_id?: string | null;
   project_type: 'residential' | 'commercial';
   title: string;
   slug: string;
@@ -47,6 +76,7 @@ export interface Project {
   last_modify: string;
   city?: City;
   locality?: Locality;
+  builder?: Builder;
 }
 
 export interface FloorPlan {
@@ -204,6 +234,11 @@ export interface Database {
         Row: City;
         Insert: Omit<City, 'id' | 'created_at' | 'last_modify'>;
         Update: Partial<Omit<City, 'id' | 'created_at' | 'last_modify'>>;
+      };
+      builders: {
+        Row: Builder;
+        Insert: Omit<Builder, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Builder, 'id' | 'created_at' | 'updated_at'>>;
       };
       localities: {
         Row: Locality;

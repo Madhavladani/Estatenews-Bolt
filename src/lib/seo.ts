@@ -1,4 +1,4 @@
-import type { City, Project, Collection, Blog } from './types';
+import type { City, Project, Collection, Blog, Builder } from './types';
 import { SITE_URL, toSiteUrl } from './site-url';
 
 const SITE_NAME = 'Home Nesto';
@@ -296,3 +296,59 @@ export function generateProjectFAQs(project: Project, city: City): { question: s
 }
 
 export const ITEMS_PER_PAGE = 12;
+
+export function buildBuilderSchema({ builder, city, url }: { builder: Builder; city: City; url: string }) {
+  const isPremium = builder.full_profile;
+  const logoUrl = builder.logo || `${SITE_URL}/favicon.svg`;
+  const image = builder.cover_image || logoUrl;
+
+  const getContactInfo = () => {
+    if (!isPremium) return {};
+    const contact: any = {};
+    if (builder.phone) contact.telephone = builder.phone;
+    if (builder.email) contact.email = builder.email;
+    return contact;
+  };
+
+  const getAddress = () => {
+    return {
+      '@type': 'PostalAddress',
+      addressLocality: builder.headquarters || city.name,
+      addressRegion: city.state,
+      addressCountry: 'IN',
+    };
+  };
+
+  const orgSchema: any = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent', // More specific than Organization
+    name: builder.name,
+    description: builder.about_builder ? builder.about_builder.replace(/<[^>]*>?/gm, '') : `${builder.name} in ${city.name}`,
+    url: builder.website || url,
+    logo: logoUrl,
+    image,
+    ...getContactInfo(),
+    address: getAddress(),
+  };
+
+  if (builder.year_established) {
+    orgSchema.foundingDate = builder.year_established.toString();
+  }
+
+  if (builder.founder_details && isPremium) {
+    orgSchema.founder = {
+      '@type': 'Person',
+      name: 'Founder'
+    };
+  }
+
+  if (builder.google_reviews_summary && typeof builder.google_reviews_summary !== 'string' && builder.google_reviews_summary.rating) {
+    orgSchema.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: builder.google_reviews_summary.rating,
+      reviewCount: builder.google_reviews_summary.count || 1
+    };
+  }
+
+  return orgSchema;
+}

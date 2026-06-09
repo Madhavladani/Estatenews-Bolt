@@ -1,0 +1,321 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import type { City, Builder } from '../../../lib/types';
+
+const { data: citiesRes } = await supabase.from('cities').select('*').order('name');
+const cities: City[] = citiesRes || [];
+
+// Check for id to prepopulate (edit mode)
+const builderId = Astro.url.searchParams.get('id');
+let builderToEdit: Builder | null = null;
+let currentCities: string[] = [];
+
+if (builderId) {
+  const pRes = await supabase.from('builders').select('*').eq('id', builderId).single();
+  builderToEdit = pRes.data as Builder | null;
+  currentCities = builderToEdit?.cities_served || [];
+}
+
+const pageTitle = builderToEdit ? 'Edit Builder' : 'Add Builder';
+---
+
+<AdminLayout title={pageTitle} activeTab="builders">
+  <div class="mb-6">
+    <div class="flex items-center gap-4">
+      <a href="/admin/builders" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-4xl mb-12">
+    <form id="builder-form" class="space-y-6">
+      <input type="hidden" id="b-id" />
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Builder Name *</label>
+          <input type="text" id="b-name" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-all duration-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+          <input type="text" id="b-slug" required class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="b-full-profile" class="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
+        <label for="b-full-profile" class="text-sm font-medium text-gray-700">Enable Full Profile Details</label>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Logo</label>
+          <input type="file" id="b-logo-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+          <p id="b-logo-status" class="mt-2 text-xs text-gray-500"></p>
+          <input type="hidden" id="b-logo" />
+          <img id="b-logo-preview" alt="Logo preview" class="hidden mt-3 w-32 h-32 object-contain bg-white rounded-lg border border-gray-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image</label>
+          <input type="file" id="b-cover-file" accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200" />
+          <p id="b-cover-status" class="mt-2 text-xs text-gray-500"></p>
+          <input type="hidden" id="b-cover" />
+          <img id="b-cover-preview" alt="Cover preview" class="hidden mt-3 w-full h-32 object-cover rounded-lg border border-gray-200" />
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Cities Served (Select all that apply)</label>
+        <div class="border border-gray-200 rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 max-h-[200px] overflow-y-auto">
+          {cities.map((city) => (
+            <label class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded border border-gray-100 shadow-sm hover:border-primary-200 transition-colors">
+              <input 
+                type="checkbox" 
+                class="city-checkbox w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" 
+                value={city.id} 
+                checked={currentCities.includes(city.id)}
+              />
+              <span class="text-sm text-gray-800 line-clamp-1">{city.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">About Builder</label>
+        <textarea id="b-about" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Year Established</label>
+          <input type="number" id="b-year" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Headquarters</label>
+          <input type="text" id="b-headquarters" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input type="text" id="b-phone" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="b-email" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+          <input type="text" id="b-website" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="https://" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp URL</label>
+          <input type="text" id="b-whatsapp" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Founder Details</label>
+        <textarea id="b-founder" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="Name and short bio"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Awards (one per line)</label>
+          <textarea id="b-awards" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow font-mono text-xs" placeholder="Award 1&#10;Award 2"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Videos URLs (one per line)</label>
+          <textarea id="b-videos" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow font-mono text-xs" placeholder="https://youtube.com/..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Press Coverage URLs (one per line)</label>
+          <textarea id="b-press" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow font-mono text-xs" placeholder="https://news..."></textarea>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+          <input type="text" id="b-meta-title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+          <textarea id="b-meta-desc" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-shadow"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
+        <a href="/admin/builders" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</a>
+        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg transition-colors shadow-sm">Save Builder</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<script define:vars={{ b: builderToEdit }}>
+  const form = document.getElementById('builder-form');
+  const nameInput = document.getElementById('b-name');
+  const slugInput = document.getElementById('b-slug');
+  const logoFileInput = document.getElementById('b-logo-file');
+  const coverFileInput = document.getElementById('b-cover-file');
+  const logoInput = document.getElementById('b-logo');
+  const coverInput = document.getElementById('b-cover');
+  const logoPreview = document.getElementById('b-logo-preview');
+  const coverPreview = document.getElementById('b-cover-preview');
+  const logoStatus = document.getElementById('b-logo-status');
+  const coverStatus = document.getElementById('b-cover-status');
+
+  nameInput.addEventListener('input', (e) => {
+    if (!b) {
+      slugInput.value = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+  });
+
+  function updateImagePreview(previewEl, url) {
+    if (!url) {
+      previewEl.classList.add('hidden');
+      previewEl.removeAttribute('src');
+      return;
+    }
+    previewEl.src = url;
+    previewEl.classList.remove('hidden');
+  }
+
+  async function uploadImage(fileInput, folder) {
+    const file = fileInput.files?.[0];
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    const res = await fetch('/admin/api/upload-image', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    return data.url;
+  }
+
+  function getFolderBase() {
+    const slugVal = slugInput.value || 'untitled-builder';
+    return `builders/${slugVal.substring(0, 50)}`;
+  }
+
+  logoFileInput?.addEventListener('change', async () => {
+    if (!logoFileInput.files.length) return;
+    updateImagePreview(logoPreview, URL.createObjectURL(logoFileInput.files[0]));
+    logoStatus.textContent = 'Uploading logo...';
+    try {
+      const url = await uploadImage(logoFileInput, getFolderBase() + '/logo');
+      if (url) {
+        logoInput.value = url;
+        logoStatus.textContent = 'Logo uploaded. Save builder to persist.';
+      }
+    } catch (e) {
+      console.error(e);
+      logoStatus.textContent = 'Logo upload failed.';
+    }
+  });
+
+  coverFileInput?.addEventListener('change', async () => {
+    if (!coverFileInput.files.length) return;
+    updateImagePreview(coverPreview, URL.createObjectURL(coverFileInput.files[0]));
+    coverStatus.textContent = 'Uploading cover...';
+    try {
+      const url = await uploadImage(coverFileInput, getFolderBase() + '/cover');
+      if (url) {
+        coverInput.value = url;
+        coverStatus.textContent = 'Cover uploaded. Save builder to persist.';
+      }
+    } catch (e) {
+      console.error(e);
+      coverStatus.textContent = 'Cover upload failed.';
+    }
+  });
+
+  if (b) {
+    document.getElementById('b-id').value = b.id;
+    document.getElementById('b-name').value = b.name || '';
+    document.getElementById('b-slug').value = b.slug || '';
+    document.getElementById('b-full-profile').checked = b.full_profile || false;
+    document.getElementById('b-logo').value = b.logo || '';
+    document.getElementById('b-cover').value = b.cover_image || '';
+    document.getElementById('b-about').value = b.about_builder || '';
+    document.getElementById('b-year').value = b.year_established || '';
+    document.getElementById('b-headquarters').value = b.headquarters || '';
+    document.getElementById('b-phone').value = b.phone || '';
+    document.getElementById('b-email').value = b.email || '';
+    document.getElementById('b-website').value = b.website || '';
+    document.getElementById('b-whatsapp').value = b.whatsapp || '';
+    document.getElementById('b-founder').value = b.founder_details || '';
+    document.getElementById('b-awards').value = (b.awards || []).join('\n');
+    document.getElementById('b-videos').value = (b.videos || []).join('\n');
+    document.getElementById('b-press').value = (b.press_coverage || []).join('\n');
+    document.getElementById('b-meta-title').value = b.meta_title || '';
+    document.getElementById('b-meta-desc').value = b.meta_description || '';
+
+    updateImagePreview(logoPreview, b.logo);
+    updateImagePreview(coverPreview, b.cover_image);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.disabled = true;
+
+    try {
+      const id = document.getElementById('b-id').value;
+      const body = {
+        name: document.getElementById('b-name').value,
+        slug: document.getElementById('b-slug').value,
+        full_profile: document.getElementById('b-full-profile').checked,
+        logo: document.getElementById('b-logo').value,
+        cover_image: document.getElementById('b-cover').value,
+        about_builder: document.getElementById('b-about').value,
+        year_established: parseInt(document.getElementById('b-year').value) || null,
+        headquarters: document.getElementById('b-headquarters').value,
+        phone: document.getElementById('b-phone').value,
+        email: document.getElementById('b-email').value,
+        website: document.getElementById('b-website').value,
+        whatsapp: document.getElementById('b-whatsapp').value,
+        founder_details: document.getElementById('b-founder').value,
+        awards: document.getElementById('b-awards').value.split('\n').map(s => s.trim()).filter(Boolean),
+        videos: document.getElementById('b-videos').value.split('\n').map(s => s.trim()).filter(Boolean),
+        press_coverage: document.getElementById('b-press').value.split('\n').map(s => s.trim()).filter(Boolean),
+        meta_title: document.getElementById('b-meta-title').value,
+        meta_description: document.getElementById('b-meta-desc').value,
+        cities_served: Array.from(document.querySelectorAll('.city-checkbox:checked')).map(cb => cb.value),
+      };
+
+      const res = await fetch(id ? `/admin/api/builders?id=${id}` : '/admin/api/builders', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        window.location.href = '/admin/builders';
+      } else {
+        const d = await res.json();
+        alert(d.error || 'Failed to save builder');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An external error occurred.');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+</script>

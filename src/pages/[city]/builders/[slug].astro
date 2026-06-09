@@ -1,0 +1,337 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { supabase } from '../../../lib/supabase';
+import { buildBuilderSchema } from '../../../lib/seo';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import type { Builder, Project, City } from '../../../lib/types';
+
+export const prerender = false;
+
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400"
+);
+
+const { city: citySlug, slug: builderSlug } = Astro.params;
+
+// Fetch City
+const { data: cityData } = await supabase
+  .from('cities')
+  .select('*')
+  .eq('slug', citySlug)
+  .single();
+
+if (!cityData) {
+  return new Response("City Not Found", { status: 404 });
+}
+const city = cityData as City;
+
+// Fetch Builder
+const { data: builderData } = await supabase
+  .from('builders')
+  .select('*')
+  .eq('slug', builderSlug)
+  .single();
+
+if (!builderData) {
+  return new Response("Builder Not Found", { status: 404 });
+}
+const builder = builderData as Builder;
+
+// Fetch Projects for Builder in this City
+const { data: projectsData } = await supabase
+  .from('projects')
+  .select('*, locality(*), city(*)')
+  .eq('builder_id', builder.id)
+  .eq('city_id', city.id);
+
+const projects = (projectsData || []) as Project[];
+
+// For FAQs and Reviews, if they're in builder jsonb, parse them:
+const reviews = typeof builder.google_reviews_summary === 'string' ? JSON.parse(builder.google_reviews_summary || '{}') : (builder.google_reviews_summary || {});
+const testimonialsList = typeof builder.testimonials === 'string' ? JSON.parse(builder.testimonials || '[]') : (builder.testimonials || []);
+
+const {
+  name, logo, cover_image, about_builder, year_established, headquarters,
+  cities_served, full_profile, phone, email, website, social_links, whatsapp,
+  founder_details, awards, videos, press_coverage, meta_title, meta_description
+} = builder;
+
+const pageTitle = meta_title || `${name} Real Estate Builder in ${city.name} | Projects & Reviews`;
+const pageDescription = meta_description || `Discover ${name} in ${city.name}. View their latest residential and commercial projects, read reviews, and explore their portfolio.`;
+const canonical = Astro.url.href.endsWith('/') ? Astro.url.href : Astro.url.href + '/';
+
+const builderSchema = buildBuilderSchema({ builder, city, url: canonical });
+
+const completedProjects = projects.filter(p => p.project_status === 'ready-to-move');
+const ongoingProjects = projects.filter(p => p.project_status === 'under-construction' || p.project_status === 'new-launch');
+
+const socialLinksParsed = typeof social_links === 'string' ? JSON.parse(social_links || '{}') : (social_links || {});
+
+const formatList = (arr: any) => Array.isArray(arr) ? arr : [];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} ogImage={cover_image || logo} jsonLd={builderSchema}>
+  <div class="bg-gray-50 min-h-screen">
+    {/* Breadcrumbs */}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <nav class="flex text-sm text-gray-500" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <a href="/" class="hover:text-primary-600">Home</a>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <span class="mx-2">/</span>
+              <a href={`/${city.slug}`} class="hover:text-primary-600 capitalize">{city.name}</a>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <span class="mx-2">/</span>
+              <span class="text-gray-900 font-medium">{name}</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    {/* Hero Section */}
+    <div class="bg-white border-b border-gray-200">
+      {cover_image && (
+        <div class="w-full h-48 md:h-80 overflow-hidden relative">
+          <img src={cover_image} alt={`${name} Cover Image`} class="w-full h-full object-cover" loading="lazy" />
+          <div class="absolute inset-0 bg-black/20"></div>
+        </div>
+      )}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative -mt-12 md:-mt-16 pb-8">
+        <div class="flex flex-col md:flex-row items-center md:items-end gap-6">
+          <div class="bg-white p-2 rounded-xl shadow-md ring-1 ring-gray-100 flex-shrink-0 z-10 w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
+            {logo ? (
+              <img src={logo} alt={`${name} Logo`} class="max-w-full max-h-full object-contain" />
+            ) : (
+              <span class="text-4xl font-bold text-gray-300">{name.charAt(0)}</span>
+            )}
+          </div>
+          <div class="flex-1 text-center md:text-left z-10 pt-4 md:pt-0">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">{name}</h1>
+            <p class="text-gray-600 mt-2 flex flex-wrap items-center justify-center md:justify-start gap-4">
+              {headquarters && (
+                <span class="inline-flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  HQ: {headquarters}
+                </span>
+              )}
+              {year_established && (
+                <span class="inline-flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  Est. {year_established}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-gray-100">
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-primary-700">{projects.length}</div>
+            <div class="text-sm text-gray-500 font-medium">Total Projects</div>
+          </div>
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-green-600">{completedProjects.length}</div>
+            <div class="text-sm text-gray-500 font-medium">Completed</div>
+          </div>
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-blue-600">{ongoingProjects.length}</div>
+            <div class="text-sm text-gray-500 font-medium">Ongoing</div>
+          </div>
+          <div class="text-center p-4 bg-gray-50 rounded-lg">
+            <div class="text-2xl font-bold text-purple-600">{formatList(cities_served).length || 1}</div>
+            <div class="text-sm text-gray-500 font-medium">Cities Served</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Main Content Area */}
+        <div class="lg:col-span-2 space-y-8">
+          
+          {/* About Section */}
+          <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">About {name}</h2>
+            <div class="prose max-w-none text-gray-600" set:html={about_builder || `<p>${name} is a renowned real estate builder in ${city.name}, offering premium residential and commercial projects.</p>`} />
+            
+            {!full_profile && (
+              <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p class="text-amber-800 text-sm">
+                  This is a free SEO listing. Are you the owner? 
+                  <a href="/contact" class="font-bold text-primary-700 hover:text-primary-800 ml-1 underline">Claim Premium Builder Profile</a>
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* Premium Content */}
+          {full_profile && (
+            <>
+              {founder_details && (
+                <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h2 class="text-2xl font-bold text-gray-900 mb-4">Founder & Leadership</h2>
+                  <div class="prose max-w-none text-gray-600" set:html={founder_details} />
+                </section>
+              )}
+
+              {formatList(awards).length > 0 && (
+                <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h2 class="text-2xl font-bold text-gray-900 mb-4">Awards & Recognition</h2>
+                  <ul class="space-y-3">
+                    {formatList(awards).map((award: string) => (
+                      <li class="flex items-start gap-3 text-gray-600">
+                        <svg class="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2l1.64 5.093h5.36l-4.32 3.14 1.64 5.094L10 12.187l-4.32 3.14 1.64-5.094-4.32-3.14h5.36L10 2z" clip-rule="evenodd" /></svg>
+                        {award}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {formatList(videos).length > 0 && (
+                <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h2 class="text-2xl font-bold text-gray-900 mb-4">Videos</h2>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {formatList(videos).map((video: string) => (
+                      <div class="aspect-w-16 aspect-h-9">
+                        <iframe src={video} class="w-full h-full rounded-lg" loading="lazy" allowfullscreen></iframe>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+              
+              {testimonialsList.length > 0 && (
+                <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                  <h2 class="text-2xl font-bold text-gray-900 mb-4">Testimonials</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {testimonialsList.map((t: any) => (
+                      <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                        <div class="flex items-center gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <svg class={`w-4 h-4 ${i < (t.rating || 5) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                          ))}
+                        </div>
+                        <p class="text-gray-600 text-sm italic">"{t.content}"</p>
+                        <p class="text-gray-900 font-medium text-sm mt-3">- {t.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+
+          {/* Projects Listing */}
+          <section>
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900">Projects in {city.name}</h2>
+            </div>
+            {projects.length > 0 ? (
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.map(project => (
+                  <ProjectCard project={project} />
+                ))}
+              </div>
+            ) : (
+              <div class="bg-white p-8 text-center rounded-xl border border-gray-100">
+                <p class="text-gray-500">No projects found for this builder in {city.name}.</p>
+              </div>
+            )}
+          </section>
+
+          {/* SEO Content & FAQs (Available for both free/premium) */}
+          {reviews && reviews.rating && (
+            <section class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+              <h2 class="text-2xl font-bold text-gray-900 mb-4">Google Reviews</h2>
+              <div class="flex items-center gap-4">
+                <div class="text-4xl font-bold text-gray-900">{reviews.rating}</div>
+                <div>
+                  <div class="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    ))}
+                  </div>
+                  <div class="text-sm text-gray-500 mt-1">Based on {reviews.count || 'several'} reviews</div>
+                </div>
+              </div>
+            </section>
+          )}
+
+        </div>
+
+        {/* Sidebar */}
+        <div class="space-y-6">
+          
+          {/* Contact Widget (Conditional on Premium) */}
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden sticky top-24">
+            <div class="bg-primary-900 text-white p-4">
+              <h3 class="font-bold text-lg">Contact Builder</h3>
+            </div>
+            <div class="p-6">
+              {full_profile ? (
+                <div class="space-y-4 text-sm">
+                  {phone && (
+                    <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} class="flex items-center gap-3 w-full py-3 px-4 bg-gray-50 hover:bg-primary-50 hover:text-primary-700 text-gray-700 font-medium rounded-lg transition-colors border border-gray-100">
+                      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                      {phone}
+                    </a>
+                  )}
+                  {whatsapp && (
+                    <a href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener" class="flex items-center gap-3 w-full py-3 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] font-medium rounded-lg transition-colors border border-[#25D366]/20">
+                      <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                      WhatsApp
+                    </a>
+                  )}
+                  {email && (
+                    <a href={`mailto:${email}`} class="flex items-center gap-3 w-full py-3 px-4 bg-gray-50 hover:bg-primary-50 hover:text-primary-700 text-gray-700 font-medium rounded-lg transition-colors border border-gray-100">
+                      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                      {email}
+                    </a>
+                  )}
+                  {website && (
+                    <a href={website} target="_blank" rel="noopener" class="flex items-center gap-3 w-full py-3 px-4 bg-gray-50 hover:bg-primary-50 hover:text-primary-700 text-gray-700 font-medium rounded-lg transition-colors border border-gray-100">
+                      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                      Visit Website
+                    </a>
+                  )}
+                  
+                  {/* Lead Generation Form placeholder */}
+                  <div class="pt-4 mt-2 border-t border-gray-100">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Send Message</p>
+                    <form class="space-y-3">
+                      <input type="text" placeholder="Your Name" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" required />
+                      <input type="tel" placeholder="Phone Number" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" required />
+                      <textarea placeholder="Message" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" required></textarea>
+                      <button type="submit" class="w-full py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg text-sm transition-colors">Submit Request</button>
+                    </form>
+                  </div>
+                </div>
+              ) : (
+                <div class="text-center">
+                  <div class="w-16 h-16 mx-auto mb-4 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  </div>
+                  <h4 class="font-bold text-gray-900 mb-2">Premium Profile Required</h4>
+                  <p class="text-sm text-gray-600 mb-4">Direct contact links, brochures, and lead generation are available on premium profiles.</p>
+                  <a href="/contact" class="inline-block w-full py-2 bg-primary-700 hover:bg-primary-800 text-white font-medium rounded-lg text-sm transition-colors text-center">Claim Profile to Unlock</a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
