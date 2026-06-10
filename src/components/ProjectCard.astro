@@ -1,73 +1,184 @@
 ---
-import type { Project, City } from '../lib/types';
-import { formatStatus, formatProjectType } from '../lib/seo';
+import type { Project, City, Builder } from "../lib/types";
+import { formatStatus, formatProjectType } from "../lib/seo";
+import { supabase } from "../lib/supabase";
 
 interface Props {
-  project: Project & { city?: City };
+  project: Project & { city?: City; builder?: Builder };
 }
 
 const { project } = Astro.props;
 const city = project.city;
+
+let builderLinkInfo: { name: string; slug: string } | null = null;
+
+if (project.builder) {
+  builderLinkInfo = { name: project.builder.name, slug: project.builder.slug };
+} else if (project.builder_id) {
+  try {
+    const { data } = await supabase
+      .from("builders")
+      .select("name, slug")
+      .eq("id", project.builder_id)
+      .single();
+    if (data) builderLinkInfo = { name: data.name, slug: data.slug };
+  } catch (err) {
+    console.error("Error fetching builder details:", err);
+  }
+}
+
+const builderDisplayName =
+  builderLinkInfo?.name || project.builder_name || "Builder";
+const builderDisplaySlug =
+  builderLinkInfo?.slug || (project.builder_id ? String(project.builder_id) : "");
+
 const statusLabel = formatStatus(project.project_status);
 const statusColor: Record<string, string> = {
-  'new-launch': 'bg-green-100 text-green-800',
-  'under-construction': 'bg-yellow-100 text-yellow-800',
-  'ready-to-move': 'bg-blue-100 text-blue-800',
+  "new-launch": "bg-green-100 text-green-800",
+  "under-construction": "bg-yellow-100 text-yellow-800",
+  "ready-to-move": "bg-blue-100 text-blue-800",
 };
-const typeColor = project.project_type === 'residential' ? 'bg-primary-100 text-primary-800' : 'bg-accent-100 text-accent-800';
+const typeColor =
+  project.project_type === "residential"
+    ? "bg-primary-100 text-primary-800"
+    : "bg-accent-100 text-accent-800";
 const localitySlug = (project as any)?.locality?.slug as string | undefined;
-const projectUrl = (city?.slug && project?.project_type && project?.slug)
-  ? localitySlug
-    ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}/`
-    : `/${city.slug}/${project.project_type}/${project.slug}/`
-  : '#';
+const projectUrl =
+  city?.slug && project?.project_type && project?.slug
+    ? localitySlug
+      ? `/${city.slug}/${project.project_type}/${localitySlug}/${project.slug}/`
+      : `/${city.slug}/${project.project_type}/${project.slug}/`
+    : "#";
 ---
 
-<article class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100">
-  <a href={projectUrl} class="block">
+<article
+  class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary-300 hover:shadow-2xl"
+>
+  <a href={projectUrl} class="absolute inset-0 z-10" aria-label={`View details for ${project.title}`}>
+    <span class="sr-only">View {project.title}</span>
+  </a>
+    <!-- Image -->
     <div class="relative overflow-hidden aspect-[16/10]">
       <img
         src={project.featured_image}
-        alt={`${project.title} in ${project.location}${city ? `, ${city.name}` : ''}`}
+        alt={`${project.title} in ${project.location}${city ? `, ${city.name}` : ""}`}
         loading="lazy"
         width="400"
         height="250"
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
-      <div class="absolute top-3 left-3 flex gap-2">
-        <span class={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColor[project.project_status] || 'bg-gray-100 text-gray-800'}`}>
+
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+      >
+      </div>
+
+      <!-- Badges -->
+      <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+        <span
+          class={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur bg-white/90 ${
+            statusColor[project.project_status] || "text-gray-800"
+          }`}
+        >
           {statusLabel}
         </span>
-        <span class={`text-xs font-semibold px-2.5 py-1 rounded-full ${typeColor}`}>
+
+        <span
+          class={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur bg-white/90 ${typeColor}`}
+        >
           {formatProjectType(project.project_type)}
         </span>
       </div>
-    </div>
-    <div class="p-4">
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-700 transition-colors line-clamp-1">
-          {project.title}
-        </h3>
+
+      <!-- Price Overlay -->
+      <div class="absolute bottom-4 left-4 right-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-white/80">
+          Starting From
+        </p>
+
+        <p class="mt-1 text-2xl font-bold text-white">
+          {project.price_range}
+        </p>
       </div>
-      <p class="text-sm text-gray-500 mb-2 flex items-center gap-1">
-        <svg class="w-4 h-4 text-accent-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+    </div>
+
+    <!-- Content -->
+    <div class="flex grow flex-col p-5">
+      <h3
+        class="line-clamp-1 text-xl font-bold text-gray-900 transition-colors group-hover:text-primary-700"
+      >
+        {project.title}
+      </h3>
+
+      <!-- Location -->
+      <div class="mt-2 flex items-center gap-2 text-gray-500">
+        <svg
+          class="h-4 w-4 flex-shrink-0 text-accent-500"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+            clip-rule="evenodd"></path>
         </svg>
-        <span class="line-clamp-1">{project.location}{city ? `, ${city.name}` : ''}</span>
-      </p>
-      <p class="text-sm text-gray-600 mb-3 line-clamp-2">{project.short_description}</p>
-      <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div>
-          <p class="text-xs text-gray-500">by {project.builder_name}</p>
-          <p class="text-base font-bold text-primary-700">{project.price_range}</p>
-        </div>
-        <span class="inline-flex items-center gap-1 text-sm font-medium text-accent-600 group-hover:text-accent-700">
-          View Details
-          <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
+
+        <span class="line-clamp-1 text-sm">
+          {project.location}{city ? `, ${city.name}` : ""}
         </span>
       </div>
+
+      <!-- Description -->
+      <p class="mt-3 min-h-[42px] line-clamp-2 text-sm text-gray-600">
+        {project.short_description}
+      </p>
+
+      <!-- Footer -->
+      <div class="mt-5 border-t border-gray-100 pt-4">
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p
+              class="text-xs font-medium uppercase tracking-wide text-gray-400"
+            >
+              Builder
+            </p>
+
+            <div class="relative z-20 mt-1 truncate text-sm font-semibold text-gray-700">
+              {
+                project.builder_id && city?.slug ? (
+                  <a
+                    href={`/${city.slug}/builders/${builderDisplaySlug}`}
+                    class="transition-colors hover:text-primary-700"
+                    onclick="event.stopPropagation()"
+                  >
+                    {builderDisplayName}
+                  </a>
+                ) : (
+                  <span>{builderDisplayName}</span>
+                )
+              }
+            </div>
+          </div>
+
+          <div
+            class="relative z-20 flex items-center gap-2 rounded-xl bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-all duration-300 group-hover:bg-primary-700 group-hover:text-white"
+          >
+            <span>View Details</span>
+
+            <svg
+              class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
-  </a>
 </article>
