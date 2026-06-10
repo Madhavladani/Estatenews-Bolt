@@ -11,6 +11,7 @@ const paths = [
   '/sitemap-guides.xml',
   '/sitemap-blog-categories.xml',
   '/sitemap-landmarks.xml',
+  '/sitemap-builders.xml',
 ];
 
 export async function GET() {

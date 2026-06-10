@@ -38,7 +38,7 @@ Astro.response.headers.set(
   "public, s-maxage=3600, stale-while-revalidate=86400",
 );
 
-const [projectsRes, collectionsRes, localitiesRes, faqsRes, landmarksRes] = hasDbCity
+const [projectsRes, collectionsRes, localitiesRes, faqsRes, landmarksRes, buildersRes] = hasDbCity
   ? await Promise.all([
       supabase
         .from("projects")
@@ -69,8 +69,15 @@ const [projectsRes, collectionsRes, localitiesRes, faqsRes, landmarksRes] = hasD
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(6),
+      supabase
+        .from("builders")
+        .select("id,name,slug,logo,year_established,headquarters")
+        .contains("cities_served", [city.id])
+        .order("created_at", { ascending: false })
+        .limit(10),
     ])
   : [
+      { data: [] as any[] } as any,
       { data: [] as any[] } as any,
       { data: [] as any[] } as any,
       { data: [] as any[] } as any,
@@ -79,6 +86,7 @@ const [projectsRes, collectionsRes, localitiesRes, faqsRes, landmarksRes] = hasD
     ];
 
 const landmarks = landmarksRes?.data || [];
+const cityBuilders = (buildersRes?.data || []) as any[];
 const localities: Locality[] = localitiesRes.data || [];
 const localityById = new Map(localities.map((l) => [l.id, l]));
 const localityByName = new Map(
@@ -105,6 +113,19 @@ const residentialProjects = projects.filter(
 const commercialProjects = projects.filter(
   (p) => p.project_type === "commercial",
 );
+
+// Count projects per builder for this city
+const builderProjectCounts: Record<string, number> = {};
+if (cityBuilders.length > 0 && projects.length > 0) {
+  for (const b of cityBuilders) {
+    const count = projects.filter(
+      (p: any) =>
+        (p.builder_id && p.builder_id === b.id) ||
+        (p.builder_name && p.builder_name.toLowerCase() === b.name.toLowerCase()),
+    ).length;
+    builderProjectCounts[b.id] = count;
+  }
+}
 
 const faqsFromDb = (faqsRes.data || []).map((f: any) => ({
   question: f.question,
@@ -437,6 +458,68 @@ const faqSchema = buildFAQSchema(faqs);
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {commercialProjects.slice(0, 6).map((project) => (
               <ProjectCard project={{ ...project, city }} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Trusted Builders -->
+  {
+    cityBuilders.length > 0 && (
+      <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">
+              Trusted Builders of <span class="text-accent-600">{city.name}</span>
+            </h2>
+            <a
+              href={`/${city.slug}/builders`}
+              class="text-sm font-medium text-accent-600 hover:text-accent-700 flex items-center gap-1 shrink-0"
+            >
+              View All Builders
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {cityBuilders.map((builder: any) => (
+              <a
+                href={`/${city.slug}/builders/${builder.slug}`}
+                class="group bg-white border border-gray-100 rounded-2xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md hover:border-accent-200 transition-all duration-200"
+              >
+                <div class="w-20 h-20 mb-3 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center p-1.5 group-hover:border-accent-200 transition-colors">
+                  {builder.logo ? (
+                    <img
+                      src={builder.logo}
+                      alt={`${builder.name} logo`}
+                      class="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span class="text-2xl font-black text-gray-300">
+                      {builder.name.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <h3 class="font-semibold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 group-hover:text-accent-700 transition-colors">
+                  {builder.name}
+                </h3>
+                <div class="flex flex-col gap-1 w-full">
+                  {builder.year_established && (
+                    <div class="flex justify-between items-center text-xs text-gray-500">
+                      <span>Since</span>
+                      <span class="font-semibold text-gray-700">{builder.year_established}</span>
+                    </div>
+                  )}
+                  <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span>Projects</span>
+                    <span class="font-bold text-accent-600">{builderProjectCounts[builder.id] ?? 0}</span>
+                  </div>
+                </div>
+              </a>
             ))}
           </div>
         </div>

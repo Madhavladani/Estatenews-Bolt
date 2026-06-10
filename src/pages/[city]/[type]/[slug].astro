@@ -126,8 +126,20 @@ let projectSchema: any = null;
 let faqSchema: any = null;
 let localityBreadcrumbSchema: any = null;
 
+let builderSlug: string | null = null;
+
 if (props.kind === "project") {
   project = props.project;
+
+  // Fetch builder slug for profile link
+  if ((project as any)?.builder_id) {
+    const { data: builderData } = await supabase
+      .from("builders")
+      .select("slug")
+      .eq("id", (project as any).builder_id)
+      .maybeSingle();
+    builderSlug = (builderData as any)?.slug || null;
+  }
 
   const { data: relatedData } = await supabase
     .from("projects")
@@ -378,9 +390,18 @@ if (props.kind === "project") {
 </a>
               </span>
               <span
-                >by <strong class="text-gray-700">{project.builder_name}</strong
-                ></span
-              >
+                >by{" "}
+                {builderSlug && city.slug ? (
+                  <a
+                    href={`/${city.slug}/builders/${builderSlug}`}
+                    class="font-semibold text-primary-700 hover:text-accent-600 underline underline-offset-4 decoration-primary-300 hover:decoration-accent-500 transition-all"
+                  >
+                    {project.builder_name}
+                  </a>
+                ) : (
+                  <strong class="text-gray-700">{project.builder_name}</strong>
+                )}
+              </span>
             </div>
             <div class="flex flex-wrap gap-3">
               <div class="bg-primary-50 rounded-lg px-4 py-2">
@@ -700,9 +721,19 @@ if (props.kind === "project") {
           Builder
         </p>
 
-        <p class="font-semibold text-gray-900 mt-1">
-          {project.builder_name}
-        </p>
+        {builderSlug && city.slug ? (
+          <a
+            href={`/${city.slug}/builders/${builderSlug}`}
+            class="inline-flex items-center gap-1 font-semibold text-primary-700 hover:text-accent-600 transition-colors mt-1"
+          >
+            {project.builder_name}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        ) : (
+          <p class="font-semibold text-gray-900 mt-1">{project.builder_name}</p>
+        )}
       </div>
     </div>
 
