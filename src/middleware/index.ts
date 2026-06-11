@@ -12,11 +12,12 @@ const adminEnabledRaw =
   getEnv('PUBLIC_ADMIN_ENABLED') ||
   getEnv('ADMIN_ENABLED');
 // Default enabled unless explicitly set to a falsy value.
-const adminEnabled =
+/*const adminEnabled =
   String(adminEnabledRaw || '').trim() === ''
     ? true
     : /^(1|true|yes|on)$/i.test(String(adminEnabledRaw).trim());
-
+*/
+const adminEnabled = false;
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies, redirect, locals } = context;
